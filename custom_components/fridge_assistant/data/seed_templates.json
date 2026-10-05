@@ -21,7 +21,8 @@
         "freezer": null,
         "pantry": 1
       },
-      "notes": "Store in the vegetable drawer; unsuitable for freezing."
+      "notes": "Store in the vegetable drawer; unsuitable for freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "spinazie",
@@ -42,7 +43,8 @@
         "freezer": 240,
         "pantry": null
       },
-      "notes": "Short shelf life; blanch before freezing."
+      "notes": "Short shelf life; blanch before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "wortel",
@@ -65,7 +67,8 @@
         "freezer": 300,
         "pantry": 5
       },
-      "notes": "Carrots keep for weeks in the fridge."
+      "notes": "Carrots keep for weeks in the fridge.",
+      "date_type": "use_by"
     },
     {
       "id": "broccoli",
@@ -84,7 +87,8 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Blanch before freezing."
+      "notes": "Blanch before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "komkommer",
@@ -104,7 +108,8 @@
         "pantry": 2
       },
       "notes": "Becomes watery when frozen; freezing is not recommended.",
-      "opened_fridge": 3
+      "opened_fridge": 3,
+      "date_type": "use_by"
     },
     {
       "id": "paprika",
@@ -128,7 +133,8 @@
         "freezer": 240,
         "pantry": 3
       },
-      "notes": "Cut into strips for freezing and use in stir-fries."
+      "notes": "Cut into strips for freezing and use in stir-fries.",
+      "date_type": "use_by"
     },
     {
       "id": "ui",
@@ -150,7 +156,8 @@
         "pantry": 30
       },
       "notes": "Store whole onions in a dry, dark place outside the fridge.",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "aardappel",
@@ -172,7 +179,8 @@
         "freezer": null,
         "pantry": 21
       },
-      "notes": "Store somewhere cool and dark, outside the fridge."
+      "notes": "Store somewhere cool and dark, outside the fridge.",
+      "date_type": "use_by"
     },
     {
       "id": "tomaat",
@@ -195,7 +203,8 @@
         "freezer": 180,
         "pantry": 4
       },
-      "notes": "More flavourful at room temperature; refrigeration extends shelf life."
+      "notes": "More flavourful at room temperature; refrigeration extends shelf life.",
+      "date_type": "use_by"
     },
     {
       "id": "bloemkool",
@@ -214,7 +223,8 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Blanch before freezing."
+      "notes": "Blanch before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "courgette",
@@ -233,7 +243,8 @@
         "freezer": 240,
         "pantry": 3
       },
-      "notes": "Freezes well when grated."
+      "notes": "Freezes well when grated.",
+      "date_type": "use_by"
     },
     {
       "id": "champignons",
@@ -255,7 +266,8 @@
         "freezer": 240,
         "pantry": null
       },
-      "notes": "Store in a paper bag rather than sealed plastic."
+      "notes": "Store in a paper bag rather than sealed plastic.",
+      "date_type": "use_by"
     },
     {
       "id": "sperziebonen",
@@ -276,7 +288,8 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Blanch before freezing."
+      "notes": "Blanch before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "prei",
@@ -295,7 +308,8 @@
         "freezer": 240,
         "pantry": null
       },
-      "notes": "Slice into rings for freezing."
+      "notes": "Slice into rings for freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "andijvie",
@@ -315,7 +329,8 @@
         "freezer": 180,
         "pantry": null
       },
-      "notes": "Blanch before freezing."
+      "notes": "Blanch before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "boerenkool",
@@ -334,7 +349,8 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Freezes well raw."
+      "notes": "Freezes well raw.",
+      "date_type": "use_by"
     },
     {
       "id": "banaan",
@@ -353,7 +369,8 @@
         "freezer": 60,
         "pantry": 5
       },
-      "notes": "Refrigeration browns the skin; peel before freezing for smoothies."
+      "notes": "Refrigeration browns the skin; peel before freezing for smoothies.",
+      "date_type": "use_by"
     },
     {
       "id": "appel",
@@ -374,7 +391,8 @@
         "freezer": 240,
         "pantry": 10
       },
-      "notes": "Apples stay crisp longest in the fridge."
+      "notes": "Apples stay crisp longest in the fridge.",
+      "date_type": "use_by"
     },
     {
       "id": "aardbeien",
@@ -394,7 +412,8 @@
         "freezer": 300,
         "pantry": 1
       },
-      "notes": "Wash just before use."
+      "notes": "Wash just before use.",
+      "date_type": "use_by"
     },
     {
       "id": "druiven",
@@ -417,7 +436,8 @@
         "freezer": 180,
         "pantry": 3
       },
-      "notes": "Frozen grapes make a refreshing snack."
+      "notes": "Frozen grapes make a refreshing snack.",
+      "date_type": "use_by"
     },
     {
       "id": "citroen",
@@ -436,7 +456,8 @@
         "freezer": 120,
         "pantry": 7
       },
-      "notes": "Freeze zest and juice separately in ice cube trays."
+      "notes": "Freeze zest and juice separately in ice cube trays.",
+      "date_type": "use_by"
     },
     {
       "id": "sinaasappel",
@@ -456,7 +477,8 @@
         "freezer": null,
         "pantry": 10
       },
-      "notes": "Keep cool for the longest shelf life."
+      "notes": "Keep cool for the longest shelf life.",
+      "date_type": "use_by"
     },
     {
       "id": "peer",
@@ -476,7 +498,8 @@
         "freezer": 180,
         "pantry": 5
       },
-      "notes": "Ripen at room temperature, then refrigerate."
+      "notes": "Ripen at room temperature, then refrigerate.",
+      "date_type": "use_by"
     },
     {
       "id": "blauwe-bessen",
@@ -497,7 +520,8 @@
         "freezer": 300,
         "pantry": 2
       },
-      "notes": "Excellent for freezing."
+      "notes": "Excellent for freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "mango",
@@ -517,7 +541,8 @@
         "freezer": 240,
         "pantry": 4
       },
-      "notes": "Ripen at room temperature; cut into cubes for freezing."
+      "notes": "Ripen at room temperature; cut into cubes for freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "avocado",
@@ -537,7 +562,8 @@
         "pantry": 4
       },
       "notes": "Browns quickly once cut; sprinkle with lemon juice.",
-      "opened_fridge": 1
+      "opened_fridge": 1,
+      "date_type": "use_by"
     },
     {
       "id": "kiwi",
@@ -557,7 +583,8 @@
         "freezer": 180,
         "pantry": 5
       },
-      "notes": "Ripens faster next to an apple or banana."
+      "notes": "Ripens faster next to an apple or banana.",
+      "date_type": "use_by"
     },
     {
       "id": "melk",
@@ -582,7 +609,8 @@
         "pantry": null
       },
       "notes": "Use within a few days of opening.",
-      "opened_fridge": 4
+      "opened_fridge": 4,
+      "date_type": "use_by"
     },
     {
       "id": "yoghurt",
@@ -605,7 +633,8 @@
         "pantry": null
       },
       "notes": "May separate after freezing; stir well.",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "jonge-kaas",
@@ -627,7 +656,8 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Wrap airtight to prevent drying out."
+      "notes": "Wrap airtight to prevent drying out.",
+      "date_type": "use_by"
     },
     {
       "id": "oude-kaas",
@@ -650,7 +680,8 @@
         "freezer": 180,
         "pantry": null
       },
-      "notes": "Hard cheese keeps well in the fridge."
+      "notes": "Hard cheese keeps well in the fridge.",
+      "date_type": "use_by"
     },
     {
       "id": "roomkaas",
@@ -672,7 +703,8 @@
         "pantry": null
       },
       "notes": "Freezing makes the texture grainy.",
-      "opened_fridge": 7
+      "opened_fridge": 7,
+      "date_type": "use_by"
     },
     {
       "id": "boter",
@@ -692,7 +724,8 @@
         "freezer": 270,
         "pantry": 3
       },
-      "notes": "Excellent for freezing."
+      "notes": "Excellent for freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "slagroom",
@@ -715,7 +748,8 @@
         "pantry": null
       },
       "notes": "Whip and freeze in small dollops.",
-      "opened_fridge": 3
+      "opened_fridge": 3,
+      "date_type": "use_by"
     },
     {
       "id": "kwark",
@@ -737,7 +771,8 @@
         "pantry": null
       },
       "notes": "May separate after freezing.",
-      "opened_fridge": 4
+      "opened_fridge": 4,
+      "date_type": "use_by"
     },
     {
       "id": "karnemelk",
@@ -757,7 +792,8 @@
         "pantry": null
       },
       "notes": "",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "creme-fraiche",
@@ -778,7 +814,8 @@
         "pantry": null
       },
       "notes": "Separates easily; freezing is not recommended.",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "geraspte-kaas",
@@ -802,7 +839,8 @@
         "pantry": null
       },
       "notes": "Can be used straight from the freezer.",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "kipfilet-rauw",
@@ -824,7 +862,8 @@
         "freezer": 270,
         "pantry": null
       },
-      "notes": "Use raw chicken promptly or freeze it."
+      "notes": "Use raw chicken promptly or freeze it.",
+      "date_type": "use_by"
     },
     {
       "id": "gehakt-rauw",
@@ -848,7 +887,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Raw mince spoils quickly; use the same day or freeze."
+      "notes": "Raw mince spoils quickly; use the same day or freeze.",
+      "date_type": "use_by"
     },
     {
       "id": "spek",
@@ -871,7 +911,8 @@
         "pantry": null
       },
       "notes": "",
-      "opened_fridge": 4
+      "opened_fridge": 4,
+      "date_type": "use_by"
     },
     {
       "id": "kip-gebraden",
@@ -894,7 +935,8 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Refrigerate within 2 hours of cooking."
+      "notes": "Refrigerate within 2 hours of cooking.",
+      "date_type": "use_by"
     },
     {
       "id": "rookworst",
@@ -916,7 +958,8 @@
         "pantry": null
       },
       "notes": "",
-      "opened_fridge": 4
+      "opened_fridge": 4,
+      "date_type": "use_by"
     },
     {
       "id": "ham-vleeswaren",
@@ -940,7 +983,8 @@
         "pantry": null
       },
       "notes": "Use opened cold cuts promptly.",
-      "opened_fridge": 3
+      "opened_fridge": 3,
+      "date_type": "use_by"
     },
     {
       "id": "salami",
@@ -962,7 +1006,8 @@
         "pantry": null
       },
       "notes": "",
-      "opened_fridge": 7
+      "opened_fridge": 7,
+      "date_type": "use_by"
     },
     {
       "id": "biefstuk-rauw",
@@ -984,7 +1029,8 @@
         "freezer": 240,
         "pantry": null
       },
-      "notes": "Whole cuts of red meat keep longer than mince."
+      "notes": "Whole cuts of red meat keep longer than mince.",
+      "date_type": "use_by"
     },
     {
       "id": "hamburger-rauw",
@@ -1005,7 +1051,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "As with mince: use promptly or freeze."
+      "notes": "As with mince: use promptly or freeze.",
+      "date_type": "use_by"
     },
     {
       "id": "zalm-rauw",
@@ -1027,7 +1074,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Cook or freeze fresh fish the same day."
+      "notes": "Cook or freeze fresh fish the same day.",
+      "date_type": "use_by"
     },
     {
       "id": "garnalen",
@@ -1051,7 +1099,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Use promptly; keep chilled."
+      "notes": "Use promptly; keep chilled.",
+      "date_type": "use_by"
     },
     {
       "id": "witvis-kabeljauw",
@@ -1074,7 +1123,8 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Use fresh white fish the same day."
+      "notes": "Use fresh white fish the same day.",
+      "date_type": "use_by"
     },
     {
       "id": "gerookte-zalm",
@@ -1095,7 +1145,8 @@
         "pantry": null
       },
       "notes": "Use within two days of opening.",
-      "opened_fridge": 2
+      "opened_fridge": 2,
+      "date_type": "use_by"
     },
     {
       "id": "tonijn-blik-open",
@@ -1117,7 +1168,8 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Transfer to a sealed container after opening."
+      "notes": "Transfer to a sealed container after opening.",
+      "date_type": "use_by"
     },
     {
       "id": "haring",
@@ -1138,7 +1190,8 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Keep chilled and eat promptly."
+      "notes": "Keep chilled and eat promptly.",
+      "date_type": "use_by"
     },
     {
       "id": "macaroni-met-vlees",
@@ -1158,7 +1211,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Allow to cool before freezing."
+      "notes": "Allow to cool before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "nasi",
@@ -1177,7 +1231,8 @@
         "freezer": 30,
         "pantry": null
       },
-      "notes": "Cool cooked rice promptly for food safety."
+      "notes": "Cool cooked rice promptly for food safety.",
+      "date_type": "use_by"
     },
     {
       "id": "verse-soep",
@@ -1198,7 +1253,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Allow to cool and freeze in portions."
+      "notes": "Allow to cool and freeze in portions.",
+      "date_type": "use_by"
     },
     {
       "id": "stamppot",
@@ -1220,7 +1276,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Allow to cool before freezing."
+      "notes": "Allow to cool before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "rijst-gekookt",
@@ -1243,7 +1300,8 @@
         "freezer": 30,
         "pantry": null
       },
-      "notes": "Cool promptly and reheat only once."
+      "notes": "Cool promptly and reheat only once.",
+      "date_type": "use_by"
     },
     {
       "id": "pasta-gekookt",
@@ -1266,7 +1324,8 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Drizzle with oil to prevent sticking."
+      "notes": "Drizzle with oil to prevent sticking.",
+      "date_type": "use_by"
     },
     {
       "id": "curry",
@@ -1289,7 +1348,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Allow to cool before freezing."
+      "notes": "Allow to cool before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "lasagne",
@@ -1308,7 +1368,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Freeze in portions to make thawing easier."
+      "notes": "Freeze in portions to make thawing easier.",
+      "date_type": "use_by"
     },
     {
       "id": "pannenkoeken",
@@ -1329,7 +1390,8 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Separate pancakes with baking paper when freezing."
+      "notes": "Separate pancakes with baking paper when freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "bami",
@@ -1349,7 +1411,8 @@
         "freezer": 30,
         "pantry": null
       },
-      "notes": "Cool promptly after cooking."
+      "notes": "Cool promptly after cooking.",
+      "date_type": "use_by"
     },
     {
       "id": "aardappelpuree",
@@ -1370,7 +1433,8 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Allow to cool before freezing."
+      "notes": "Allow to cool before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "groentesoep",
@@ -1391,7 +1455,8 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Excellent for freezing in portions."
+      "notes": "Excellent for freezing in portions.",
+      "date_type": "use_by"
     },
     {
       "id": "brood",
@@ -1416,7 +1481,8 @@
         "freezer": 90,
         "pantry": 3
       },
-      "notes": "Bread goes stale quickly in the fridge; freeze in portions."
+      "notes": "Bread goes stale quickly in the fridge; freeze in portions.",
+      "date_type": "use_by"
     },
     {
       "id": "croissant",
@@ -1436,7 +1502,8 @@
         "freezer": 60,
         "pantry": 2
       },
-      "notes": "Briefly bake after thawing for a fresh taste."
+      "notes": "Briefly bake after thawing for a fresh taste.",
+      "date_type": "use_by"
     },
     {
       "id": "wraps",
@@ -1457,7 +1524,8 @@
         "pantry": 7
       },
       "notes": "",
-      "opened_fridge": 10
+      "opened_fridge": 10,
+      "date_type": "use_by"
     },
     {
       "id": "bagels",
@@ -1475,7 +1543,8 @@
         "freezer": 90,
         "pantry": 3
       },
-      "notes": "Freeze and toast straight from the freezer."
+      "notes": "Freeze and toast straight from the freezer.",
+      "date_type": "use_by"
     },
     {
       "id": "beschuit",
@@ -1496,7 +1565,8 @@
         "pantry": 60
       },
       "notes": "Store dry and airtight to keep crisp.",
-      "opened_fridge": null
+      "opened_fridge": null,
+      "date_type": "use_by"
     },
     {
       "id": "krentenbollen",
@@ -1517,7 +1587,8 @@
         "freezer": 90,
         "pantry": 3
       },
-      "notes": "Freeze individually for a fresh bun each time."
+      "notes": "Freeze individually for a fresh bun each time.",
+      "date_type": "use_by"
     },
     {
       "id": "pesto",
@@ -1541,7 +1612,8 @@
         "pantry": null
       },
       "notes": "Cover with a layer of olive oil to prevent drying out.",
-      "opened_fridge": 7
+      "opened_fridge": 7,
+      "date_type": "use_by"
     },
     {
       "id": "mayonaise-open",
@@ -1563,7 +1635,8 @@
         "pantry": null
       },
       "notes": "Refrigerate after opening.",
-      "opened_fridge": 60
+      "opened_fridge": 60,
+      "date_type": "use_by"
     },
     {
       "id": "ketchup-open",
@@ -1584,7 +1657,8 @@
         "pantry": null
       },
       "notes": "Keeps for months in the fridge after opening.",
-      "opened_fridge": 180
+      "opened_fridge": 180,
+      "date_type": "use_by"
     },
     {
       "id": "hummus",
@@ -1605,7 +1679,8 @@
         "pantry": null
       },
       "notes": "",
-      "opened_fridge": 4
+      "opened_fridge": 4,
+      "date_type": "use_by"
     },
     {
       "id": "tomatensaus-open",
@@ -1629,7 +1704,8 @@
         "pantry": null
       },
       "notes": "Freeze leftovers for your next pasta dish.",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "mosterd-open",
@@ -1651,7 +1727,8 @@
         "pantry": null
       },
       "notes": "Keeps well in the fridge.",
-      "opened_fridge": 180
+      "opened_fridge": 180,
+      "date_type": "use_by"
     },
     {
       "id": "sojasaus-open",
@@ -1673,7 +1750,8 @@
         "pantry": 30
       },
       "notes": "The salt helps it keep for a long time.",
-      "opened_fridge": 365
+      "opened_fridge": 365,
+      "date_type": "use_by"
     },
     {
       "id": "appelmoes-open",
@@ -1695,7 +1773,8 @@
         "pantry": null
       },
       "notes": "",
-      "opened_fridge": 7
+      "opened_fridge": 7,
+      "date_type": "use_by"
     },
     {
       "id": "verse-pesto-koelvers",
@@ -1717,7 +1796,8 @@
         "pantry": null
       },
       "notes": "Chilled fresh pesto keeps for less time than jarred pesto.",
-      "opened_fridge": 3
+      "opened_fridge": 3,
+      "date_type": "use_by"
     },
     {
       "id": "verse-jus",
@@ -1740,7 +1820,8 @@
         "pantry": null
       },
       "notes": "Drink fresh juice promptly; freezes well.",
-      "opened_fridge": 2
+      "opened_fridge": 2,
+      "date_type": "use_by"
     },
     {
       "id": "open-witte-wijn",
@@ -1762,7 +1843,8 @@
         "pantry": null
       },
       "notes": "Freeze leftovers in ice cube trays for sauces.",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "open-rode-wijn",
@@ -1782,7 +1864,8 @@
         "pantry": 3
       },
       "notes": "Keep sealed and cool for a longer shelf life.",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "plantaardige-melk-open",
@@ -1807,7 +1890,8 @@
         "pantry": null
       },
       "notes": "Shake well; may separate after freezing.",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "vruchtensap-open",
@@ -1831,7 +1915,8 @@
         "pantry": null
       },
       "notes": "",
-      "opened_fridge": 5
+      "opened_fridge": 5,
+      "date_type": "use_by"
     },
     {
       "id": "eieren",
@@ -1854,7 +1939,8 @@
         "freezer": null,
         "pantry": 14
       },
-      "notes": "Freeze beaten eggs, not eggs in their shells."
+      "notes": "Freeze beaten eggs, not eggs in their shells.",
+      "date_type": "use_by"
     },
     {
       "id": "gekookt-ei",
@@ -1875,7 +1961,8 @@
         "freezer": null,
         "pantry": 1
       },
-      "notes": "Keeps longer in its shell than peeled."
+      "notes": "Keeps longer in its shell than peeled.",
+      "date_type": "use_by"
     },
     {
       "id": "restjes-algemeen",
@@ -1897,7 +1984,8 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Refrigerate within 2 hours and seal well."
+      "notes": "Refrigerate within 2 hours and seal well.",
+      "date_type": "use_by"
     },
     {
       "id": "restjes-ovenschotel",
@@ -1918,7 +2006,8 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Allow to cool before freezing."
+      "notes": "Allow to cool before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "tofu-open",
@@ -1940,7 +2029,8 @@
         "pantry": null
       },
       "notes": "Store opened tofu under water and change the water daily.",
-      "opened_fridge": 4
+      "opened_fridge": 4,
+      "date_type": "use_by"
     },
     {
       "id": "olijven-open",
@@ -1962,7 +2052,8 @@
         "pantry": null
       },
       "notes": "Store in their original liquid.",
-      "opened_fridge": 21
+      "opened_fridge": 21,
+      "date_type": "use_by"
     },
     {
       "id": "verse-basilicum",
@@ -1988,7 +2079,8 @@
         "freezer": 90,
         "pantry": 2
       },
-      "notes": "Finely chop and freeze with oil in ice cube trays."
+      "notes": "Finely chop and freeze with oil in ice cube trays.",
+      "date_type": "use_by"
     },
     {
       "id": "tuinbonen",
@@ -2008,7 +2100,8 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Blanch before freezing."
+      "notes": "Blanch before freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "doperwten",
@@ -2029,7 +2122,8 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Excellent for freezing."
+      "notes": "Excellent for freezing.",
+      "date_type": "use_by"
     },
     {
       "id": "mais",
@@ -2052,7 +2146,8 @@
         "freezer": 240,
         "pantry": 2
       },
-      "notes": "Fresh corn is sweetest; use promptly or freeze."
+      "notes": "Fresh corn is sweetest; use promptly or freeze.",
+      "date_type": "use_by"
     },
     {
       "id": "frambozen",
@@ -2072,7 +2167,8 @@
         "freezer": 300,
         "pantry": 1
       },
-      "notes": "Delicate fruit; freezes well."
+      "notes": "Delicate fruit; freezes well.",
+      "date_type": "use_by"
     },
     {
       "id": "meloen",
@@ -2095,7 +2191,8 @@
         "pantry": 4
       },
       "notes": "Once cut, cover and refrigerate.",
-      "opened_fridge": 3
+      "opened_fridge": 3,
+      "date_type": "use_by"
     },
     {
       "id": "pizza-margherita",
@@ -2116,7 +2213,8 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Cover and refrigerate leftover pizza; reheat in the oven or a pan."
+      "notes": "Cover and refrigerate leftover pizza; reheat in the oven or a pan.",
+      "date_type": "use_by"
     },
     {
       "id": "pindakaas",
@@ -2137,7 +2235,8 @@
         "pantry": 180
       },
       "notes": "Does not need refrigeration; store dry and tightly sealed.",
-      "opened_fridge": 120
+      "opened_fridge": 120,
+      "date_type": "use_by"
     }
   ]
 }

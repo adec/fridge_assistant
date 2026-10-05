@@ -30,6 +30,7 @@ from .const import (
     CONF_PRINTER_URL,
     DEFAULT_PRINTER_URL,
     CONF_WARN_DAYS,
+    DATE_TYPES,
     DOMAIN,
     HISTORY_ACTIONS,
     MAX_PORTIONS,
@@ -74,6 +75,7 @@ _ITEM_FIELDS = {
         None, vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_PORTIONS))
     ),
     vol.Optional("added_date"): _OPT_STR,
+    vol.Optional("date_type"): vol.In(DATE_TYPES),
     vol.Optional("expiry_date"): _OPT_STR,
     vol.Optional("expiry_source"): _OPT_STR,
     vol.Optional("notes"): _OPT_STR,
@@ -93,6 +95,7 @@ TEMPLATE_SCHEMA = vol.Schema(
         vol.Optional("kind"): _OPT_STR,
         vol.Optional("emoji"): _OPT_STR,
         vol.Optional("icon"): _OPT_STR,
+        vol.Optional("date_type"): vol.In(DATE_TYPES),
         vol.Optional("shelf_life"): vol.Schema(
             {cv.string: vol.Any(None, vol.Coerce(int))}
         ),

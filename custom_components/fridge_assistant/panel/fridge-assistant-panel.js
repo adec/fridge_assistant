@@ -451,8 +451,8 @@ class FridgeAssistantPanel extends HTMLElement {
         </div>
       </div>
       <div class="card-right">
-        <div class="status" style="--c:${STATUS_COLOR[i.status]}">${daysLabel(i.days_left, lang)}</div>
-        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${fmtDate(i.expiry_date, lang)}</span>` : ""}</div>
+        <div class="status" style="--c:${STATUS_COLOR[i.status]}">${daysLabel(i.days_left, lang, i.date_type)}</div>
+        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${this.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} · ${fmtDate(i.expiry_date, lang)}</span>` : ""}</div>
       </div>
       <button class="card-print icon-btn" data-print="${i.id}" title="${this.t("printSticker")}" aria-label="${this.t("printSticker")}"><ha-icon icon="mdi:tag-outline"></ha-icon></button>
     </div>`;

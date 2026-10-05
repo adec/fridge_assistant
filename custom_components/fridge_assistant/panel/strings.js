@@ -107,6 +107,11 @@ export const STRINGS = {
 
     addNamePlaceholder: "Wat leg je erin? bv. krop sla",
     dateInFieldLabel: "Datum erin",
+    bestBeforeCheckbox: "Ten minste houdbaar tot-datum",
+    useByUnchecked: "Niet aangevinkt betekent Te gebruiken tot.",
+    dateTypeLabel: "Datumtype",
+    useByLabel: "Te gebruiken tot",
+    bestBeforeLabel: "Ten minste houdbaar tot",
     expiryLabel: "Houdbaar tot",
     datePickPlaceholder: "Kies datum",
     dateOptionalPlaceholder: "Optioneel",
@@ -368,7 +373,7 @@ export const STRINGS = {
 
     itemsUnit: "items",
     soonUnit: "soon",
-    expiredUnit: "expired",
+    expiredUnit: "past date",
     all: "All",
 
     emptyTitle: "Nothing in the fridge yet",
@@ -380,6 +385,11 @@ export const STRINGS = {
 
     addNamePlaceholder: "What are you putting in? e.g. lettuce",
     dateInFieldLabel: "Date added",
+    bestBeforeCheckbox: "Best Before date",
+    useByUnchecked: "Unticked means Use By.",
+    dateTypeLabel: "Date type",
+    useByLabel: "Use By",
+    bestBeforeLabel: "Best Before",
     expiryLabel: "Use by",
     datePickPlaceholder: "Pick a date",
     dateOptionalPlaceholder: "Optional",

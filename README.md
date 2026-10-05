@@ -48,6 +48,14 @@ full undo. It works completely offline; AI estimates and the printer add-on are 
 - [Architecture (for contributors)](#architecture-for-contributors)
 - [License](#license)
 
+## AI disclosure
+
+OpenAI Codex was used to produce enhancements in this fork, including the English food
+catalogue, mobile layout changes, custom storage locations, and Use By / Best Before date
+tracking and sticker labels. Its work included code changes, documentation and automated tests.
+The enhancements were checked with automated tests, local browser previews and rendered sticker
+previews. A live Home Assistant installation and physical printer have not been tested.
+
 ## Features
 
 - 📋 **Inventory** across named fridges, freezers and cupboards, with search and per-location filters.
@@ -115,6 +123,19 @@ Kind is derived from a set of 15 finer categories (vegetables, fruit, dairy, mea
 lunch, dinner, snack, bakery, sauces & spices, drinks, eggs, leftovers, other) but can always be
 overridden per item. Prepared meals are categorised by the meal-time they're usually eaten at, so
 the inventory can be filtered on e.g. "what dinners are in the freezer?".
+
+### Use By and Best Before dates
+
+Tick **Best Before date** in the item editor for a best-before date; leave it unticked for
+**Use By**. The date label updates immediately. Templates use the same checkbox and save a
+default date type which new items inherit; individual items can override it. Editing a template
+does not change existing items. Existing inventory, templates and history default to Use By
+when updating from an earlier release.
+
+Stickers print **USE BY** or **BEST BEFORE** according to the item. Lists, item details and
+notifications distinguish the two date types, including “Expired” versus “Past best before”.
+Countdowns and reminder timing stay the same. Automations can pass `date_type: use_by` or
+`date_type: best_before` in add/update actions; `expiry_date` remains the date field for both.
 
 ### Storage locations
 

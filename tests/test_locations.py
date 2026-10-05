@@ -182,6 +182,8 @@ class TestLocations(unittest.TestCase):
         before = copy.deepcopy(data)
         migrated = asyncio.run(store_mod.FridgeDataStore(fake_hass(), 5, "test")._async_migrate_func(4, 1, data))
         self.assertEqual(migrated.pop("locations"), list(store_mod.default_locations().values()))
+        for record in [*before["items"], *before["user_templates"], before["history"][0]["item"]]:
+            record["date_type"] = "use_by"
         self.assertEqual(migrated, before)
 
     def test_migration_never_overwrites_saved_locations(self):

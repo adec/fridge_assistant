@@ -30,13 +30,13 @@ export function fmtDate(iso, lang) {
   if (!dt) return "—";
   return `${dt.getUTCDate()} ${MONTHS[lang][dt.getUTCMonth()]}`;
 }
-export function daysLabel(daysLeft, lang) {
+export function daysLabel(daysLeft, lang, dateType = "use_by") {
   if (daysLeft === null || daysLeft === undefined) return lang === "nl" ? "geen datum" : "no date";
   if (daysLeft < 0) {
     const abs = Math.abs(daysLeft);
     return lang === "nl"
-      ? `${abs} dag${abs === 1 ? "" : "en"} over datum`
-      : `${abs} day${abs === 1 ? "" : "s"} past date`;
+      ? `${dateType === "best_before" ? "Na THT" : "Verlopen"} · ${abs} dag${abs === 1 ? "" : "en"}`
+      : `${dateType === "best_before" ? "Past best before" : "Expired"} · ${abs} day${abs === 1 ? "" : "s"}`;
   }
   if (daysLeft === 0) return lang === "nl" ? "vandaag!" : "today!";
   if (daysLeft === 1) return lang === "nl" ? "nog 1 dag" : "1 day left";

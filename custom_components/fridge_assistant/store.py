@@ -30,6 +30,8 @@ from .const import (
     HISTORY_ACTIONS,
     KIND_DISH,
     KIND_INGREDIENT,
+    DATE_TYPES,
+    DEFAULT_DATE_TYPE,
     LOCATIONS,
     LOCATION_META,
     location_label as default_location_label,
@@ -146,6 +148,12 @@ def default_portions(count: int = 1) -> list[dict[str, Any]]:
     return [{"n": i + 1, "status": "open"} for i in range(count)]
 
 
+def valid_date_type(value: str) -> str:
+    if value not in DATE_TYPES:
+        raise ValueError("Invalid date_type; expected use_by or best_before")
+    return value
+
+
 def default_locations() -> dict[str, dict[str, Any]]:
     """Stable IDs keep old inventory and automations valid."""
     return {key: {"id": key, "name": None, "storage_type": key,
@@ -164,6 +172,7 @@ class FridgeDataStore(Store):
     snapshot gets a ``portions`` list (default one open portion). v3 -> v4:
     the "prepared_dish" category is remapped onto "dinner". v4 -> v5:
     named locations are seeded with the three existing location IDs.
+    v5 -> v6: items, templates and history default to Use By.
     """
 
     async def _async_migrate_func(
@@ -205,6 +214,11 @@ class FridgeDataStore(Store):
                     _migrate_category_v4(snap)
         if old_major_version < 5:
             old_data.setdefault("locations", list(default_locations().values()))
+        if old_major_version < 6:
+            records = [*old_data.get("items", []), *old_data.get("user_templates", []),
+                       *(e.get("item") for e in old_data.get("history", []) if isinstance(e.get("item"), dict))]
+            for record in records:
+                record.setdefault("date_type", DEFAULT_DATE_TYPE)
         return old_data
 
 
@@ -268,6 +282,7 @@ class FridgeStore:
         for tpl in raw.get("templates", []):
             tpl = dict(tpl)
             tpl["source"] = "builtin"
+            tpl.setdefault("date_type", DEFAULT_DATE_TYPE)
             result[tpl["id"]] = tpl
         return result
 
@@ -484,6 +499,7 @@ class FridgeStore:
             ),
             "emoji": data.get("emoji", existing.get("emoji", DEFAULT_EMOJI)),
             "icon": data.get("icon", existing.get("icon", DEFAULT_ICON)),
+            "date_type": valid_date_type(data.get("date_type", existing.get("date_type", DEFAULT_DATE_TYPE))),
             "shelf_life": data.get("shelf_life", existing.get("shelf_life", {})),
             "notes": data.get("notes", existing.get("notes", "")),
             "source": data.get("source", "user"),
@@ -603,6 +619,7 @@ class FridgeStore:
             # Only multi-portion items get sub-codes (AB12-1 …) on stickers.
             "portions": default_portions(data.get("portions")),
             "added_date": added_date,
+            "date_type": valid_date_type(data.get("date_type", (template or {}).get("date_type", DEFAULT_DATE_TYPE))),
             "expiry_date": expiry_date,
             "expiry_source": expiry_source,
             "notes": data.get("notes"),
@@ -635,6 +652,8 @@ class FridgeStore:
         item = self.items.get(item_id)
         if not item:
             return None
+        if "date_type" in changes:
+            valid_date_type(changes["date_type"])
         if "location" in changes:
             self.validate_item_location(changes["location"], item.get("location"))
         allowed = {
@@ -651,6 +670,7 @@ class FridgeStore:
             "added_date",
             "expiry_date",
             "expiry_source",
+            "date_type",
             "notes",
             "barcode",
         }

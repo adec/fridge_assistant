@@ -16,6 +16,16 @@ add_item:
     added_date:
       selector:
         text:
+    date_type:
+      name: Date type
+      description: "Use By for expiry dates, or Best Before for quality dates. Defaults to the template's date type."
+      selector:
+        select:
+          options:
+            - label: Use By
+              value: use_by
+            - label: Best Before
+              value: best_before
     expiry_date:
       selector:
         text:
@@ -33,6 +43,16 @@ add_item:
 
 update_item:
   fields:
+    date_type:
+      name: Date type
+      description: "Use By for expiry dates, or Best Before for quality dates. Defaults to the template's date type."
+      selector:
+        select:
+          options:
+            - label: Use By
+              value: use_by
+            - label: Best Before
+              value: best_before
     id:
       required: true
       selector:

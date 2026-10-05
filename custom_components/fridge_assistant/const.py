@@ -13,7 +13,7 @@ DOMAIN: Final = "fridge_assistant"
 # carries a `portions` list (default one open portion). Version 2 = English
 # enum identifiers (fridge/freezer/pantry, dish, dairy/…); version 1 stored the
 # original Dutch ones. See FridgeDataStore._async_migrate_func in store.py.
-STORAGE_VERSION: Final = 5
+STORAGE_VERSION: Final = 6
 STORAGE_KEY: Final = "fridge_assistant.data"
 
 # Frontend panel / static
@@ -299,3 +299,7 @@ _SHARED_STRINGS: dict[str, dict[str, str]] = {
 def shared_text(hass, key: str, **kwargs: Any) -> str:
     """nl/en text for an error shared by services.py and websocket_api.py."""
     return localized(_SHARED_STRINGS, resolve_language(hass), key, **kwargs)
+
+# Date meaning is independent of how the date was estimated.
+DATE_TYPES: Final = ["use_by", "best_before"]
+DEFAULT_DATE_TYPE: Final = "use_by"

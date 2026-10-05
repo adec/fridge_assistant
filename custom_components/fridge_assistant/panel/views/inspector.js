@@ -74,7 +74,7 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         <div class="d-title"><h2>${esc(i.name)}</h2><div class="d-code">${esc(i.code)}${total > 1 ? ` · <span class="pbadge" title="${esc(panel.t("pbadgeTitle", open, total))}">${open}/${total}</span>` : ""}</div></div>
         <button class="icon-btn" id="d-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button>
       </div>
-      <div class="d-status" style="--c:${col}">${daysLabel(i.days_left, lang)}${i.expiry_date ? " · " + fmtDate(i.expiry_date, lang) : ""}</div>
+      <div class="d-status" style="--c:${col}">${daysLabel(i.days_left, lang, i.date_type)}${i.expiry_date ? " · " + panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel") + " " + fmtDate(i.expiry_date, lang) : ""}</div>
       <div class="po-sec">
         <div class="po-head">
           <span>${panel.t("portionsLabel")}</span>
@@ -92,7 +92,7 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         ${i.added_by_name ? `<div class="d-row"><span>${panel.t("addedByLabel")}</span><b class="who">${panel._avatar(i.added_by_name, i.added_by_picture, 24)} ${esc(i.added_by_name)}</b></div>` : ""}
         ${i.contents && i.contents !== i.name ? `<div class="d-row"><span>${panel.t("contentsLabel")}</span><b>${esc(i.contents)}</b></div>` : ""}
         <div class="d-row"><span>${panel.t("dateInDetailLabel")}</span><b>${fmtDate(i.added_date, lang)}${i.age_days != null ? ` · ${esc(panel.t("daysAgoShort", i.age_days))}` : ""}</b></div>
-        <div class="d-row"><span>${panel.t("expiryLabel")}</span><b>${i.expiry_date ? fmtDate(i.expiry_date, lang) : "—"}</b></div>
+        <div class="d-row"><span>${panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")}</span><b>${i.expiry_date ? fmtDate(i.expiry_date, lang) : "—"}</b></div>
         ${i.quantity ? `<div class="d-row"><span>${panel.t("quantityLabel")}</span><b>${esc(i.quantity)}</b></div>` : ""}
         ${i.notes ? `<div class="d-row"><span>${panel.t("notesLabel")}</span><b>${esc(i.notes)}</b></div>` : ""}
       </div>

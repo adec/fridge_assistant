@@ -7,6 +7,8 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   const m = {
     location: prefill.location || editItem?.location || panel._state.active_locations?.[0] || "fridge",
     added: prefill.added_date || editItem?.added_date || todayISO(),
+    dateType: editItem?.date_type || prefill.date_type || "use_by",
+    dateTypeManual: isEdit || !!prefill.date_type,
     expiry: prefill.expiry_date || editItem?.expiry_date || "",
     expiryManual: isEdit ? editItem?.expiry_source === "manual" : !!prefill.expiry_date,
     expiryLocked: isEdit || !!prefill.expiry_date,
@@ -49,9 +51,11 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
         <small class="ps-note">${panel.t("portionsFieldNote")}</small>
       </div>
     </label>` : ""}
+    <label class="date-type-check"><input type="checkbox" id="f-date-type" ${m.dateType === "best_before" ? "checked" : ""}><span>${panel.t("bestBeforeCheckbox")}</span></label>
+    <p class="date-type-help">${panel.t("useByUnchecked")}</p>
     <div class="grid2">
       <label class="field"><span>${panel.t("dateInFieldLabel")}</span><div class="datefield"><input type="date" id="f-added" value="${m.added}"><span class="df-display"></span></div></label>
-      <label class="field"><span>${panel.t("expiryLabel")}</span><div class="datefield"><input type="date" id="f-expiry" value="${m.expiry}"><span class="df-display"></span><button type="button" class="df-clear" title="${panel.t("clearDateTitle")}" aria-label="${panel.t("clearDateTitle")}"><ha-icon icon="mdi:close"></ha-icon></button></div></label>
+      <label class="field"><span id="f-date-label">${panel.t(m.dateType === "best_before" ? "bestBeforeLabel" : "useByLabel")}</span><div class="datefield"><input type="date" id="f-expiry" value="${m.expiry}"><span class="df-display"></span><button type="button" class="df-clear" title="${panel.t("clearDateTitle")}" aria-label="${panel.t("clearDateTitle")}"><ha-icon icon="mdi:close"></ha-icon></button></div></label>
     </div>
     <div class="expiry-hint" id="f-hint"></div>
     <div id="f-expiry-suggestion" class="expiry-suggestion hidden"></div>
@@ -88,8 +92,15 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     if (!val) { hintEl.textContent = ""; return; }
     const dl = daysBetween(todayISO(), val);
     const col = dl < 0 ? "var(--fa-red)" : dl <= (panel._state.options.warn_days || 3) ? "var(--fa-orange)" : "var(--fa-green)";
-    hintEl.innerHTML = `<span style="color:${col}">● ${daysLabel(dl, lang)}</span>`;
+    hintEl.innerHTML = `<span style="color:${col}">● ${daysLabel(dl, lang, m.dateType)}</span>`;
   };
+  const setDateType = type => {
+    m.dateType = type || "use_by";
+    q("#f-date-type").checked = m.dateType === "best_before";
+    q("#f-date-label").textContent = panel.t(m.dateType === "best_before" ? "bestBeforeLabel" : "useByLabel");
+    updateHint();
+  };
+  q("#f-date-type").addEventListener("change", e => { m.dateTypeManual = true; setDateType(e.target.checked ? "best_before" : "use_by"); });
   updateHint();
   panel._wireDateField(addedEl, panel.t("datePickPlaceholder"), lang);
   panel._wireDateField(expEl, panel.t("dateOptionalPlaceholder"), lang);
@@ -153,6 +164,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     if (version !== matchVersion || nameEl.value.trim() !== query || m.location !== location || addedEl.value !== addedDate) return;
     if (res.template) {
       const t = res.template;
+      if (!m.dateTypeManual) setDateType(t.date_type);
       m.template_id = t.id; m.category = t.category; setEmoji(t.emoji || "🍽️");
       if (!m.kindManual) setKind(panel._kindOf(t));
       const sl = t.shelf_life || {};
@@ -186,6 +198,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
         showManual(query, panel.t("manualEntry"));
       });
     } else {
+      if (!m.dateTypeManual) setDateType("use_by");
       applySuggestion(null, "none");
       showManual(query);
     }
@@ -245,6 +258,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       contents: nameEl.value.trim(),
       location: m.location,
       added_date: addedEl.value || todayISO(),
+      date_type: m.dateType,
       expiry_date: expEl.value || null,
       expiry_source: m.expiryManual ? "manual" : (m.expirySource || (expEl.value ? "manual" : "none")),
       emoji: m.emoji,
@@ -261,6 +275,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     q("#f-submit").disabled = true;
     try {
       if (!m.aiResult && !m.noAutoMatch) await matchNow();
+      payload.date_type = m.dateType;
       payload.expiry_date = expEl.value || null;
       payload.expiry_source = m.expiryManual ? "manual" : m.expirySource;
       payload.template_id = m.template_id;
@@ -282,6 +297,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
               kind: m.kind || m.aiResult.kind,
               emoji: m.aiResult.emoji,
               icon: m.aiResult.icon,
+              date_type: m.dateType,
               shelf_life: m.aiResult.shelf_life,
               notes: m.aiResult.notes,
               source: "ai",
@@ -346,7 +362,7 @@ export async function aiEstimate(panel, name, ctx) {
       if (expEl.value) {
         const dl = daysBetween(todayISO(), expEl.value);
         const col = dl < 0 ? "var(--fa-red)" : dl <= warn ? "var(--fa-orange)" : "var(--fa-green)";
-        hintEl.innerHTML = `<span style="color:${col}">● ${daysLabel(dl, lang)}</span>`;
+        hintEl.innerHTML = `<span style="color:${col}">● ${daysLabel(dl, lang, m.dateType)}</span>`;
       } else hintEl.innerHTML = "";
     }
   };

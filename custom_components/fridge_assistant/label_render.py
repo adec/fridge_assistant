@@ -52,7 +52,8 @@ STRINGS = {
     "nl": {
         "code": "ITEMCODE",
         "added": "INGELEGD",
-        "eat_before": "EET VOOR",
+        "use_by": "TE GEBRUIKEN TOT",
+        "best_before": "TEN MINSTE HOUDBAAR TOT",
         "contents": "WAT ZIT ERIN",
         "servings": "HOEVEELHEID",
         "days_left": "nog {n} dagen",
@@ -67,7 +68,8 @@ STRINGS = {
     "en": {
         "code": "ITEM CODE",
         "added": "STORED",
-        "eat_before": "EAT BEFORE",
+        "use_by": "USE BY",
+        "best_before": "BEST BEFORE",
         "contents": "WHAT'S INSIDE",
         "servings": "SERVINGS",
         "days_left": "{n} days left",
@@ -406,19 +408,18 @@ def render_label(item: dict[str, Any], ctx: dict[str, Any] | None = None) -> Ima
     d.text((MX, y), added_str, font=sans_bold(S(46)), fill=BLACK)
     y += S(66)
 
-    # 5) Eat-before block — the actionable hero, always inverted -------------
-    # (A physical label is only ever printed for a still-good item, and a
-    # "X days left" countdown is only true on the print date, so we drop it and
-    # keep the strong black "EAT BEFORE <date>" panel.)
+    # 5) Date-type block — the actionable hero, always inverted -------------
+    # Print the saved date meaning; countdowns would become stale on paper.
     expiry = _parse(item.get("expiry_date"))
     exp_str = _fmt_date(expiry, lang) or s["no_date"]
-    label_font = sans_bold(S(26))
+    date_heading = s["best_before" if item.get("date_type") == "best_before" else "use_by"]
+    label_font, _ = _fit_font(d, date_heading, sans_bold, inner_w - S(6) * (len(date_heading) - 1), start=S(26), min_size=S(14))
     exp_font, _ = _fit_font(d, exp_str, sans_bold, inner_w - S(56), start=S(58),
                             min_size=S(34))
     # Measure both lines and size the box so top and bottom padding are equal.
-    _, lh2, _, lt2 = _text_size(d, s["eat_before"], label_font)
+    _, lh2, _, lt2 = _text_size(d, date_heading, label_font)
     _, ehh, _, et = _text_size(d, exp_str, exp_font)
-    gap_ld = S(16)   # gap between the "EET VOOR" label and the big date
+    gap_ld = S(16)   # gap between the heading and the big date
     pad = S(24)      # equal top/bottom padding inside the box
     content_h = lh2 + gap_ld + ehh
     box_h = content_h + 2 * pad
@@ -427,7 +428,7 @@ def render_label(item: dict[str, Any], ctx: dict[str, Any] | None = None) -> Ima
                         radius=S(20), fill=BLACK)
     fg = WHITE
     ly = box_top + pad
-    _draw_tracked(d, (MX, ly - lt2), s["eat_before"], label_font,
+    _draw_tracked(d, (MX, ly - lt2), date_heading, label_font,
                   fill=fg, tracking=S(6))
     dy = ly + lh2 + gap_ld
     d.text((MX, dy - et), exp_str, font=exp_font, fill=fg)

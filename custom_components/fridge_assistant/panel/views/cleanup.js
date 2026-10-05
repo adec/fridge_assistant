@@ -13,7 +13,7 @@ export function openCleanModal(panel) {
       <input type="checkbox" data-id="${i.id}" ${checked ? "checked" : ""}>
       <span class="cr-emoji">${i.emoji || "🍽️"}</span>
       <span class="cr-name"><b>${esc(i.name)}</b><small>${lm.emoji || ""} ${esc(lm.label || i.location)} · ${esc(i.code)}</small></span>
-      <span class="cr-days" style="--c:${STATUS_COLOR[i.status]}">${daysLabel(i.days_left, lang)}</span>
+      <span class="cr-days" style="--c:${STATUS_COLOR[i.status]}">${daysLabel(i.days_left, lang, i.date_type)}</span>
     </label>`;
   };
   const h = panel._openModal(`

@@ -560,4 +560,8 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .expiry-suggestion{background:var(--fa-soft);padding:12px;border-radius:12px;margin-bottom:12px;font-size:13px;}
 .card-sub{flex-wrap:wrap;}
 .card-sub .cs-fix{flex:0 1 auto;overflow-wrap:anywhere;}
+
+.date-type-check { display:flex; align-items:center; gap:10px; font-weight:600; padding:10px 0 0; cursor:pointer; }
+.date-type-check input { width:22px; height:22px; flex:0 0 22px; accent-color:var(--fa-accent); }
+.date-type-help { margin:4px 0 14px 32px; font-size:12px; color:var(--fa-muted); }
 `;

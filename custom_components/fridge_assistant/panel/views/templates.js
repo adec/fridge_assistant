@@ -214,6 +214,8 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
       <div class="seg" id="te-kind">${Object.keys(kinds).map((k) => { const km = panel._kindMeta(k); return `<button type="button" data-kind="${k}" class="${curKind === k ? "on" : ""}">${km.emoji || ""} ${km.short}</button>`; }).join("")}</div>
     </label>
     <label class="field"><span>${panel.t("categoryLabel")}</span><div class="select-wrap"><select id="te-cat">${catOptions}</select></div></label>
+    <label class="date-type-check"><input type="checkbox" id="te-date-type" ${(t.date_type || "use_by") === "best_before" ? "checked" : ""}><span>${panel.t("bestBeforeCheckbox")}</span></label>
+    <p class="date-type-help">${panel.t("useByUnchecked")}</p>
     <div class="te-sec">${panel.t("shelfLifeSectionLabel")}</div>
     <div class="grid3">${locs.map(dayField).join("")}</div>
     <label class="field"><span>${panel.t("aliasesLabel")}</span><input id="te-aliases" value="${esc((t.aliases || []).join(", "))}" placeholder="${panel.t("aliasesPlaceholder")}"></label>
@@ -252,6 +254,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
       icon: (tpl && tpl.icon) || catOf(cat).icon,
       category: cat,
       kind: selKind,
+      date_type: q("#te-date-type").checked ? "best_before" : "use_by",
       shelf_life: shelf,
       aliases: (q("#te-aliases").value || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
       notes: (q("#te-notes").value || "").trim(),

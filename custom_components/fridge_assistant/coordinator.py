@@ -87,6 +87,7 @@ def item_summary(item: dict[str, Any], today: date) -> dict[str, Any]:
         "emoji": item.get("emoji"),
         "location": item.get("location"),
         "expiry_date": item.get("expiry_date"),
+        "date_type": item.get("date_type", "use_by"),
         "days_left": item_days_left(item, today),
     }
 
@@ -335,15 +336,17 @@ def _notification_message(summaries: list[dict[str, Any]], lang: str) -> str:
 
 def _line(item: dict[str, Any], lang: str) -> str:
     s = _NOTIFY_STRINGS[lang]
+    date_label = ("Ten minste houdbaar tot" if item.get("date_type") == "best_before" else "Te gebruiken tot") if lang == "nl" else ("Best Before" if item.get("date_type") == "best_before" else "Use By")
     loc = item.get("location_label") or get_location_label(item["location"], lang)
     dl = item["days_left"]
     if dl is None:
         when = ""
     elif dl < 0:
-        when = s["expired_suffix"].format(n=abs(dl))
+        past = ("na THT" if item.get("date_type") == "best_before" else "verlopen") if lang == "nl" else ("past best before" if item.get("date_type") == "best_before" else "expired")
+        when = f" — {past} ({abs(dl)} {'dagen' if lang == 'nl' else 'days'})"
     elif dl == 0:
         when = s["today"]
     else:
         when = s["soon_suffix"].format(n=dl)
     emoji = item.get("emoji") or "•"
-    return f"- {emoji} **{item['name']}** `{item['code']}` ({loc}){when}"
+    return f"- {emoji} **{item['name']}** `{item['code']}` ({loc}; {date_label}){when}"

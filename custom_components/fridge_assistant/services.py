@@ -25,6 +25,7 @@ from .const import (
     ACTION_EATEN,
     CONF_AI_ENABLED,
     CONF_PRINTER_ENABLED,
+    DATE_TYPES,
     DOMAIN,
     HISTORY_ACTIONS,
     MAX_PORTIONS,
@@ -131,6 +132,7 @@ ADD_ITEM_SCHEMA = vol.Schema(
         vol.Optional("kind"): cv.string,
         vol.Optional("template_id"): cv.string,
         vol.Optional("added_date"): cv.string,
+        vol.Optional("date_type"): vol.In(DATE_TYPES),
         vol.Optional("expiry_date"): cv.string,
         vol.Optional("quantity"): cv.string,
         vol.Optional("portions"): vol.All(
@@ -144,7 +146,7 @@ ADD_ITEM_SCHEMA = vol.Schema(
 )
 
 UPDATE_ITEM_SCHEMA = vol.Schema(
-    {vol.Required("id"): cv.string}, extra=vol.ALLOW_EXTRA
+    {vol.Required("id"): cv.string, vol.Optional("date_type"): vol.In(DATE_TYPES)}, extra=vol.ALLOW_EXTRA
 )
 
 REMOVE_ITEM_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
@@ -413,7 +415,7 @@ def async_setup_services(hass: HomeAssistant) -> None:
     )
     hass.services.async_register(
         DOMAIN, SERVICE_ADD_TEMPLATE, handle_add_template,
-        schema=vol.Schema({vol.Required("name"): cv.string}, extra=vol.ALLOW_EXTRA),
+        schema=vol.Schema({vol.Required("name"): cv.string, vol.Optional("date_type"): vol.In(DATE_TYPES)}, extra=vol.ALLOW_EXTRA),
         supports_response=SupportsResponse.OPTIONAL,
     )
     hass.services.async_register(
