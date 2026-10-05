@@ -100,6 +100,23 @@ class TestCompleteRestore(unittest.TestCase):
 
 
 class TestMatchTemplate(unittest.TestCase):
+    def test_english_catalogue_names_and_aliases(self):
+        store = make_store("en")
+        for query, template_id in (
+            ("Milk", "melk"), ("Cooked rice", "rijst-gekookt"),
+            ("zucchini", "courgette"), ("ground beef", "gehakt-rauw"),
+            ("leftover pizza", "pizza-margherita"),
+        ):
+            with self.subTest(query=query):
+                self.assertEqual(store.match_template(query)["id"], template_id)
+
+    def test_english_template_sets_existing_shelf_life(self):
+        item = make_store("en").build_item({
+            "name": "Cooked rice", "location": "fridge", "added_date": "2026-07-01",
+        })
+        self.assertEqual(item["template_id"], "rijst-gekookt")
+        self.assertEqual(item["expiry_date"], "2026-07-04")
+
     def setUp(self):
         self.store = make_store()
 
