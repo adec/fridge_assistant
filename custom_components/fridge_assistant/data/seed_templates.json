@@ -1,10 +1,13 @@
 {
-  "version": 1,
+  "version": 2,
   "templates": [
     {
       "id": "krop-sla",
-      "name": "Krop sla",
+      "name": "Lettuce",
       "aliases": [
+        "iceberg lettuce",
+        "head lettuce",
+        "krop sla",
         "sla",
         "ijsbergsla",
         "kropsla"
@@ -18,12 +21,15 @@
         "freezer": null,
         "pantry": 1
       },
-      "notes": "Bewaar in groentela; niet geschikt om in te vriezen."
+      "notes": "Store in the vegetable drawer; unsuitable for freezing."
     },
     {
       "id": "spinazie",
-      "name": "Spinazie",
+      "name": "Spinach",
       "aliases": [
+        "fresh spinach",
+        "baby spinach",
+        "spinazie",
         "verse spinazie",
         "babyspinazie"
       ],
@@ -36,12 +42,15 @@
         "freezer": 240,
         "pantry": null
       },
-      "notes": "Kort houdbaar; blancheren voor het invriezen."
+      "notes": "Short shelf life; blanch before freezing."
     },
     {
       "id": "wortel",
-      "name": "Wortel",
+      "name": "Carrot",
       "aliases": [
+        "carrots",
+        "baby carrots",
+        "wortel",
         "wortels",
         "peen",
         "winterpeen",
@@ -56,12 +65,14 @@
         "freezer": 300,
         "pantry": 5
       },
-      "notes": "In koelkast blijven wortels weken goed."
+      "notes": "Carrots keep for weeks in the fridge."
     },
     {
       "id": "broccoli",
       "name": "Broccoli",
       "aliases": [
+        "broccoli florets",
+        "broccoli",
         "broccoliroosjes"
       ],
       "category": "vegetables",
@@ -73,12 +84,14 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Blancheren voor het invriezen."
+      "notes": "Blanch before freezing."
     },
     {
       "id": "komkommer",
-      "name": "Komkommer",
+      "name": "Cucumber",
       "aliases": [
+        "cucumbers",
+        "komkommer",
         "komkommers"
       ],
       "category": "vegetables",
@@ -90,13 +103,18 @@
         "freezer": null,
         "pantry": 2
       },
-      "notes": "Wordt waterig bij invriezen; niet aanbevolen.",
+      "notes": "Becomes watery when frozen; freezing is not recommended.",
       "opened_fridge": 3
     },
     {
       "id": "paprika",
-      "name": "Paprika",
+      "name": "Bell pepper",
       "aliases": [
+        "red pepper",
+        "yellow pepper",
+        "green pepper",
+        "sweet pepper",
+        "paprika",
         "rode paprika",
         "gele paprika",
         "groene paprika"
@@ -110,12 +128,15 @@
         "freezer": 240,
         "pantry": 3
       },
-      "notes": "In reepjes goed in te vriezen voor roerbak."
+      "notes": "Cut into strips for freezing and use in stir-fries."
     },
     {
       "id": "ui",
-      "name": "Ui",
+      "name": "Onion",
       "aliases": [
+        "onions",
+        "yellow onion",
+        "ui",
         "uien",
         "gele ui"
       ],
@@ -128,13 +149,16 @@
         "freezer": 180,
         "pantry": 30
       },
-      "notes": "Hele uien bewaar je droog en donker buiten de koelkast.",
+      "notes": "Store whole onions in a dry, dark place outside the fridge.",
       "opened_fridge": 5
     },
     {
       "id": "aardappel",
-      "name": "Aardappel",
+      "name": "Potato",
       "aliases": [
+        "potatoes",
+        "baby potatoes",
+        "aardappel",
         "aardappelen",
         "piepers",
         "krieltjes"
@@ -148,12 +172,16 @@
         "freezer": null,
         "pantry": 21
       },
-      "notes": "Donker en koel bewaren, niet in de koelkast."
+      "notes": "Store somewhere cool and dark, outside the fridge."
     },
     {
       "id": "tomaat",
-      "name": "Tomaat",
+      "name": "Tomato",
       "aliases": [
+        "tomatoes",
+        "vine tomatoes",
+        "cherry tomatoes",
+        "tomaat",
         "tomaten",
         "trostomaat",
         "cherrytomaatjes"
@@ -167,12 +195,14 @@
         "freezer": 180,
         "pantry": 4
       },
-      "notes": "Op kamertemperatuur smaakvoller; koud alleen langer houdbaar."
+      "notes": "More flavourful at room temperature; refrigeration extends shelf life."
     },
     {
       "id": "bloemkool",
-      "name": "Bloemkool",
+      "name": "Cauliflower",
       "aliases": [
+        "cauliflower florets",
+        "bloemkool",
         "bloemkoolroosjes"
       ],
       "category": "vegetables",
@@ -184,13 +214,15 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Blancheren voor het invriezen."
+      "notes": "Blanch before freezing."
     },
     {
       "id": "courgette",
       "name": "Courgette",
       "aliases": [
-        "courgettes"
+        "courgettes",
+        "zucchini",
+        "courgette"
       ],
       "category": "vegetables",
       "kind": "ingredient",
@@ -201,12 +233,16 @@
         "freezer": 240,
         "pantry": 3
       },
-      "notes": "Geraspt goed in te vriezen."
+      "notes": "Freezes well when grated."
     },
     {
       "id": "champignons",
-      "name": "Champignons",
+      "name": "Mushrooms",
       "aliases": [
+        "mushroom",
+        "chestnut mushrooms",
+        "button mushrooms",
+        "champignons",
         "paddenstoelen",
         "kastanjechampignons"
       ],
@@ -219,12 +255,15 @@
         "freezer": 240,
         "pantry": null
       },
-      "notes": "In papieren zak bewaren, niet afgesloten in plastic."
+      "notes": "Store in a paper bag rather than sealed plastic."
     },
     {
       "id": "sperziebonen",
-      "name": "Sperziebonen",
+      "name": "Green beans",
       "aliases": [
+        "french beans",
+        "string beans",
+        "sperziebonen",
         "prinsessenbonen",
         "haricots verts"
       ],
@@ -237,12 +276,14 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Blancheren voor het invriezen."
+      "notes": "Blanch before freezing."
     },
     {
       "id": "prei",
-      "name": "Prei",
+      "name": "Leek",
       "aliases": [
+        "leeks",
+        "prei",
         "preien"
       ],
       "category": "vegetables",
@@ -254,12 +295,15 @@
         "freezer": 240,
         "pantry": null
       },
-      "notes": "In ringen gesneden goed in te vriezen."
+      "notes": "Slice into rings for freezing."
     },
     {
       "id": "andijvie",
-      "name": "Andijvie",
+      "name": "Endive",
       "aliases": [
+        "fresh endive",
+        "escarole",
+        "andijvie",
         "verse andijvie"
       ],
       "category": "vegetables",
@@ -271,12 +315,14 @@
         "freezer": 180,
         "pantry": null
       },
-      "notes": "Blancheren voor het invriezen."
+      "notes": "Blanch before freezing."
     },
     {
       "id": "boerenkool",
-      "name": "Boerenkool",
+      "name": "Kale",
       "aliases": [
+        "chopped kale",
+        "boerenkool",
         "gesneden boerenkool"
       ],
       "category": "vegetables",
@@ -288,12 +334,14 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Prima om rauw in te vriezen."
+      "notes": "Freezes well raw."
     },
     {
       "id": "banaan",
-      "name": "Banaan",
+      "name": "Banana",
       "aliases": [
+        "bananas",
+        "banaan",
         "bananen"
       ],
       "category": "fruit",
@@ -305,12 +353,14 @@
         "freezer": 60,
         "pantry": 5
       },
-      "notes": "Koelkast maakt de schil bruin; gepeld in te vriezen voor smoothies."
+      "notes": "Refrigeration browns the skin; peel before freezing for smoothies."
     },
     {
       "id": "appel",
-      "name": "Appel",
+      "name": "Apple",
       "aliases": [
+        "apples",
+        "appel",
         "appels",
         "elstar",
         "jonagold"
@@ -324,12 +374,15 @@
         "freezer": 240,
         "pantry": 10
       },
-      "notes": "In koelkast blijven appels het langst knapperig."
+      "notes": "Apples stay crisp longest in the fridge."
     },
     {
       "id": "aardbeien",
-      "name": "Aardbeien",
+      "name": "Strawberries",
       "aliases": [
+        "strawberry",
+        "fresh strawberries",
+        "aardbeien",
         "verse aardbeien"
       ],
       "category": "fruit",
@@ -341,12 +394,16 @@
         "freezer": 300,
         "pantry": 1
       },
-      "notes": "Pas vlak voor gebruik wassen."
+      "notes": "Wash just before use."
     },
     {
       "id": "druiven",
-      "name": "Druiven",
+      "name": "Grapes",
       "aliases": [
+        "red grapes",
+        "white grapes",
+        "seedless grapes",
+        "druiven",
         "blauwe druiven",
         "witte druiven",
         "pitloze druiven"
@@ -360,12 +417,14 @@
         "freezer": 180,
         "pantry": 3
       },
-      "notes": "Bevroren druiven zijn een lekker koud snackje."
+      "notes": "Frozen grapes make a refreshing snack."
     },
     {
       "id": "citroen",
-      "name": "Citroen",
+      "name": "Lemon",
       "aliases": [
+        "lemons",
+        "citroen",
         "citroenen"
       ],
       "category": "fruit",
@@ -377,12 +436,14 @@
         "freezer": 120,
         "pantry": 7
       },
-      "notes": "Rasp en sap los in te vriezen in ijsblokjes."
+      "notes": "Freeze zest and juice separately in ice cube trays."
     },
     {
       "id": "sinaasappel",
-      "name": "Sinaasappel",
+      "name": "Orange",
       "aliases": [
+        "oranges",
+        "sinaasappel",
         "sinaasappels",
         "handsinaasappel"
       ],
@@ -395,12 +456,14 @@
         "freezer": null,
         "pantry": 10
       },
-      "notes": "Bewaar koel voor de langste houdbaarheid."
+      "notes": "Keep cool for the longest shelf life."
     },
     {
       "id": "peer",
-      "name": "Peer",
+      "name": "Pear",
       "aliases": [
+        "pears",
+        "peer",
         "peren",
         "conference"
       ],
@@ -413,12 +476,15 @@
         "freezer": 180,
         "pantry": 5
       },
-      "notes": "Rijp op kamertemperatuur, bewaar daarna koud."
+      "notes": "Ripen at room temperature, then refrigerate."
     },
     {
       "id": "blauwe-bessen",
-      "name": "Blauwe bessen",
+      "name": "Blueberries",
       "aliases": [
+        "blueberry",
+        "bilberries",
+        "blauwe bessen",
         "bosbessen",
         "blueberries"
       ],
@@ -431,12 +497,15 @@
         "freezer": 300,
         "pantry": 2
       },
-      "notes": "Uitstekend om in te vriezen."
+      "notes": "Excellent for freezing."
     },
     {
       "id": "mango",
       "name": "Mango",
       "aliases": [
+        "mangoes",
+        "mangos",
+        "mango",
         "mango's"
       ],
       "category": "fruit",
@@ -448,12 +517,14 @@
         "freezer": 240,
         "pantry": 4
       },
-      "notes": "Rijp op kamertemperatuur; in blokjes in te vriezen."
+      "notes": "Ripen at room temperature; cut into cubes for freezing."
     },
     {
       "id": "avocado",
       "name": "Avocado",
       "aliases": [
+        "avocados",
+        "avocado",
         "avocado's"
       ],
       "category": "fruit",
@@ -465,13 +536,16 @@
         "freezer": 120,
         "pantry": 4
       },
-      "notes": "Aangesneden snel bruin; besprenkel met citroensap.",
+      "notes": "Browns quickly once cut; sprinkle with lemon juice.",
       "opened_fridge": 1
     },
     {
       "id": "kiwi",
       "name": "Kiwi",
       "aliases": [
+        "kiwis",
+        "kiwifruit",
+        "kiwi",
         "kiwi's"
       ],
       "category": "fruit",
@@ -483,12 +557,17 @@
         "freezer": 180,
         "pantry": 5
       },
-      "notes": "Rijpt sneller naast een appel of banaan."
+      "notes": "Ripens faster next to an apple or banana."
     },
     {
       "id": "melk",
-      "name": "Melk",
+      "name": "Milk",
       "aliases": [
+        "semi-skimmed milk",
+        "whole milk",
+        "fresh milk",
+        "skimmed milk",
+        "melk",
         "halfvolle melk",
         "volle melk",
         "verse melk"
@@ -502,13 +581,17 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Geopend binnen enkele dagen opmaken.",
+      "notes": "Use within a few days of opening.",
       "opened_fridge": 4
     },
     {
       "id": "yoghurt",
       "name": "Yoghurt",
       "aliases": [
+        "yogurt",
+        "plain yoghurt",
+        "greek yoghurt",
+        "yoghurt",
         "naturel yoghurt",
         "griekse yoghurt"
       ],
@@ -521,13 +604,16 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Kan na invriezen schiften; roer goed door.",
+      "notes": "May separate after freezing; stir well.",
       "opened_fridge": 5
     },
     {
       "id": "jonge-kaas",
-      "name": "Jonge kaas",
+      "name": "Young Gouda cheese",
       "aliases": [
+        "mild gouda",
+        "cheese slices",
+        "jonge kaas",
         "kaas jong",
         "goudse jong",
         "plakjes kaas"
@@ -541,12 +627,16 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Verpak luchtdicht om uitdrogen te voorkomen."
+      "notes": "Wrap airtight to prevent drying out."
     },
     {
       "id": "oude-kaas",
-      "name": "Oude kaas",
+      "name": "Aged cheese",
       "aliases": [
+        "aged gouda",
+        "mature cheese",
+        "hard cheese",
+        "oude kaas",
         "kaas oud",
         "belegen kaas",
         "harde kaas"
@@ -560,12 +650,14 @@
         "freezer": 180,
         "pantry": null
       },
-      "notes": "Harde kaas is lang houdbaar in de koelkast."
+      "notes": "Hard cheese keeps well in the fridge."
     },
     {
       "id": "roomkaas",
-      "name": "Roomkaas",
+      "name": "Cream cheese",
       "aliases": [
+        "spreadable cheese",
+        "roomkaas",
         "monchou",
         "smeerkaas",
         "philadelphia"
@@ -579,13 +671,15 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Textuur wordt korrelig na invriezen.",
+      "notes": "Freezing makes the texture grainy.",
       "opened_fridge": 7
     },
     {
       "id": "boter",
-      "name": "Boter",
+      "name": "Butter",
       "aliases": [
+        "unsalted butter",
+        "boter",
         "roomboter",
         "ongezouten boter"
       ],
@@ -598,12 +692,16 @@
         "freezer": 270,
         "pantry": 3
       },
-      "notes": "Uitstekend in te vriezen."
+      "notes": "Excellent for freezing."
     },
     {
       "id": "slagroom",
-      "name": "Slagroom",
+      "name": "Whipping cream",
       "aliases": [
+        "cream",
+        "fresh cream",
+        "double cream",
+        "slagroom",
         "room",
         "verse slagroom"
       ],
@@ -616,13 +714,16 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Opgeklopt in toefjes in te vriezen.",
+      "notes": "Whip and freeze in small dollops.",
       "opened_fridge": 3
     },
     {
       "id": "kwark",
-      "name": "Kwark",
+      "name": "Quark",
       "aliases": [
+        "low-fat quark",
+        "full-fat quark",
+        "kwark",
         "magere kwark",
         "volle kwark"
       ],
@@ -635,13 +736,15 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Kan schiften na invriezen.",
+      "notes": "May separate after freezing.",
       "opened_fridge": 4
     },
     {
       "id": "karnemelk",
-      "name": "Karnemelk",
+      "name": "Buttermilk",
       "aliases": [
+        "fresh buttermilk",
+        "karnemelk",
         "verse karnemelk"
       ],
       "category": "dairy",
@@ -661,6 +764,8 @@
       "name": "Crème fraîche",
       "aliases": [
         "creme fraiche",
+        "sour cream",
+        "crème fraîche",
         "zure room"
       ],
       "category": "dairy",
@@ -672,13 +777,17 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Schift makkelijk; niet aanbevolen om in te vriezen.",
+      "notes": "Separates easily; freezing is not recommended.",
       "opened_fridge": 5
     },
     {
       "id": "geraspte-kaas",
-      "name": "Geraspte kaas",
+      "name": "Grated cheese",
       "aliases": [
+        "shredded cheese",
+        "pizza cheese",
+        "grated gouda",
+        "geraspte kaas",
         "gemalen kaas",
         "pizzakaas",
         "geraspte gouda"
@@ -692,13 +801,16 @@
         "freezer": 180,
         "pantry": null
       },
-      "notes": "Prima rechtstreeks uit de vriezer te gebruiken.",
+      "notes": "Can be used straight from the freezer.",
       "opened_fridge": 5
     },
     {
       "id": "kipfilet-rauw",
-      "name": "Kipfilet rauw",
+      "name": "Raw chicken breast",
       "aliases": [
+        "raw chicken",
+        "chicken breast",
+        "kipfilet rauw",
         "rauwe kip",
         "kipfilet",
         "kippenborst"
@@ -712,12 +824,17 @@
         "freezer": 270,
         "pantry": null
       },
-      "notes": "Rauwe kip snel verwerken of invriezen."
+      "notes": "Use raw chicken promptly or freeze it."
     },
     {
       "id": "gehakt-rauw",
-      "name": "Gehakt rauw",
+      "name": "Raw minced meat",
       "aliases": [
+        "minced beef",
+        "ground beef",
+        "ground meat",
+        "beef and pork mince",
+        "gehakt rauw",
         "rauw gehakt",
         "rundergehakt",
         "half-om-half gehakt"
@@ -731,12 +848,15 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Rauw gehakt bederft snel; dezelfde dag gebruiken of invriezen."
+      "notes": "Raw mince spoils quickly; use the same day or freeze."
     },
     {
       "id": "spek",
-      "name": "Spek",
+      "name": "Bacon",
       "aliases": [
+        "bacon pieces",
+        "bacon rashers",
+        "spek",
         "ontbijtspek",
         "spekjes",
         "bacon"
@@ -755,8 +875,12 @@
     },
     {
       "id": "kip-gebraden",
-      "name": "Kip gebraden",
+      "name": "Roast chicken",
       "aliases": [
+        "roasted chicken",
+        "cooked chicken",
+        "rotisserie chicken",
+        "kip gebraden",
         "gebraden kip",
         "grillkip",
         "kip gaar"
@@ -770,12 +894,15 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Binnen 2 uur na bereiding koelen."
+      "notes": "Refrigerate within 2 hours of cooking."
     },
     {
       "id": "rookworst",
-      "name": "Rookworst",
+      "name": "Smoked sausage",
       "aliases": [
+        "sausage",
+        "dutch smoked sausage",
+        "rookworst",
         "gelderse rookworst",
         "worst"
       ],
@@ -795,6 +922,10 @@
       "id": "ham-vleeswaren",
       "name": "Ham",
       "aliases": [
+        "cooked ham",
+        "sliced ham",
+        "cold cuts",
+        "ham",
         "achterham",
         "vleeswaren",
         "beenham"
@@ -808,13 +939,16 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Geopende vleeswaren snel opmaken.",
+      "notes": "Use opened cold cuts promptly.",
       "opened_fridge": 3
     },
     {
       "id": "salami",
       "name": "Salami",
       "aliases": [
+        "cervelat",
+        "cured sausage",
+        "salami",
         "cervelaat",
         "worstwaren"
       ],
@@ -832,11 +966,14 @@
     },
     {
       "id": "biefstuk-rauw",
-      "name": "Biefstuk rauw",
+      "name": "Raw steak",
       "aliases": [
+        "steak",
+        "beef steak",
+        "raw beef",
+        "biefstuk rauw",
         "rauwe biefstuk",
-        "runderlappen",
-        "steak"
+        "runderlappen"
       ],
       "category": "meat",
       "kind": "ingredient",
@@ -847,14 +984,17 @@
         "freezer": 240,
         "pantry": null
       },
-      "notes": "Hele stukken rood vlees blijven langer goed dan gehakt."
+      "notes": "Whole cuts of red meat keep longer than mince."
     },
     {
       "id": "hamburger-rauw",
-      "name": "Hamburger rauw",
+      "name": "Raw burger",
       "aliases": [
-        "rauwe hamburger",
-        "burgers"
+        "raw hamburger",
+        "burgers",
+        "beef burger",
+        "hamburger rauw",
+        "rauwe hamburger"
       ],
       "category": "meat",
       "kind": "ingredient",
@@ -865,12 +1005,15 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Als gehakt: snel gebruiken of invriezen."
+      "notes": "As with mince: use promptly or freeze."
     },
     {
       "id": "zalm-rauw",
-      "name": "Zalm rauw",
+      "name": "Raw salmon",
       "aliases": [
+        "fresh salmon",
+        "salmon fillet",
+        "zalm rauw",
         "rauwe zalm",
         "zalmfilet",
         "verse zalm"
@@ -884,12 +1027,17 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Verse vis dezelfde dag bereiden of invriezen."
+      "notes": "Cook or freeze fresh fish the same day."
     },
     {
       "id": "garnalen",
-      "name": "Garnalen",
+      "name": "Prawns",
       "aliases": [
+        "shrimp",
+        "peeled prawns",
+        "brown shrimp",
+        "king prawns",
+        "garnalen",
         "gepelde garnalen",
         "hollandse garnalen",
         "grote garnalen"
@@ -903,12 +1051,15 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Snel verwerken; koel houden."
+      "notes": "Use promptly; keep chilled."
     },
     {
       "id": "witvis-kabeljauw",
-      "name": "Witvis",
+      "name": "White fish",
       "aliases": [
+        "cod",
+        "white fish fillet",
+        "witvis",
         "kabeljauw",
         "witvisfilet",
         "pangasius",
@@ -923,12 +1074,14 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Verse witvis dezelfde dag gebruiken."
+      "notes": "Use fresh white fish the same day."
     },
     {
       "id": "gerookte-zalm",
-      "name": "Gerookte zalm",
+      "name": "Smoked salmon",
       "aliases": [
+        "salmon smoked",
+        "gerookte zalm",
         "rookzalm",
         "zalm gerookt"
       ],
@@ -941,13 +1094,17 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Geopend binnen twee dagen opmaken.",
+      "notes": "Use within two days of opening.",
       "opened_fridge": 2
     },
     {
       "id": "tonijn-blik-open",
-      "name": "Tonijn uit blik (open)",
+      "name": "Tinned tuna (opened)",
       "aliases": [
+        "canned tuna",
+        "tuna",
+        "tuna opened",
+        "tonijn uit blik (open)",
         "tonijn open",
         "tonijn blik"
       ],
@@ -960,12 +1117,15 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Overhevelen naar afgesloten bakje na openen."
+      "notes": "Transfer to a sealed container after opening."
     },
     {
       "id": "haring",
-      "name": "Haring",
+      "name": "Herring",
       "aliases": [
+        "fresh herring",
+        "soused herring",
+        "haring",
         "hollandse nieuwe",
         "maatjesharing"
       ],
@@ -978,14 +1138,15 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Koel bewaren en snel eten."
+      "notes": "Keep chilled and eat promptly."
     },
     {
       "id": "macaroni-met-vlees",
-      "name": "Macaroni met vlees",
+      "name": "Macaroni with meat",
       "aliases": [
         "pasta bolognese",
         "spaghetti bolognese",
+        "macaroni met vlees",
         "macaroni"
       ],
       "category": "dinner",
@@ -997,13 +1158,14 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Laat eerst afkoelen voor je invriest."
+      "notes": "Allow to cool before freezing."
     },
     {
       "id": "nasi",
-      "name": "Nasi",
+      "name": "Fried rice",
       "aliases": [
         "nasi goreng",
+        "nasi",
         "gebakken rijst"
       ],
       "category": "dinner",
@@ -1015,12 +1177,15 @@
         "freezer": 30,
         "pantry": null
       },
-      "notes": "Gekookte rijst snel koelen i.v.m. voedselveiligheid."
+      "notes": "Cool cooked rice promptly for food safety."
     },
     {
       "id": "verse-soep",
-      "name": "Verse soep",
+      "name": "Fresh soup",
       "aliases": [
+        "soup",
+        "homemade soup",
+        "verse soep",
         "soep",
         "zelfgemaakte soep"
       ],
@@ -1033,14 +1198,17 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Laat afkoelen en vries in porties in."
+      "notes": "Allow to cool and freeze in portions."
     },
     {
       "id": "stamppot",
-      "name": "Stamppot",
+      "name": "Dutch mashed potato and vegetables",
       "aliases": [
-        "boerenkoolstamppot",
+        "stamppot",
         "hutspot",
+        "kale mash",
+        "endive mash",
+        "boerenkoolstamppot",
         "andijviestamppot"
       ],
       "category": "dinner",
@@ -1052,12 +1220,16 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Laat afkoelen voor het invriezen."
+      "notes": "Allow to cool before freezing."
     },
     {
       "id": "rijst-gekookt",
-      "name": "Rijst gekookt",
+      "name": "Cooked rice",
       "aliases": [
+        "rice",
+        "cooked white rice",
+        "cooked brown rice",
+        "rijst gekookt",
         "gekookte rijst",
         "witte rijst",
         "zilvervliesrijst gekookt"
@@ -1071,12 +1243,16 @@
         "freezer": 30,
         "pantry": null
       },
-      "notes": "Snel koelen en niet opnieuw opwarmen na 1 keer."
+      "notes": "Cool promptly and reheat only once."
     },
     {
       "id": "pasta-gekookt",
-      "name": "Pasta gekookt",
+      "name": "Cooked pasta",
       "aliases": [
+        "pasta",
+        "cooked spaghetti",
+        "cooked penne",
+        "pasta gekookt",
         "gekookte pasta",
         "spaghetti gekookt",
         "penne gekookt"
@@ -1090,12 +1266,16 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Besprenkel met olie zodat het niet plakt."
+      "notes": "Drizzle with oil to prevent sticking."
     },
     {
       "id": "curry",
       "name": "Curry",
       "aliases": [
+        "chicken curry",
+        "green curry",
+        "red curry",
+        "curry",
         "kip curry",
         "groene curry",
         "rode curry"
@@ -1109,12 +1289,14 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Laat afkoelen voor het invriezen."
+      "notes": "Allow to cool before freezing."
     },
     {
       "id": "lasagne",
       "name": "Lasagne",
       "aliases": [
+        "lasagna",
+        "lasagne",
         "ovenschotel lasagne"
       ],
       "category": "dinner",
@@ -1126,12 +1308,15 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "In porties invriezen scheelt bij het ontdooien."
+      "notes": "Freeze in portions to make thawing easier."
     },
     {
       "id": "pannenkoeken",
-      "name": "Pannenkoeken",
+      "name": "Pancakes",
       "aliases": [
+        "pancake",
+        "crepes",
+        "pannenkoeken",
         "pannenkoek",
         "flensjes"
       ],
@@ -1144,13 +1329,15 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Leg vellen bakpapier tussen de pannenkoeken in de vriezer."
+      "notes": "Separate pancakes with baking paper when freezing."
     },
     {
       "id": "bami",
-      "name": "Bami",
+      "name": "Fried noodles",
       "aliases": [
         "bami goreng",
+        "stir-fried noodles",
+        "bami",
         "gebakken mie"
       ],
       "category": "dinner",
@@ -1162,12 +1349,15 @@
         "freezer": 30,
         "pantry": null
       },
-      "notes": "Snel koelen na bereiding."
+      "notes": "Cool promptly after cooking."
     },
     {
       "id": "aardappelpuree",
-      "name": "Aardappelpuree",
+      "name": "Mashed potatoes",
       "aliases": [
+        "potato mash",
+        "mash",
+        "aardappelpuree",
         "puree",
         "gestampte aardappelen"
       ],
@@ -1180,12 +1370,15 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Laat afkoelen voor het invriezen."
+      "notes": "Allow to cool before freezing."
     },
     {
       "id": "groentesoep",
-      "name": "Groentesoep",
+      "name": "Vegetable soup",
       "aliases": [
+        "fresh vegetable soup",
+        "tomato soup",
+        "groentesoep",
         "verse groentesoep",
         "tomatensoep"
       ],
@@ -1198,12 +1391,17 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Uitstekend om in porties in te vriezen."
+      "notes": "Excellent for freezing in portions."
     },
     {
       "id": "brood",
-      "name": "Brood",
+      "name": "Bread",
       "aliases": [
+        "loaf",
+        "wholemeal bread",
+        "white bread",
+        "brown bread",
+        "brood",
         "heel brood",
         "volkorenbrood",
         "wit brood",
@@ -1218,13 +1416,15 @@
         "freezer": 90,
         "pantry": 3
       },
-      "notes": "Koelkast maakt brood snel oud; vries in per portie."
+      "notes": "Bread goes stale quickly in the fridge; freeze in portions."
     },
     {
       "id": "croissant",
       "name": "Croissant",
       "aliases": [
         "croissants",
+        "butter croissant",
+        "croissant",
         "roomboter croissant"
       ],
       "category": "bread_bakery",
@@ -1236,13 +1436,15 @@
         "freezer": 60,
         "pantry": 2
       },
-      "notes": "Even opbakken na ontdooien voor een verse smaak."
+      "notes": "Briefly bake after thawing for a fresh taste."
     },
     {
       "id": "wraps",
       "name": "Wraps",
       "aliases": [
         "tortilla wraps",
+        "tortillas",
+        "wraps",
         "tortilla's"
       ],
       "category": "bread_bakery",
@@ -1261,7 +1463,8 @@
       "id": "bagels",
       "name": "Bagels",
       "aliases": [
-        "bagel"
+        "bagel",
+        "bagels"
       ],
       "category": "bread_bakery",
       "kind": "ingredient",
@@ -1272,12 +1475,15 @@
         "freezer": 90,
         "pantry": 3
       },
-      "notes": "Vries in en rooster direct vanuit de vriezer."
+      "notes": "Freeze and toast straight from the freezer."
     },
     {
       "id": "beschuit",
-      "name": "Beschuit",
+      "name": "Rusks",
       "aliases": [
+        "rusk",
+        "dutch rusks",
+        "beschuit",
         "beschuitjes"
       ],
       "category": "bread_bakery",
@@ -1289,13 +1495,16 @@
         "freezer": null,
         "pantry": 60
       },
-      "notes": "Droog en luchtdicht bewaren tegen zacht worden.",
+      "notes": "Store dry and airtight to keep crisp.",
       "opened_fridge": null
     },
     {
       "id": "krentenbollen",
-      "name": "Krentenbollen",
+      "name": "Currant buns",
       "aliases": [
+        "raisin buns",
+        "currant bun",
+        "krentenbollen",
         "rozijnenbollen",
         "krentenbol"
       ],
@@ -1308,12 +1517,16 @@
         "freezer": 90,
         "pantry": 3
       },
-      "notes": "Vries los in voor een verse bol per keer."
+      "notes": "Freeze individually for a fresh bun each time."
     },
     {
       "id": "pesto",
-      "name": "Pesto (open)",
+      "name": "Pesto (opened)",
       "aliases": [
+        "green pesto",
+        "red pesto",
+        "jar of pesto",
+        "pesto (open)",
         "groene pesto",
         "rode pesto",
         "pesto pot"
@@ -1327,13 +1540,16 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Dek af met laagje olijfolie tegen uitdrogen.",
+      "notes": "Cover with a layer of olive oil to prevent drying out.",
       "opened_fridge": 7
     },
     {
       "id": "mayonaise-open",
-      "name": "Mayonaise (open)",
+      "name": "Mayonnaise (opened)",
       "aliases": [
+        "mayo",
+        "mayonnaise",
+        "mayonaise (open)",
         "mayo open",
         "mayonaise"
       ],
@@ -1346,13 +1562,15 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Na openen in de koelkast bewaren.",
+      "notes": "Refrigerate after opening.",
       "opened_fridge": 60
     },
     {
       "id": "ketchup-open",
-      "name": "Ketchup (open)",
+      "name": "Ketchup (opened)",
       "aliases": [
+        "tomato ketchup",
+        "ketchup (open)",
         "ketchup",
         "tomatenketchup"
       ],
@@ -1365,13 +1583,15 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Geopend in de koelkast maanden houdbaar.",
+      "notes": "Keeps for months in the fridge after opening.",
       "opened_fridge": 180
     },
     {
       "id": "hummus",
       "name": "Hummus",
       "aliases": [
+        "chickpea dip",
+        "hummus",
         "houmous",
         "kikkererwtendip"
       ],
@@ -1389,8 +1609,12 @@
     },
     {
       "id": "tomatensaus-open",
-      "name": "Tomatensaus (open)",
+      "name": "Tomato sauce (opened)",
       "aliases": [
+        "pasta sauce",
+        "passata",
+        "tomato sauce",
+        "tomatensaus (open)",
         "pastasaus open",
         "tomatensaus pot",
         "passata open"
@@ -1404,13 +1628,16 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Rest goed in te vriezen voor een volgende pasta.",
+      "notes": "Freeze leftovers for your next pasta dish.",
       "opened_fridge": 5
     },
     {
       "id": "mosterd-open",
-      "name": "Mosterd (open)",
+      "name": "Mustard (opened)",
       "aliases": [
+        "mustard",
+        "dijon mustard",
+        "mosterd (open)",
         "mosterd",
         "dijonmosterd"
       ],
@@ -1423,13 +1650,16 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Lang houdbaar in de koelkast.",
+      "notes": "Keeps well in the fridge.",
       "opened_fridge": 180
     },
     {
       "id": "sojasaus-open",
-      "name": "Sojasaus (open)",
+      "name": "Soy sauce (opened)",
       "aliases": [
+        "soy sauce",
+        "ketjap",
+        "sojasaus (open)",
         "soja saus",
         "ketjap open"
       ],
@@ -1442,13 +1672,16 @@
         "freezer": null,
         "pantry": 30
       },
-      "notes": "Blijft door het zout heel lang goed.",
+      "notes": "The salt helps it keep for a long time.",
       "opened_fridge": 365
     },
     {
       "id": "appelmoes-open",
-      "name": "Appelmoes (open)",
+      "name": "Apple sauce (opened)",
       "aliases": [
+        "apple sauce",
+        "applesauce",
+        "appelmoes (open)",
         "appelmoes",
         "appelmoes pot"
       ],
@@ -1466,8 +1699,11 @@
     },
     {
       "id": "verse-pesto-koelvers",
-      "name": "Verse pesto (koelvers)",
+      "name": "Fresh pesto (chilled)",
       "aliases": [
+        "fresh basil pesto",
+        "chilled pesto",
+        "verse pesto (koelvers)",
         "koelverse pesto",
         "verse basilicumpesto"
       ],
@@ -1480,13 +1716,16 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Koelvers is korter houdbaar dan pesto uit pot.",
+      "notes": "Chilled fresh pesto keeps for less time than jarred pesto.",
       "opened_fridge": 3
     },
     {
       "id": "verse-jus",
-      "name": "Verse jus d'orange",
+      "name": "Fresh orange juice",
       "aliases": [
+        "freshly squeezed orange juice",
+        "orange juice",
+        "verse jus d'orange",
         "verse sinaasappelsap",
         "jus d'orange",
         "vers geperst sap"
@@ -1500,13 +1739,16 @@
         "freezer": 120,
         "pantry": null
       },
-      "notes": "Vers sap snel opdrinken; goed in te vriezen.",
+      "notes": "Drink fresh juice promptly; freezes well.",
       "opened_fridge": 2
     },
     {
       "id": "open-witte-wijn",
-      "name": "Open witte wijn",
+      "name": "White wine (opened)",
       "aliases": [
+        "white wine",
+        "opened wine",
+        "open witte wijn",
         "witte wijn open",
         "wijn open"
       ],
@@ -1519,13 +1761,15 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Rest in ijsblokjes invriezen voor in de saus.",
+      "notes": "Freeze leftovers in ice cube trays for sauces.",
       "opened_fridge": 5
     },
     {
       "id": "open-rode-wijn",
-      "name": "Open rode wijn",
+      "name": "Red wine (opened)",
       "aliases": [
+        "red wine",
+        "open rode wijn",
         "rode wijn open"
       ],
       "category": "drinks",
@@ -1537,13 +1781,18 @@
         "freezer": null,
         "pantry": 3
       },
-      "notes": "Afgesloten koel bewaren voor langere houdbaarheid.",
+      "notes": "Keep sealed and cool for a longer shelf life.",
       "opened_fridge": 5
     },
     {
       "id": "plantaardige-melk-open",
-      "name": "Plantaardige melk (open)",
+      "name": "Plant-based milk (opened)",
       "aliases": [
+        "oat milk",
+        "soy milk",
+        "soya milk",
+        "almond milk",
+        "plantaardige melk (open)",
         "havermelk open",
         "sojamelk open",
         "amandelmelk open"
@@ -1557,13 +1806,17 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Goed schudden; kan na invriezen schiften.",
+      "notes": "Shake well; may separate after freezing.",
       "opened_fridge": 5
     },
     {
       "id": "vruchtensap-open",
-      "name": "Vruchtensap (open)",
+      "name": "Fruit juice (opened)",
       "aliases": [
+        "apple juice",
+        "fruit juice",
+        "juice carton",
+        "vruchtensap (open)",
         "appelsap open",
         "sap open",
         "vruchtensap pak"
@@ -1582,8 +1835,12 @@
     },
     {
       "id": "eieren",
-      "name": "Eieren",
+      "name": "Eggs",
       "aliases": [
+        "egg",
+        "free-range eggs",
+        "chicken eggs",
+        "eieren",
         "ei",
         "scharreleieren",
         "kippeneieren"
@@ -1597,12 +1854,15 @@
         "freezer": null,
         "pantry": 14
       },
-      "notes": "Losgeklopt wel in te vriezen, in de schaal niet."
+      "notes": "Freeze beaten eggs, not eggs in their shells."
     },
     {
       "id": "gekookt-ei",
-      "name": "Gekookt ei",
+      "name": "Boiled egg",
       "aliases": [
+        "boiled eggs",
+        "hard-boiled egg",
+        "gekookt ei",
         "gekookte eieren",
         "hardgekookt ei"
       ],
@@ -1615,12 +1875,15 @@
         "freezer": null,
         "pantry": 1
       },
-      "notes": "In de schaal langer houdbaar dan gepeld."
+      "notes": "Keeps longer in its shell than peeled."
     },
     {
       "id": "restjes-algemeen",
-      "name": "Restjes",
+      "name": "Leftovers",
       "aliases": [
+        "leftover food",
+        "leftover meal",
+        "restjes",
         "kliekjes",
         "overgebleven eten",
         "restje"
@@ -1634,12 +1897,15 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Binnen 2 uur koelen en goed afsluiten."
+      "notes": "Refrigerate within 2 hours and seal well."
     },
     {
       "id": "restjes-ovenschotel",
-      "name": "Restjes ovenschotel",
+      "name": "Leftover casserole",
       "aliases": [
+        "casserole leftovers",
+        "gratin leftovers",
+        "restjes ovenschotel",
         "ovenschotel restje",
         "gratin restje"
       ],
@@ -1652,15 +1918,17 @@
         "freezer": 90,
         "pantry": null
       },
-      "notes": "Laat afkoelen voor het invriezen."
+      "notes": "Allow to cool before freezing."
     },
     {
       "id": "tofu-open",
-      "name": "Tofu (open)",
+      "name": "Tofu (opened)",
       "aliases": [
+        "tofu",
+        "bean curd",
+        "tofu (open)",
         "tofoe",
-        "tahoe open",
-        "tofu"
+        "tahoe open"
       ],
       "category": "other",
       "kind": "ingredient",
@@ -1671,13 +1939,16 @@
         "freezer": 150,
         "pantry": null
       },
-      "notes": "Bewaar geopend onder water, dagelijks verversen.",
+      "notes": "Store opened tofu under water and change the water daily.",
       "opened_fridge": 4
     },
     {
       "id": "olijven-open",
-      "name": "Olijven (open)",
+      "name": "Olives (opened)",
       "aliases": [
+        "green olives",
+        "black olives",
+        "olijven (open)",
         "groene olijven",
         "zwarte olijven"
       ],
@@ -1690,13 +1961,19 @@
         "freezer": null,
         "pantry": null
       },
-      "notes": "Bewaar in het eigen vocht.",
+      "notes": "Store in their original liquid.",
       "opened_fridge": 21
     },
     {
       "id": "verse-basilicum",
-      "name": "Verse basilicum",
+      "name": "Fresh basil",
       "aliases": [
+        "basil",
+        "fresh herbs",
+        "parsley",
+        "coriander",
+        "cilantro",
+        "verse basilicum",
         "basilicum",
         "verse kruiden",
         "peterselie",
@@ -1711,12 +1988,15 @@
         "freezer": 90,
         "pantry": 2
       },
-      "notes": "Fijngehakt met olie in ijsblokjes in te vriezen."
+      "notes": "Finely chop and freeze with oil in ice cube trays."
     },
     {
       "id": "tuinbonen",
-      "name": "Tuinbonen",
+      "name": "Broad beans",
       "aliases": [
+        "fresh broad beans",
+        "fava beans",
+        "tuinbonen",
         "verse tuinbonen"
       ],
       "category": "vegetables",
@@ -1728,12 +2008,15 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Blancheren voor het invriezen."
+      "notes": "Blanch before freezing."
     },
     {
       "id": "doperwten",
-      "name": "Doperwten",
+      "name": "Peas",
       "aliases": [
+        "fresh peas",
+        "green peas",
+        "doperwten",
         "erwtjes",
         "verse erwten"
       ],
@@ -1746,12 +2029,16 @@
         "freezer": 300,
         "pantry": null
       },
-      "notes": "Uitstekend om in te vriezen."
+      "notes": "Excellent for freezing."
     },
     {
       "id": "mais",
-      "name": "Maïs",
+      "name": "Sweetcorn",
       "aliases": [
+        "corn",
+        "corn on the cob",
+        "sweet corn",
+        "maïs",
         "mais",
         "maiskolf",
         "suikermais"
@@ -1765,12 +2052,15 @@
         "freezer": 240,
         "pantry": 2
       },
-      "notes": "Vers is het zoetst; snel gebruiken of invriezen."
+      "notes": "Fresh corn is sweetest; use promptly or freeze."
     },
     {
       "id": "frambozen",
-      "name": "Frambozen",
+      "name": "Raspberries",
       "aliases": [
+        "raspberry",
+        "fresh raspberries",
+        "frambozen",
         "verse frambozen"
       ],
       "category": "fruit",
@@ -1782,12 +2072,15 @@
         "freezer": 300,
         "pantry": 1
       },
-      "notes": "Kwetsbaar fruit; goed in te vriezen."
+      "notes": "Delicate fruit; freezes well."
     },
     {
       "id": "meloen",
-      "name": "Meloen",
+      "name": "Melon",
       "aliases": [
+        "galia melon",
+        "watermelon",
+        "meloen",
         "galiameloen",
         "cantaloupe",
         "watermeloen"
@@ -1801,14 +2094,16 @@
         "freezer": 180,
         "pantry": 4
       },
-      "notes": "Aangesneden afgedekt in de koelkast bewaren.",
+      "notes": "Once cut, cover and refrigerate.",
       "opened_fridge": 3
     },
     {
       "id": "pizza-margherita",
-      "name": "Pizza margherita",
+      "name": "Margherita pizza",
       "aliases": [
         "pizza",
+        "leftover pizza",
+        "pizza margherita",
         "margherita",
         "pizza restje"
       ],
@@ -1821,12 +2116,14 @@
         "freezer": 60,
         "pantry": null
       },
-      "notes": "Restje pizza afgedekt koelen; opwarmen in de oven of pan."
+      "notes": "Cover and refrigerate leftover pizza; reheat in the oven or a pan."
     },
     {
       "id": "pindakaas",
-      "name": "Pindakaas",
+      "name": "Peanut butter",
       "aliases": [
+        "jar of peanut butter",
+        "pindakaas",
         "pindakaas pot",
         "peanut butter"
       ],
@@ -1839,7 +2136,7 @@
         "freezer": null,
         "pantry": 180
       },
-      "notes": "Hoeft niet in de koelkast; droog en goed afgesloten bewaren.",
+      "notes": "Does not need refrigeration; store dry and tightly sealed.",
       "opened_fridge": 120
     }
   ]
