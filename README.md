@@ -50,7 +50,7 @@ full undo. It works completely offline; AI estimates and the printer add-on are 
 ## Features
 
 - 📋 **Inventory** across fridge, freezer and pantry, with search and per-location filters.
-- 🗓️ **Automatic expiry dates** from a built-in database of 99 common products & dishes (Dutch, i18n-ready),
+- 🗓️ **Automatic expiry dates** from a built-in database of 99 common products & dishes (English, with Dutch search aliases),
   matched conservatively — it will ask rather than guess wrong.
 - ✨ **AI estimates** for anything not in the database, via your existing Home Assistant conversation
   agent or a direct OpenAI key.
@@ -136,7 +136,7 @@ lets you eat, toss or reprint per portion, and resize the batch without disturbi
 
 ### Automatic expiry estimation
 
-A seed database of 99 Dutch recipes/products (84 ingredients, 15 dishes) maps product names to
+A seed database of 99 recipes/products with English names (84 ingredients, 15 dishes) maps product names to
 shelf-life in days, per location. Typing a name matches conservatively — an exact or near-exact
 match is auto-suggested, but a loose one-word overlap is not (so "pizza" won't silently become
 "cheese"), and negations like *"macaroni zonder vlees"* ("without meat") correctly exclude templates
@@ -222,8 +222,10 @@ household can each see their own language); server-rendered text (printed labels
 notification, AI prompts) reads Home Assistant's system-configured language, since those aren't tied
 to a specific browser session.
 
-> The 99-recipe shelf-life database itself (product names, storage tips) is Dutch content — a
-> different kind of project than UI translation — and isn't translated by this rule.
+The 99-entry built-in shelf-life catalogue has English names and storage tips. English and
+legacy Dutch search aliases are supported. Saved inventory names and customised templates
+retain their existing text. On phone screens, expiry badges appear below item names; long
+names wrap.
 
 ## Installation
 
@@ -232,10 +234,28 @@ to a specific browser session.
 Fridge Assistant isn't in the default HACS store, so add it as a custom repository:
 
 1. HACS → **Integrations** → ⋮ → **Custom repositories**.
-2. Add `https://github.com/MaxGramser/fridge_assistant`, category **Integration**.
+2. Add `https://github.com/adec/fridge_assistant`, category **Integration**.
 3. Install **Fridge Assistant**, then restart Home Assistant.
 4. **Settings → Devices & Services → Add Integration → Fridge Assistant**.
 5. Open **Koelkast** in the sidebar.
+
+### Switching an existing installation to this fork
+
+1. Make a full Home Assistant backup before updating.
+2. Keep the existing **Fridge Assistant** entry under **Settings → Devices & Services**.
+   Replace only the integration code in `config/custom_components/fridge_assistant`.
+3. In HACS, switch the custom repository to `https://github.com/adec/fridge_assistant`
+   (category **Integration**) and download this fork. If HACS offers multiple versions,
+   select `main` to get these changes. Avoid leaving the upstream repository registered
+   for updates to the same integration.
+4. Restart Home Assistant, then reload the panel on your phone.
+
+This fork keeps the `fridge_assistant` domain, storage key and storage schema. Inventory,
+portions, custom templates, hidden templates and history are loaded from the existing
+`config/.storage/fridge_assistant.data` file. Existing integration settings remain in
+Home Assistant's configuration entry. Do not delete these storage files or recreate the
+integration when switching. Customised templates override their built-in equivalents,
+so their saved names and notes are not translated automatically.
 
 ### Manual
 
@@ -321,7 +341,7 @@ URL if yours differs — an add-on installed from the repository gets a hostname
 ## Known limitations
 
 - Only Dutch and English exist (see [Language](#language)) — the 99-recipe database's product names
-  and notes stay Dutch regardless of the UI language.
+  and notes are English regardless of the UI language.
 - Live camera barcode scanning requires a secure context (HTTPS); it degrades gracefully to
   photo-capture or manual entry otherwise.
 - The label printer add-on has been tested against DYMO LabelWriter 400/450/550 (99014 labels) and a
