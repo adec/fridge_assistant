@@ -266,7 +266,8 @@ class FridgeRuntime:
         warn_days = int(self.options[CONF_WARN_DAYS])
         today = dt_util.now().date()
         items = self.store.expiring_items(warn_days, today)
-        summaries = [item_summary(i, today) for i in items]
+        summaries = [{**item_summary(i, today),
+                      "location_label": self.store.location_label(i["location"])} for i in items]
 
         self.hass.bus.async_fire(
             EVENT_EXPIRING,
@@ -334,7 +335,7 @@ def _notification_message(summaries: list[dict[str, Any]], lang: str) -> str:
 
 def _line(item: dict[str, Any], lang: str) -> str:
     s = _NOTIFY_STRINGS[lang]
-    loc = get_location_label(item["location"], lang)
+    loc = item.get("location_label") or get_location_label(item["location"], lang)
     dl = item["days_left"]
     if dl is None:
         when = ""

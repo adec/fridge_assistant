@@ -139,9 +139,11 @@ def build_label_context(
     lang = resolve_language(hass)
     location = item.get("location") or ""
     kind = item.get("kind") or CATEGORY_KIND.get(item.get("category"), DEFAULT_KIND)
+    from .coordinator import get_runtime
+    runtime = get_runtime(hass)
     return {
         "lang": lang,
-        "location_label": get_location_label(location, lang),
+        "location_label": runtime.store.location_label(location, lang) if runtime else get_location_label(location, lang),
         "kind_label": get_kind_label(kind, lang),
         "today": dt_util.now().date(),
         # Portion stickers get a sub-code (AB12-3) + "PORTIE n/N" heading;

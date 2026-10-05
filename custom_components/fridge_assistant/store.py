@@ -31,6 +31,8 @@ from .const import (
     KIND_DISH,
     KIND_INGREDIENT,
     LOCATIONS,
+    LOCATION_META,
+    location_label as default_location_label,
     MAX_HISTORY,
     MAX_PORTIONS,
     PORTION_ACTIONS,
@@ -144,13 +146,24 @@ def default_portions(count: int = 1) -> list[dict[str, Any]]:
     return [{"n": i + 1, "status": "open"} for i in range(count)]
 
 
+def default_locations() -> dict[str, dict[str, Any]]:
+    """Stable IDs keep old inventory and automations valid."""
+    return {key: {"id": key, "name": None, "storage_type": key,
+                  "emoji": LOCATION_META[key]["emoji"], "archived": False,
+                  "deleted": False} for key in LOCATIONS}
+
+
+class LocationError(ValueError):
+    """A location operation rejected without mutating inventory."""
+
+
 class FridgeDataStore(Store):
     """Versioned store.
 
     v1 -> v2: Dutch identifiers to English. v2 -> v3: every item and history
     snapshot gets a ``portions`` list (default one open portion). v3 -> v4:
-    the "prepared_dish" category is remapped onto "dinner" (see
-    LEGACY_CATEGORIES / CATEGORIES in const.py).
+    the "prepared_dish" category is remapped onto "dinner". v4 -> v5:
+    named locations are seeded with the three existing location IDs.
     """
 
     async def _async_migrate_func(
@@ -190,6 +203,8 @@ class FridgeDataStore(Store):
                 snap = event.get("item")
                 if isinstance(snap, dict):
                     _migrate_category_v4(snap)
+        if old_major_version < 5:
+            old_data.setdefault("locations", list(default_locations().values()))
         return old_data
 
 
@@ -204,6 +219,7 @@ class FridgeStore:
         self._store: Store = FridgeDataStore(
             hass, STORAGE_VERSION, STORAGE_KEY, atomic_writes=True
         )
+        self.locations = default_locations()
         self.items: dict[str, dict[str, Any]] = {}
         self.user_templates: dict[str, dict[str, Any]] = {}
         self.hidden: set[str] = set()
@@ -215,12 +231,24 @@ class FridgeStore:
     async def async_load(self) -> None:
         data = await self._store.async_load()
         if data:
+            if "locations" in data:
+                self.locations = {loc["id"]: dict(loc) for loc in data["locations"]}
             self.items = {i["id"]: i for i in data.get("items", []) if i.get("id")}
             self.user_templates = {
                 t["id"]: t for t in data.get("user_templates", []) if t.get("id")
             }
             self.hidden = set(data.get("hidden", []))
             self.history = list(data.get("history", []))[:MAX_HISTORY]
+        # Keep unknown IDs from imported inventories/history readable and restorable.
+        for item in [*self.items.values(), *(ev.get("item") or {} for ev in self.history)]:
+            key = item.get("location")
+            if key and key not in self.locations:
+                self.locations[key] = {"id": key, "name": key, "storage_type": "fridge",
+                                       "emoji": "📦", "archived": True, "deleted": True}
+        if not self.active_locations():
+            # Defensive recovery for an imported store with no selectable destination.
+            self.locations.setdefault("fridge", default_locations()["fridge"])
+            self.locations["fridge"].update(archived=False, deleted=False)
         self._seed = await self.hass.async_add_executor_job(self._read_seed)
         _LOGGER.debug(
             "Fridge Assistant loaded: %s items, %s user templates, %s seed templates",
@@ -246,12 +274,90 @@ class FridgeStore:
     async def async_save(self) -> None:
         await self._store.async_save(
             {
+                "locations": list(self.locations.values()),
                 "items": list(self.items.values()),
                 "user_templates": list(self.user_templates.values()),
                 "hidden": list(self.hidden),
                 "history": self.history,
             }
         )
+
+    # ---- storage locations ------------------------------------------------
+
+    def active_locations(self) -> list[str]:
+        return [key for key, loc in self.locations.items()
+                if not loc.get("archived") and not loc.get("deleted")]
+
+    def location_label(self, key: str, lang: str | None = None) -> str:
+        loc = self.locations.get(key, {})
+        return loc.get("name") or default_location_label(key, lang or resolve_language(self.hass))
+
+    def storage_type(self, key: str) -> str:
+        loc = self.locations.get(canonical_location(key))
+        if loc is None:
+            raise LocationError("location_not_found")
+        return loc["storage_type"]
+
+    def locations_for_ui(self) -> dict[str, dict[str, Any]]:
+        in_use = {i.get("location") for i in self.items.values()}
+        return {key: {**loc, "label": self.location_label(key),
+                      "count": sum(i.get("location") == key for i in self.items.values())}
+                for key, loc in self.locations.items()
+                if not loc.get("deleted") or key in in_use}
+
+    def upsert_location(self, data: dict[str, Any]) -> dict[str, Any]:
+        key = data.get("id")
+        existing = self.locations.get(key) if key else None
+        if key and (existing is None or existing.get("deleted")):
+            raise LocationError("location_not_found")
+        name = (data.get("name") or "").strip() if "name" in data else (existing or {}).get("name")
+        if ("name" in data or not existing) and (not name or len(name) > 80):
+            raise LocationError("location_name_required")
+        storage_type = data.get("storage_type", (existing or {}).get("storage_type"))
+        if storage_type not in LOCATIONS:
+            raise LocationError("location_type_invalid")
+        archived = data.get("archived", (existing or {}).get("archived", False))
+        if archived and existing and key in self.active_locations() and len(self.active_locations()) == 1:
+            raise LocationError("location_last_active")
+        if any(k != key and not loc.get("deleted")
+               and self.location_label(k).casefold() == (name or self.location_label(key)).casefold()
+               for k, loc in self.locations.items()):
+            raise LocationError("location_name_duplicate")
+        emoji = (data.get("emoji") or "").strip() or LOCATION_META[storage_type]["emoji"]
+        if len(emoji) > 16:
+            raise LocationError("location_icon_invalid")
+        key = key or "loc_" + uuid.uuid4().hex
+        loc = {"id": key, "name": name, "storage_type": storage_type,
+               "emoji": emoji, "archived": archived, "deleted": False}
+        self.locations[key] = loc
+        return dict(loc)
+
+    def reorder_locations(self, ids: list[str]) -> None:
+        visible = list(self.locations_for_ui())
+        if len(ids) != len(set(ids)) or set(ids) != set(visible):
+            raise LocationError("location_order_invalid")
+        self.locations = {key: self.locations[key] for key in
+                          [*ids, *(key for key in self.locations if key not in ids)]}
+
+    def remove_location(self, key: str) -> None:
+        loc = self.locations.get(key)
+        if loc is None or loc.get("deleted"):
+            raise LocationError("location_not_found")
+        if any(i.get("location") == key for i in self.items.values()):
+            raise LocationError("location_in_use")
+        if key in self.active_locations() and len(self.active_locations()) == 1:
+            raise LocationError("location_last_active")
+        # Retain metadata for old history and Undo, never orphan a snapshot.
+        loc.update(archived=True, deleted=True)
+
+    def validate_item_location(self, key: str, current: str | None = None) -> str:
+        key = canonical_location(key)
+        loc = self.locations.get(key)
+        if loc is None:
+            raise LocationError("location_not_found")
+        if key != current and (loc.get("archived") or loc.get("deleted")):
+            raise LocationError("location_archived")
+        return key
 
     # ---- templates --------------------------------------------------------
 
@@ -414,12 +520,11 @@ class FridgeStore:
                 return candidate
         return uuid.uuid4().hex
 
-    @staticmethod
-    def shelf_life_days(template: dict[str, Any] | None, location: str) -> int | None:
+    def shelf_life_days(self, template: dict[str, Any] | None, location: str) -> int | None:
         if not template:
             return None
         sl = template.get("shelf_life") or {}
-        val = sl.get(location)
+        val = sl.get(self.storage_type(location))
         return int(val) if isinstance(val, (int, float)) else None
 
     # ---- items ------------------------------------------------------------
@@ -449,7 +554,7 @@ class FridgeStore:
         today = now.date()
         # Accept legacy Dutch values from old automations / service calls.
         loc = canonical_location(data.get("location"))
-        location = loc if loc in LOCATIONS else LOCATIONS[0]
+        location = self.validate_item_location(loc or self.active_locations()[0])
 
         template = self.get_template(data.get("template_id"))
         if template is None and data.get("contents"):
@@ -461,7 +566,7 @@ class FridgeStore:
 
         expiry_date = data.get("expiry_date")
         expiry_source = data.get("expiry_source") or SOURCE_MANUAL
-        if not expiry_date:
+        if not expiry_date and data.get("expiry_source") != SOURCE_MANUAL:
             days = self.shelf_life_days(template, location)
             if days is not None:
                 base = parse_date(added_date) or today
@@ -530,6 +635,8 @@ class FridgeStore:
         item = self.items.get(item_id)
         if not item:
             return None
+        if "location" in changes:
+            self.validate_item_location(changes["location"], item.get("location"))
         allowed = {
             "name",
             "contents",
@@ -555,8 +662,7 @@ class FridgeStore:
             # break filtering/labels.
             if key == "location":
                 value = canonical_location(value)
-                if value not in LOCATIONS:
-                    continue
+                self.validate_item_location(value, item.get("location"))
             if key == "kind":
                 value = canonical_kind(value)
                 if value not in (KIND_INGREDIENT, KIND_DISH):

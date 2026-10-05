@@ -6,13 +6,14 @@ from typing import Any, Final
 
 DOMAIN: Final = "fridge_assistant"
 
-# Storage. Version 4 = the single "prepared_dish" category was split into
+# Storage. Version 5 = managed storage locations with independent storage types.
+# Version 4 = the single "prepared_dish" category was split into
 # meal-time categories (breakfast/lunch/dinner/snack); old data is remapped to
 # "dinner" (see LEGACY_CATEGORIES). Version 3 = every item/history snapshot
 # carries a `portions` list (default one open portion). Version 2 = English
 # enum identifiers (fridge/freezer/pantry, dish, dairy/…); version 1 stored the
 # original Dutch ones. See FridgeDataStore._async_migrate_func in store.py.
-STORAGE_VERSION: Final = 4
+STORAGE_VERSION: Final = 5
 STORAGE_KEY: Final = "fridge_assistant.data"
 
 # Frontend panel / static
@@ -257,6 +258,15 @@ def localized(strings: dict[str, dict[str, str]], lang: str, key: str, **kwargs:
 # them for the same conditions), kept in one place to avoid drift.
 _SHARED_STRINGS: dict[str, dict[str, str]] = {
     "nl": {
+        'location_not_found': 'Opslaglocatie niet gevonden.',
+        'location_name_required': 'Voer een locatienaam van 1–80 tekens in.',
+        'location_type_invalid': 'Kies koelkast, vriezer of kast als opslagtype.',
+        'location_last_active': 'Houd minimaal één actieve opslaglocatie.',
+        'location_name_duplicate': 'Er bestaat al een opslaglocatie met deze naam.',
+        'location_icon_invalid': 'Kies een kortere locatie-emoji.',
+        'location_order_invalid': 'Locaties zijn gewijzigd. Vernieuw en probeer opnieuw.',
+        'location_in_use': 'Verplaats alle items voordat je deze locatie verwijdert.',
+        'location_archived': 'Kies een actieve opslaglocatie voor nieuwe of verplaatste items.',
         "not_configured": "Fridge Assistant is niet (meer) geconfigureerd.",
         "not_loaded": "Fridge Assistant niet geladen.",
         "item_not_found": "Item {id} niet gevonden.",
@@ -266,6 +276,15 @@ _SHARED_STRINGS: dict[str, dict[str, str]] = {
         "no_open_portions": "Geen open porties meer.",
     },
     "en": {
+        'location_not_found': 'Storage location not found.',
+        'location_name_required': 'Enter a location name of 1–80 characters.',
+        'location_type_invalid': 'Select fridge, freezer or cupboard as the storage type.',
+        'location_last_active': 'Keep at least one active storage location.',
+        'location_name_duplicate': 'A storage location already has this name.',
+        'location_icon_invalid': 'Choose a shorter location emoji.',
+        'location_order_invalid': 'Locations changed. Reload and try ordering them again.',
+        'location_in_use': 'Move all items elsewhere before removing this location.',
+        'location_archived': 'Choose an active storage location for new or moved items.',
         "not_configured": "Fridge Assistant is not configured (anymore).",
         "not_loaded": "Fridge Assistant not loaded.",
         "item_not_found": "Item {id} not found.",

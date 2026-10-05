@@ -32,10 +32,9 @@ class TestBuildItem(unittest.TestCase):
         item = store.build_item({"name": "Soep", "kind": "gerecht"})
         self.assertEqual(item["kind"], "dish")
 
-    def test_invalid_location_falls_back_to_first(self):
-        store = make_store()
-        item = store.build_item({"name": "X", "location": "garage"})
-        self.assertEqual(item["location"], const.LOCATIONS[0])
+    def test_unknown_location_is_rejected(self):
+        with self.assertRaisesRegex(store_mod.LocationError, "location_not_found"):
+            make_store().build_item({"name": "X", "location": "garage"})
 
     def test_unknown_name_localised(self):
         self.assertEqual(make_store("nl").build_item({})["name"], "Onbekend")
@@ -66,7 +65,7 @@ class TestUpdateItem(unittest.TestCase):
 
     def test_invalid_enum_values_are_ignored(self):
         updated = self.store.update_item(
-            self.item["id"], {"location": "garage", "kind": "snack"}
+            self.item["id"], {"kind": "snack"}
         )
         self.assertEqual(updated["location"], "fridge")
         self.assertIn(updated["kind"], ("ingredient", "dish"))

@@ -18,6 +18,7 @@ from homeassistant.core import (
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 
+from .store import LocationError
 from .ai import AIEstimateError, async_estimate
 from .codes import split_portion_code
 from .const import (
@@ -26,8 +27,6 @@ from .const import (
     CONF_PRINTER_ENABLED,
     DOMAIN,
     HISTORY_ACTIONS,
-    LEGACY_LOCATIONS,
-    LOCATIONS,
     MAX_PORTIONS,
     localized,
     resolve_language,
@@ -127,9 +126,7 @@ ADD_ITEM_SCHEMA = vol.Schema(
         vol.Optional("contents"): cv.string,
         # Legacy Dutch values stay accepted so old automations keep working;
         # store.build_item canonicalises them to the English ones.
-        vol.Optional("location", default=LOCATIONS[0]): vol.In(
-            [*LOCATIONS, *LEGACY_LOCATIONS]
-        ),
+        vol.Optional("location"): cv.string,
         vol.Optional("category"): cv.string,
         vol.Optional("kind"): cv.string,
         vol.Optional("template_id"): cv.string,
@@ -199,14 +196,20 @@ def async_setup_services(hass: HomeAssistant) -> None:
         runtime = _get_runtime(hass)
         # Attribute the item to the HA user behind the service call, if any.
         by, by_name = await runtime.async_user_attrs(call.context.user_id)
-        item = await runtime.async_add_item(dict(call.data), by=by, by_name=by_name)
+        try:
+            item = await runtime.async_add_item(dict(call.data), by=by, by_name=by_name)
+        except LocationError as err:
+            raise HomeAssistantError(shared_text(hass, str(err))) from err
         return {"item": item}
 
     async def handle_update_item(call: ServiceCall) -> ServiceResponse:
         runtime = _get_runtime(hass)
         data = dict(call.data)
         item_id = data.pop("id")
-        item = runtime.store.update_item(item_id, data)
+        try:
+            item = runtime.store.update_item(item_id, data)
+        except LocationError as err:
+            raise HomeAssistantError(shared_text(hass, str(err))) from err
         if item is None:
             raise HomeAssistantError(shared_text(hass, "item_not_found", id=item_id))
         await runtime.async_changed()

@@ -29,6 +29,7 @@ full undo. It works completely offline; AI estimates and the printer add-on are 
 - [Screenshots](#screenshots)
 - [How it works](#how-it-works)
   - [Inventory model](#inventory-model)
+  - [Storage locations](#storage-locations)
   - [Item codes & stickers](#item-codes--stickers)
   - [Automatic expiry estimation](#automatic-expiry-estimation)
   - [AI estimates](#ai-estimates)
@@ -49,7 +50,8 @@ full undo. It works completely offline; AI estimates and the printer add-on are 
 
 ## Features
 
-- 📋 **Inventory** across fridge, freezer and pantry, with search and per-location filters.
+- 📋 **Inventory** across named fridges, freezers and cupboards, with search and per-location filters.
+- 📍 **Manage locations** — add, rename, reorder or archive storage spaces and choose their storage type.
 - 🗓️ **Automatic expiry dates** from a built-in database of 99 common products & dishes (English, with Dutch search aliases),
   matched conservatively — it will ask rather than guess wrong.
 - ✨ **AI estimates** for anything not in the database, via your existing Home Assistant conversation
@@ -103,8 +105,8 @@ full undo. It works completely offline; AI estimates and the printer add-on are 
 
 ### Inventory model
 
-Every item lives in one of three **locations** — `fridge`, `freezer`, or `pantry`
-(room-temperature storage) — and belongs to one of two **kinds**:
+Every item lives in a named **location**, such as Kitchen fridge or Garage freezer,
+and belongs to one of two **kinds**:
 
 - 🥕 **ingredient** — a single product (milk, lettuce, cheese, ...)
 - 🍲 **dish** — something prepared (leftovers, a home-cooked meal, ...)
@@ -113,6 +115,35 @@ Kind is derived from a set of 15 finer categories (vegetables, fruit, dairy, mea
 lunch, dinner, snack, bakery, sauces & spices, drinks, eggs, leftovers, other) but can always be
 overridden per item. Prepared meals are categorised by the meal-time they're usually eaten at, so
 the inventory can be filtered on e.g. "what dinners are in the freezer?".
+
+### Storage locations
+
+Open **Manage locations** beside the inventory's location filters. Add a name, choose a
+storage type, and optionally choose an emoji. You can also rename locations and use the arrow
+buttons to reorder them. The first active location is the default for new items.
+
+| Storage type | Example location | Shelf-life value used |
+|---|---|---|
+| Fridge | Kitchen fridge, Drinks fridge | `fridge` |
+| Freezer | Garage freezer, Chest freezer | `freezer` |
+| Cupboard | Pantry, Baking cupboard | `pantry` |
+
+Templates and AI estimates keep these three shelf-life values; each physical location uses its
+chosen type. Moving an existing item or changing a location's type keeps its expiry date.
+The item editor offers a new estimate where available, which you can accept explicitly.
+Estimates use the item's **date added**, so moving an item does not restart its storage duration.
+
+**Archive** keeps a location visible on existing items and filters, but removes it from destinations
+for new or moved items. **Restore** makes it selectable again. Remove is available only when the
+location has no inventory items, and at least one active location must remain. Removed location
+metadata is retained so old history entries can still be undone; a restored item can be moved to
+an active location.
+
+Updating from an earlier version keeps inventory, custom templates and history, and creates the
+original three locations with their existing IDs (`fridge`, `freezer`, `pantry`). Renaming does not
+change a location's ID. For automations, copy the **Location ID** from the manager and pass it as
+the `location` field in add/update actions. Sensors, notifications and printed labels include custom
+locations too.
 
 ### Item codes & stickers
 

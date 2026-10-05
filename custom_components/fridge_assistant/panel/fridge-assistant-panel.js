@@ -16,6 +16,7 @@ import { daysLabel, esc, fmtDate } from "./lib/format.js";
 import { openModal, toast, wireDateField } from "./lib/surface.js";
 import { aiEstimate, openAddModal } from "./views/add-item.js";
 import { completeItem, openInspector } from "./views/inspector.js";
+import { openLocationsManager } from "./views/locations.js";
 import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js";
 import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js";
 import { historyRow, openHistory, relTime } from "./views/history.js";
@@ -81,7 +82,15 @@ class FridgeAssistantPanel extends HTMLElement {
   _locMeta(key) {
     const base = (this._state && this._state.location_meta || {})[key] || {};
     const table = LOCATION_LABELS[this._lang()] || LOCATION_LABELS.en;
-    return { ...base, label: table[key] || base.label || key };
+    return { ...base, label: base.name || table[key] || base.label || key };
+  }
+  _storageType(key) {
+    return this._state.location_meta?.[key]?.storage_type || key;
+  }
+  _storageMeta(key) {
+    const labels = { fridge: this.t("storageFridge"), freezer: this.t("storageFreezer"), pantry: this.t("storagePantry") };
+    const emojis = { fridge: "🧊", freezer: "❄️", pantry: "🧺" };
+    return { label: labels[key] || key, emoji: emojis[key] || "📦" };
   }
   _catMeta(key) {
     const base = (this._state && this._state.categories || {})[key] || {};
@@ -250,11 +259,13 @@ class FridgeAssistantPanel extends HTMLElement {
   _onState() {
     const hb = this.shadowRoot.getElementById("btn-history");
     if (hb) hb.title = this.t("historyTooltip", this._state.history_count || 0);
+    if (this._filterLoc !== "all" && !this._state.locations.includes(this._filterLoc)) this._filterLoc = "all";
     this._renderCounts();
     this._renderFilters();
     this._renderList();
     // Keep an open inspector (drawer or sheet) in sync with the new state.
     if (this._refreshSurface) this._refreshSurface();
+    if (this._refreshLocations) this._refreshLocations();
   }
 
   _renderCounts() {
@@ -275,9 +286,10 @@ class FridgeAssistantPanel extends HTMLElement {
     let html = locChip("all", this.t("all"), counts.total);
     for (const loc of locations) {
       const m = this._locMeta(loc);
-      html += locChip(loc, `${m.emoji || ""} ${m.label || loc}`, counts.by_location[loc] || 0);
+      html += locChip(loc, `${esc(m.emoji || "")} ${esc(m.label || loc)}${m.archived ? " · " + this.t("locationArchived") : ""}`, counts.by_location[loc] || 0);
     }
 
+    html += `<button class="chip" id="manage-locations"><ha-icon icon="mdi:map-marker-multiple-outline"></ha-icon> ${this.t("manageLocations")}</button>`;
     const kindKeys = Object.keys(kinds || {});
     if (kindKeys.length) {
       const kindCounts = {};
@@ -316,6 +328,7 @@ class FridgeAssistantPanel extends HTMLElement {
     }
 
     el.innerHTML = html;
+    el.querySelector("#manage-locations").addEventListener("click", () => openLocationsManager(this));
     el.querySelectorAll("[data-loc]").forEach((b) =>
       b.addEventListener("click", () => { this._filterLoc = b.dataset.loc; this._renderFilters(); this._renderList(); })
     );
@@ -417,9 +430,7 @@ class FridgeAssistantPanel extends HTMLElement {
 
   _itemCard(i, lang) {
     const lm = this._locMeta(i.location);
-    // First word of the location label keeps the meta line short in both
-    // languages ("Buiten koelkast" -> "Buiten", "Fridge" -> "Fridge").
-    const locShort = (lm.label || i.location || "").split(" ")[0];
+    const locLabel = lm.label || i.location || "";
     const contents = i.contents && i.contents !== i.name ? i.contents : "";
     const portions = i.portions || [];
     const total = portions.length;
@@ -433,7 +444,7 @@ class FridgeAssistantPanel extends HTMLElement {
       <div class="card-main">
         <div class="card-title">${esc(i.name)}</div>
         <div class="card-sub">
-          <span class="cs-fix">${lm.emoji || ""} ${esc(locShort)}</span>
+          <span class="cs-fix">${lm.emoji || ""} ${esc(locLabel)}</span>
           <span class="cs-sep">·</span>
           <span class="code">${esc(i.code)}</span>${pbadge}
           ${contents ? `<span class="cs-sep">·</span><span class="cs-more">${esc(contents)}</span>` : ""}

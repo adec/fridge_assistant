@@ -85,7 +85,8 @@ class TestMigration(unittest.TestCase):
         v3 = {"items": [{"id": "n1", "location": "fridge",
                          "portions": [{"n": 1, "status": "eaten"}]}]}
         out = migrate({"items": [dict(v3["items"][0])]}, major=3)
-        self.assertEqual(out, v3)
+        self.assertEqual(out["items"], v3["items"])
+        self.assertEqual(out["locations"], list(store_mod.default_locations().values()))
 
     def test_v3_prepared_dish_category_migrates_to_dinner(self):
         v3 = {

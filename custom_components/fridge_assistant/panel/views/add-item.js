@@ -5,10 +5,12 @@ import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
   const m = {
-    location: prefill.location || editItem?.location || "fridge",
+    location: prefill.location || editItem?.location || panel._state.active_locations?.[0] || "fridge",
     added: prefill.added_date || editItem?.added_date || todayISO(),
     expiry: prefill.expiry_date || editItem?.expiry_date || "",
-    expiryManual: isEdit ? editItem?.expiry_source === "manual" : false,
+    expiryManual: isEdit ? editItem?.expiry_source === "manual" : !!prefill.expiry_date,
+    expiryLocked: isEdit || !!prefill.expiry_date,
+    expirySource: editItem?.expiry_source || prefill.expiry_source || (prefill.expiry_date ? "manual" : "none"),
     emoji: prefill.emoji || editItem?.emoji || "🍽️",
     template_id: prefill.template_id || editItem?.template_id || null,
     category: prefill.category || editItem?.category || null,
@@ -17,7 +19,8 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     portions: 1,
     aiResult: null,
   };
-  const locs = panel._state.locations;
+  const locs = (panel._state.active_locations || panel._state.locations).slice();
+  if (isEdit && !locs.includes(m.location)) locs.push(m.location);
   const kinds = panel._state.kinds || { ingredient: {}, dish: {} };
   const nameVal = editItem ? editItem.name : (prefill.name || "");
 
@@ -30,8 +33,8 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       <button class="icon-btn" id="m-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button>
     </div>
     <div class="suggest" id="f-suggest"></div>
-    <div class="seg" id="f-loc">
-      ${locs.map((l) => { const lm = panel._locMeta(l); return `<button data-loc="${l}" class="${m.location === l ? "on" : ""}">${lm.emoji} ${lm.label}</button>`; }).join("")}
+    <div class="seg location-select" id="f-loc">
+      ${locs.map((l) => { const lm = panel._locMeta(l); return `<button data-loc="${l}" class="${m.location === l ? "on" : ""}">${esc(lm.emoji)} ${esc(lm.label)}${lm.archived ? " · " + panel.t("locationArchived") : ""}</button>`; }).join("")}
     </div>
     <div class="seg" id="f-kind">
       ${Object.keys(kinds).map((k) => { const km = panel._kindMeta(k); return `<button type="button" data-kind="${k}" class="${m.kind === k ? "on" : ""}">${km.emoji || ""} ${km.short}</button>`; }).join("")}
@@ -51,6 +54,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       <label class="field"><span>${panel.t("expiryLabel")}</span><div class="datefield"><input type="date" id="f-expiry" value="${m.expiry}"><span class="df-display"></span><button type="button" class="df-clear" title="${panel.t("clearDateTitle")}" aria-label="${panel.t("clearDateTitle")}"><ha-icon icon="mdi:close"></ha-icon></button></div></label>
     </div>
     <div class="expiry-hint" id="f-hint"></div>
+    <div id="f-expiry-suggestion" class="expiry-suggestion hidden"></div>
     <button class="link" id="f-adv">${panel.t("moreOptions")}</button>
     <div class="adv hidden" id="f-advbox">
       <label class="field"><span>${panel.t("displayNameLabel")}</span><input id="f-dispname" placeholder="${panel.t("displayNamePlaceholder")}" value="${esc(editItem?.name || "")}"></label>
@@ -91,8 +95,21 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   panel._wireDateField(expEl, panel.t("dateOptionalPlaceholder"), lang);
 
   const applySuggestion = (expiryDate, source) => {
-    if (!m.expiryManual && expiryDate) { expEl.value = expiryDate; m.expiry = expiryDate; }
-    m.expirySource = source;
+    const proposal = q("#f-expiry-suggestion");
+    if (m.expiryLocked || m.expiryManual) {
+      proposal.classList.toggle("hidden", !expiryDate || expiryDate === expEl.value);
+      proposal.innerHTML = expiryDate && expiryDate !== expEl.value
+        ? `<p>${panel.t("suggestedExpiry")}: <b>${esc(expiryDate)}</b><br>${panel.t("keepExpiry")}</p><button type="button" class="btn ghost" id="accept-expiry">${panel.t("useSuggestedExpiry")}</button>` : "";
+      proposal.querySelector("#accept-expiry")?.addEventListener("click", () => {
+        expEl.value = expiryDate; m.expiry = expiryDate; m.expiryManual = false;
+        m.expiryLocked = true; m.expirySource = source;
+        proposal.classList.add("hidden"); updateHint();
+      });
+    } else {
+      expEl.value = expiryDate || ""; m.expiry = expEl.value;
+      m.expirySource = expiryDate ? source : "none";
+      proposal.classList.add("hidden");
+    }
     updateHint();
   };
 
@@ -119,31 +136,34 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   };
 
   let lastMatched = null;
+  let matchVersion = 0;
   const matchNow = async () => {
+    const version = ++matchVersion;
+    const location = m.location, addedDate = addedEl.value;
     const query = nameEl.value.trim();
     if (m.noAutoMatch) return;
     if (query.length < 2) { suggestEl.innerHTML = ""; suggestEl.className = "suggest"; return; }
     lastMatched = query;
     let res;
-    try { res = await panel._call("match_template", { query, location: m.location, added_date: addedEl.value }); }
+    try { res = await panel._call("match_template", { query, location, added_date: addedDate }); }
     catch (e) { return; }
     if (m.noAutoMatch) return; // rejected while the request was in flight
     // Out-of-order responses: an older, slower reply must never overwrite
     // the match for what's in the field NOW ("kip" landing after "kipfilet").
-    if (nameEl.value.trim() !== query) return;
+    if (version !== matchVersion || nameEl.value.trim() !== query || m.location !== location || addedEl.value !== addedDate) return;
     if (res.template) {
       const t = res.template;
       m.template_id = t.id; m.category = t.category; setEmoji(t.emoji || "🍽️");
       if (!m.kindManual) setKind(panel._kindOf(t));
       const sl = t.shelf_life || {};
-      const noHere = sl[m.location] === null || sl[m.location] === undefined;
+      const noHere = sl[panel._storageType(m.location)] === null || sl[panel._storageType(m.location)] === undefined;
       applySuggestion(res.suggestion?.expiry_date, "template");
       suggestEl.className = "suggest ok";
       suggestEl.innerHTML = `
         <button type="button" class="s-take" id="s-take" title="${panel.t("useTemplateNameTitle")}">
           <span class="s-emoji">${t.emoji || "📋"}</span>
           <div class="s-body"><b>${esc(t.name)}</b>
-            <div class="s-sub">${noHere ? panel.t("notSuitableHere") : panel.t("daysAtLocation", panel._locMeta(m.location).label, sl[m.location])}${t.notes ? " · " + esc(t.notes) : ""}</div></div>
+            <div class="s-sub">${noHere ? panel.t("notSuitableHere") : esc(panel.t("daysAtLocation", panel._locMeta(m.location).label, sl[panel._storageType(m.location)]))}${t.notes ? " · " + esc(t.notes) : ""}</div></div>
         </button>
         <div class="s-actions">
           ${panel._state.options.ai_enabled ? `<button class="s-mini" id="s-ai" title="${panel.t("aiEstimateTitle")}"><ha-icon icon="mdi:creation"></ha-icon></button>` : ""}
@@ -161,11 +181,12 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       });
       const d = q("#s-dismiss");
       if (d) d.addEventListener("click", () => {
-        m.noAutoMatch = true; m.expiryManual = false; m.expirySource = "manual";
+        m.noAutoMatch = true; m.expiryManual = true; m.expiryLocked = true; m.expirySource = "manual";
         setEmoji("🍽️"); expEl.value = ""; m.expiry = ""; updateHint();
         showManual(query, panel.t("manualEntry"));
       });
     } else {
+      applySuggestion(null, "none");
       showManual(query);
     }
   };
@@ -184,11 +205,14 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   q("#m-close").addEventListener("click", h.close);
   q("#f-loc").querySelectorAll("button").forEach((b) =>
     b.addEventListener("click", () => {
-      m.location = b.dataset.loc;
+      if (b.dataset.loc !== editItem?.location && panel._locMeta(b.dataset.loc).archived) return;
+      m.location = b.dataset.loc; ++matchVersion;
+      q("#f-expiry-suggestion").classList.add("hidden");
       q("#f-loc").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
       if (m.aiResult) {
-        const days = m.aiResult.shelf_life[m.location];
-        applySuggestion(days ? addDays(addedEl.value, days) : null, "ai");
+        h.modal.querySelectorAll(".ai-loc").forEach(cell => cell.classList.toggle("active", cell.dataset.loccell === panel._storageType(m.location)));
+        const days = m.aiResult.shelf_life[panel._storageType(m.location)];
+        applySuggestion(days != null ? addDays(addedEl.value, days) : null, "ai");
       } else doMatch();
     })
   );
@@ -203,8 +227,8 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   };
   if (psMinus) psMinus.addEventListener("click", () => setPortions(m.portions - 1));
   if (psPlus) psPlus.addEventListener("click", () => setPortions(m.portions + 1));
-  addedEl.addEventListener("change", () => { if (!m.expiryManual) doMatch(); });
-  expEl.addEventListener("input", () => { m.expiryManual = true; m.expiry = expEl.value; updateHint(); });
+  addedEl.addEventListener("change", () => { ++matchVersion; if (m.aiResult) { const d = m.aiResult.shelf_life[panel._storageType(m.location)]; applySuggestion(d != null ? addDays(addedEl.value, d) : null, "ai"); } else doMatch(); });
+  expEl.addEventListener("input", () => { m.expiryManual = true; m.expiryLocked = true; m.expirySource = "manual"; q("#f-expiry-suggestion").classList.add("hidden"); m.expiry = expEl.value; updateHint(); });
   q("#f-adv").addEventListener("click", () => {
     const box = q("#f-advbox"); box.classList.toggle("hidden");
     q("#f-adv").textContent = box.classList.contains("hidden") ? panel.t("moreOptions") : panel.t("lessOptions");
@@ -236,6 +260,13 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     if (!payload.contents) { nameEl.focus(); return; }
     q("#f-submit").disabled = true;
     try {
+      if (!m.aiResult && !m.noAutoMatch) await matchNow();
+      payload.expiry_date = expEl.value || null;
+      payload.expiry_source = m.expiryManual ? "manual" : m.expirySource;
+      payload.template_id = m.template_id;
+      payload.location = m.location;
+      payload.added_date = addedEl.value || todayISO();
+      payload.emoji = m.emoji; payload.category = m.category; payload.kind = m.kind;
       if (isEdit) {
         await panel._call("update_item", { item_id: editItem.id, changes: payload });
         h.close();
@@ -300,7 +331,7 @@ export async function aiEstimate(panel, name, ctx) {
     return;
   }
   const est = res.estimate;
-  m.aiResult = est; m.category = est.category; m.expirySource = "ai"; setEmoji(est.emoji || "✨");
+  m.aiResult = est; m.category = est.category; setEmoji(est.emoji || "✨");
   if (!m.kindManual && setKind) setKind(est.kind);
   const addedEl = ctx.addedEl || suggestEl.parentNode.querySelector("#f-added");
   const expEl = ctx.expEl || suggestEl.parentNode.querySelector("#f-expiry");
@@ -309,11 +340,8 @@ export async function aiEstimate(panel, name, ctx) {
 
   // Recompute the expiry date + hint from the (possibly edited) AI days.
   const recompute = () => {
-    const days = m.aiResult.shelf_life[m.location];
-    if (!m.expiryManual) {
-      expEl.value = days ? addDays(addedEl.value, days) : "";
-      m.expiry = expEl.value;
-    }
+    const days = m.aiResult.shelf_life[panel._storageType(m.location)];
+    ctx.applySuggestion(days != null ? addDays(addedEl.value, days) : null, "ai");
     if (hintEl) {
       if (expEl.value) {
         const dl = daysBetween(todayISO(), expEl.value);
@@ -325,11 +353,11 @@ export async function aiEstimate(panel, name, ctx) {
 
   const cell = (loc) => {
     const d = est.shelf_life[loc];
-    const lm = panel._locMeta(loc);
-    return `<div class="ai-loc ${loc === m.location ? "active" : ""}" data-loccell="${loc}">
+    const lm = panel._storageMeta(loc);
+    return `<div class="ai-loc ${loc === panel._storageType(m.location) ? "active" : ""}" data-loccell="${loc}">
       <span class="ai-loc-emoji">${lm.emoji}</span>
       <span class="ai-days-wrap"><input class="ai-days" type="number" inputmode="numeric" min="0" max="3650" step="1" data-loc="${loc}" value="${d ?? ""}" placeholder="—"><i>${panel.t("dayUnitShort")}</i></span>
-      <small>${lm.label}</small>
+      <small>${esc(lm.label)}</small>
     </div>`;
   };
 
@@ -337,7 +365,7 @@ export async function aiEstimate(panel, name, ctx) {
   suggestEl.innerHTML = `
     <div class="ai-head"><span class="s-emoji">${est.emoji || "✨"}</span><b>${panel.t("aiEstimateTitle")}</b><span class="s-badge ai">AI · ${esc(res.estimate.provider || "")}</span></div>
     <div class="ai-sub">${panel.t("aiHint")}</div>
-    <div class="ai-locs">${panel._state.locations.map(cell).join("")}</div>
+    <div class="ai-locs">${(panel._state.storage_types || ["fridge", "freezer", "pantry"]).map(cell).join("")}</div>
     ${est.notes ? `<div class="s-sub">💡 ${esc(est.notes)}</div>` : ""}
     <label class="checkline"><input type="checkbox" id="s-savetpl" checked> ${panel.t("saveAsTemplateLabel")}</label>
   `;

@@ -316,9 +316,8 @@ def render_label(item: dict[str, Any], ctx: dict[str, Any] | None = None) -> Ima
     bar_h = S(96)
     d.rounded_rectangle([0, y, W - 1, y + bar_h], radius=S(20), fill=BLACK,
                         corners=(False, False, True, True))
-    # Compact banner text: first word of the localized label, so
-    # "Buiten koelkast" -> "BUITEN" and "Fridge" -> "FRIDGE".
-    loc_compact = (location_label.split()[0] if location_label else "").upper()
+    # Named locations must stay distinguishable (Kitchen fridge / Kitchen freezer).
+    loc_compact = location_label
     # Kind chip on the right — computed first so the location text can dodge
     # it. Text/chip insets equal MX, so everything below lines up with them.
     chip_left = W - MX
@@ -337,7 +336,8 @@ def render_label(item: dict[str, Any], ctx: dict[str, Any] | None = None) -> Ima
     # Location text, auto-fit into the space left of the chip.
     loc_avail = chip_left - MX - S(20)
     loc_font, _ = _fit_font(d, loc_compact or " ", cond_bold, loc_avail,
-                            start=S(52), min_size=S(30))
+                            start=S(52), min_size=S(16))
+    loc_compact = _wrap(d, loc_compact or " ", loc_font, loc_avail, max_lines=1)[0]
     _, lh, _, lt = _text_size(d, loc_compact or " ", loc_font)
     d.text((MX, y + (bar_h - lh) / 2 - lt), loc_compact,
            font=loc_font, fill=WHITE)

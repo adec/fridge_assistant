@@ -10,7 +10,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
-from .const import CONF_WARN_DAYS, DOMAIN, LOCATIONS, SIGNAL_UPDATED, resolve_language
+from .const import CONF_WARN_DAYS, DOMAIN, SIGNAL_UPDATED, resolve_language
 from .coordinator import FridgeRuntime, item_summary
 
 
@@ -73,7 +73,7 @@ class FridgeTotalSensor(_FridgeSensorBase):
         return {
             "by_location": {
                 loc: sum(1 for i in items if i.get("location") == loc)
-                for loc in LOCATIONS
+                for loc in self._runtime.store.locations_for_ui()
             }
         }
 

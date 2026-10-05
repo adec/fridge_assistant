@@ -33,7 +33,6 @@ from .const import (
     DOMAIN,
     HISTORY_ACTIONS,
     MAX_PORTIONS,
-    LOCATION_META,
     LOCATIONS,
     SIGNAL_UPDATED,
     localized,
@@ -41,7 +40,7 @@ from .const import (
     shared_text,
 )
 from .coordinator import FridgeRuntime, get_runtime
-from .store import item_age_days, item_days_left, parse_date
+from .store import LocationError, item_age_days, item_days_left, parse_date
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -106,6 +105,9 @@ TEMPLATE_SCHEMA = vol.Schema(
 
 
 def async_register_websocket(hass: HomeAssistant) -> None:
+    websocket_api.async_register_command(hass, ws_save_location)
+    websocket_api.async_register_command(hass, ws_remove_location)
+    websocket_api.async_register_command(hass, ws_reorder_locations)
     websocket_api.async_register_command(hass, ws_subscribe)
     websocket_api.async_register_command(hass, ws_get_state)
     websocket_api.async_register_command(hass, ws_add_item)
@@ -179,7 +181,7 @@ def _serialize_state(hass: HomeAssistant, runtime: FridgeRuntime) -> dict[str, A
         "expired": sum(1 for i in items if i["status"] == "expired"),
         "soon": sum(1 for i in items if i["status"] == "soon"),
         "by_location": {
-            loc: sum(1 for i in items if i["location"] == loc) for loc in LOCATIONS
+            loc: sum(1 for i in items if i["location"] == loc) for loc in runtime.store.locations_for_ui()
         },
     }
     return {
@@ -189,8 +191,10 @@ def _serialize_state(hass: HomeAssistant, runtime: FridgeRuntime) -> dict[str, A
         "categories": CATEGORIES,
         "kinds": KINDS,
         "category_kind": CATEGORY_KIND,
-        "locations": LOCATIONS,
-        "location_meta": LOCATION_META,
+        "locations": list(runtime.store.locations_for_ui()),
+        "active_locations": runtime.store.active_locations(),
+        "location_meta": runtime.store.locations_for_ui(),
+        "storage_types": LOCATIONS,
         "counts": counts,
         "today": today.isoformat(),
         # Only a count in the live state; the full log is paged via ws_history so
@@ -270,7 +274,11 @@ async def ws_add_item(hass, connection, msg) -> None:
         return
     # Attribution comes from the authenticated websocket user.
     by, by_name = _user_attrs(connection)
-    item = await runtime.async_add_item(dict(msg["item"]), by=by, by_name=by_name)
+    try:
+        item = await runtime.async_add_item(dict(msg["item"]), by=by, by_name=by_name)
+    except LocationError as err:
+        connection.send_error(msg["id"], str(err), shared_text(hass, str(err)))
+        return
     connection.send_result(msg["id"], {"item": item})
 
 
@@ -286,7 +294,11 @@ async def ws_update_item(hass, connection, msg) -> None:
     runtime = _runtime_or_error(hass, connection, msg)
     if runtime is None:
         return
-    item = runtime.store.update_item(msg["item_id"], dict(msg["changes"]))
+    try:
+        item = runtime.store.update_item(msg["item_id"], dict(msg["changes"]))
+    except LocationError as err:
+        connection.send_error(msg["id"], str(err), shared_text(hass, str(err)))
+        return
     if item is None:
         connection.send_error(msg["id"], "not_found", shared_text(hass, "item_not_found", id=msg["item_id"]))
         return
@@ -527,7 +539,7 @@ async def ws_lookup_barcode(hass, connection, msg) -> None:
     {
         vol.Required("type"): f"{DOMAIN}/match_template",
         vol.Required("query"): str,
-        vol.Optional("location"): vol.In(LOCATIONS),
+        vol.Optional("location"): cv.string,
         vol.Optional("added_date"): str,
     }
 )
@@ -536,6 +548,12 @@ async def ws_match_template(hass, connection, msg) -> None:
     runtime = _runtime_or_error(hass, connection, msg)
     if runtime is None:
         return
+    if msg.get("location"):
+        try:
+            runtime.store.storage_type(msg["location"])
+        except LocationError as err:
+            connection.send_error(msg["id"], str(err), shared_text(hass, str(err)))
+            return
     tpl = runtime.store.match_template(msg["query"])
     suggestion = None
     if tpl and msg.get("location"):
@@ -749,3 +767,66 @@ async def ws_get_printers(hass, connection, msg) -> None:
     connection.send_result(
         msg["id"], {"available": bool(data), "printers": printers}
     )
+
+
+LOCATION_SCHEMA = vol.Schema({
+    vol.Optional("id"): cv.string,
+    vol.Optional("name"): cv.string,
+    vol.Required("storage_type"): vol.In(LOCATIONS),
+    vol.Optional("emoji"): cv.string,
+    vol.Optional("archived"): cv.boolean,
+}, extra=vol.REMOVE_EXTRA)
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): f"{DOMAIN}/save_location",
+    vol.Required("location"): LOCATION_SCHEMA,
+})
+@websocket_api.async_response
+async def ws_save_location(hass, connection, msg) -> None:
+    runtime = _runtime_or_error(hass, connection, msg)
+    if runtime is None:
+        return
+    try:
+        location = runtime.store.upsert_location(dict(msg["location"]))
+    except LocationError as err:
+        connection.send_error(msg["id"], str(err), shared_text(hass, str(err)))
+        return
+    await runtime.async_changed()
+    connection.send_result(msg["id"], {"location": location})
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): f"{DOMAIN}/remove_location",
+    vol.Required("location_id"): cv.string,
+})
+@websocket_api.async_response
+async def ws_remove_location(hass, connection, msg) -> None:
+    runtime = _runtime_or_error(hass, connection, msg)
+    if runtime is None:
+        return
+    try:
+        runtime.store.remove_location(msg["location_id"])
+    except LocationError as err:
+        connection.send_error(msg["id"], str(err), shared_text(hass, str(err)))
+        return
+    await runtime.async_changed()
+    connection.send_result(msg["id"], {"removed": True})
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): f"{DOMAIN}/reorder_locations",
+    vol.Required("location_ids"): [cv.string],
+})
+@websocket_api.async_response
+async def ws_reorder_locations(hass, connection, msg) -> None:
+    runtime = _runtime_or_error(hass, connection, msg)
+    if runtime is None:
+        return
+    try:
+        runtime.store.reorder_locations(msg["location_ids"])
+    except LocationError as err:
+        connection.send_error(msg["id"], str(err), shared_text(hass, str(err)))
+        return
+    await runtime.async_changed()
+    connection.send_result(msg["id"], {"reordered": True})

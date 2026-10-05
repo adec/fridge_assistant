@@ -9,13 +9,10 @@ add_item:
       selector:
         text:
     location:
+      description: "Storage location ID (shown in Manage locations). Defaults to the first active location."
+      example: fridge
       selector:
-        select:
-          options:
-            - fridge
-            - freezer
-            - pantry
-          translation_key: item_location
+        text:
     added_date:
       selector:
         text:

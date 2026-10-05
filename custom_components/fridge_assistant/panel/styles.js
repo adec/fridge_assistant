@@ -545,4 +545,19 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 @media (min-width:760px){
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 }
+
+/* Named storage locations and their manager. */
+.location-select{flex-wrap:wrap;}
+.location-select button{flex:1 1 140px;white-space:normal;overflow-wrap:anywhere;}
+.location-row{border:1px solid var(--fa-line);border-radius:14px;padding:12px;margin:10px 0;}
+.location-row-head{display:flex;align-items:flex-start;gap:8px;}
+.location-row-main{flex:1;min-width:0;overflow-wrap:anywhere;}
+.location-row-main b{display:block;}
+.location-row-main small{display:block;color:var(--fa-muted);margin-top:4px;}
+.location-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.location-help{color:var(--fa-muted);font-size:13px;line-height:1.5;}
+.location-id{font-size:11px;overflow-wrap:anywhere;user-select:all;}
+.expiry-suggestion{background:var(--fa-soft);padding:12px;border-radius:12px;margin-bottom:12px;font-size:13px;}
+.card-sub{flex-wrap:wrap;}
+.card-sub .cs-fix{flex:0 1 auto;overflow-wrap:anywhere;}
 `;
