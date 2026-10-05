@@ -132,7 +132,7 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
   justify-content:center;background:color-mix(in srgb,var(--fa-accent) 7%,var(--fa-bg));
   border-radius:15px;}
 .card-main{flex:1;min-width:0;}
-.card-title{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-title{font-weight:800;font-size:16px;white-space:normal;overflow-wrap:anywhere;}
 .card-sub{display:flex;gap:6px;align-items:center;margin-top:3px;flex-wrap:nowrap;overflow:hidden;
   font-size:12px;color:var(--fa-muted);}
 .cs-fix,.cs-sep,.card-sub .code{flex:none;}
@@ -156,6 +156,17 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .card-print{font-size:15px;flex:none;}
 .card.selected{border-color:var(--fa-accent);
   box-shadow:0 0 0 3px var(--fa-accent-soft),var(--fa-shadow-s);}
+/* Give names the full content width on phones; expiry gets its own row. */
+@media(max-width:639px){
+  .card{display:grid;grid-template-columns:48px minmax(0,1fr) 44px;
+    column-gap:10px;row-gap:6px;}
+  .card-emoji{grid-column:1;grid-row:1;}
+  .card-main{grid-column:2 / -1;grid-row:1;}
+  .card-right{grid-column:2;grid-row:2;align-items:flex-start;text-align:left;min-width:0;}
+  .card-right .status{max-width:100%;box-sizing:border-box;overflow-wrap:anywhere;}
+  .card-when{justify-content:flex-start;flex-wrap:wrap;}
+  .card-print{grid-column:3;grid-row:2;justify-self:end;}
+}
 /* Portion badge on a card: how many of the batch are still open. */
 .pbadge{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;font-weight:700;
   background:var(--fa-accent-soft);color:var(--fa-accent);border-radius:6px;
