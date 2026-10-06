@@ -1,7 +1,7 @@
 # Feature backlog
 
 ## In progress: Mealie recipe suggestions
-Keep the existing Home Assistant integration. Add an in-app “What can I cook?” view, direct Mealie API access, saved ingredient mappings, date-based ranking and optional AI-assisted matching reviewed by the user. See [the implementation plan](docs/mealie-integration-plan.md). Connection settings, atomic recipe caching and a read-only catalogue preview are implemented on `feature/mealie-integration`. Matching, ranking and optional AI review remain to be built. No separate Docker backend yet.
+Keep the existing Home Assistant integration. Add an in-app “What can I cook?” view, direct Mealie API access, saved ingredient mappings, date-based ranking and optional AI-assisted matching reviewed by the user. See [the implementation plan](docs/mealie-integration-plan.md). Connection settings, atomic recipe caching and a read-only catalogue preview are implemented on `feature/mealie-integration`. Saved food mappings, deterministic presence matching and date ranking are also implemented. Optional AI review and live validation remain outstanding. No separate Docker backend yet.
 
 ## Backlog: minimum-stock alerts and replenishment
 Requested 6 October 2026. Let users identify foods they want to keep in stock, set minimum stock thresholds and receive low-stock prompts.
@@ -22,3 +22,31 @@ Searchable curated offline food icons, optional product/personal photos, templat
 
 ## Future architecture option
 Consider extracting a standalone backend only if independent operation, persistent jobs or additional clients justify it. Keep new recipe logic separate from Home Assistant-specific code to preserve that option.
+
+## Backlog: opened and defrosted item lifetimes
+Requested 6 October 2026. Optional lightweight tracking to answer when food needs eating,
+without structured quantities or a Grocy-style workflow. Design proposal, not implemented:
+
+- A user-facing configuration setting enables opened/defrosted tracking (off by default).
+  Basic stock entry remains unchanged. No separate technical feature-flag machinery needed.
+- Optional template defaults: days after opening and days after defrosting. Empty means
+  no automatic estimate; allow an item override. No mandatory extra fields.
+- Item actions: “Opened today” and “Move to fridge / start defrosting”. Allow correcting
+  the timestamp and undoing the action, retaining the original date and location.
+- Moving frozen stock to a selected fridge can offer defrost tracking; do not silently
+  declare it fully thawed. Distinguish started defrosting from fully defrosted, and state
+  which event begins the configured lifetime. Offer “Defrosted today” for confirmation.
+- Store opening/defrost timestamps and separate derived deadlines. The effective deadline
+  is the earliest applicable one, preserving the original label date and its type.
+  Confirm deadline changes and show the reason (e.g. “Use within 2 days of opening”).
+- Preserve Use By versus Best Before meaning. Do not automatically label a storage-life
+  estimate as a manufacturer's Use By date; make the handling deadline distinct in UI,
+  stickers, notifications and recipe priority. Do not extend an original Use By date.
+- Select destination from managed fridge-type locations; never assume a single built-in
+  fridge. A normal storage move should not reset dates automatically.
+- Partially opened packs still count as one pack/item for minimum-stock purposes; no
+  remaining-weight tracking. Define interactions with portions and undo/history.
+- Verify food-safety guidance before introducing any built-in duration or thawing rule;
+  prefer user/package-specific instructions over a universal defrost lifetime.
+
+Record only at this stage; implementation belongs to a later feature branch/release.
