@@ -234,6 +234,7 @@ class FridgeStore:
             hass, STORAGE_VERSION, STORAGE_KEY, atomic_writes=True
         )
         self.mealie_cache = {}
+        self.mealie_mappings = {}
         self.locations = default_locations()
         self.items: dict[str, dict[str, Any]] = {}
         self.user_templates: dict[str, dict[str, Any]] = {}
@@ -247,6 +248,7 @@ class FridgeStore:
         data = await self._store.async_load()
         if data:
             self.mealie_cache = data.get("mealie_cache") or {}
+            self.mealie_mappings = data.get("mealie_mappings") or {}
             if "locations" in data:
                 self.locations = {loc["id"]: dict(loc) for loc in data["locations"]}
             self.items = {i["id"]: i for i in data.get("items", []) if i.get("id")}
@@ -292,6 +294,7 @@ class FridgeStore:
         await self._store.async_save(
             {
                 "mealie_cache": self.mealie_cache,
+                "mealie_mappings": self.mealie_mappings,
                 "locations": list(self.locations.values()),
                 "items": list(self.items.values()),
                 "user_templates": list(self.user_templates.values()),

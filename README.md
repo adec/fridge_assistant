@@ -60,10 +60,14 @@ previews. A live Home Assistant installation and physical printer have not been 
 
 See [BACKLOG.md](BACKLOG.md) for unprioritised feature ideas and the
 [Mealie integration plan](docs/mealie-integration-plan.md) for current work.
-The Mealie catalogue preview lives on `feature/mealie-integration` and is not a stable release.
+The Mealie development preview lives on `feature/mealie-integration` and is not a stable release.
 It adds optional Mealie URL/API-token settings and a **What can I cook?** entry point with
 **Test connection** and **Refresh recipes**. Recipes also refresh at startup and every six hours.
-Matching, ranking, AI review and shopping-list writes are not implemented yet.
+Recipes now show ingredient presence, missing/unresolved foods, date priority and thawing flags.
+Use **Link Mealie foods to templates** to save reviewed links; unique exact names and aliases
+match automatically. Past Use By stock is excluded; past Best Before stock is flagged.
+This checks presence only, not sufficient amounts. Parsed foods and template-linked stock
+are required. AI-assisted mapping and shopping-list writes are still planned.
 
 ## Features
 

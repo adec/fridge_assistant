@@ -21,3 +21,20 @@ Next: confirm API behaviour against the user's installed Mealie version, add sav
 126 automated tests pass (including 17 Mealie client/cache tests); Python and panel JavaScript syntax checks pass. No live Home Assistant or Mealie instance has been tested. Local browser verification was blocked because the execution environment could not open a listening socket. GitHub fetch/push access was unavailable during this milestone, so the feature branch is local until network access is restored. The stable main release is unchanged.
 
 The next check needs the installed Mealie version and a handful of imported recipes. Do not enter API tokens in GitHub files or chat; use the integration options.
+
+## Milestone 2: deterministic matching and ranking
+
+Implemented saved Mealie food-ID to ingredient-template mappings, unique exact-name/alias
+matching, review controls and presence filters. Complete recipes rank first, followed by
+fewer missing/unresolved foods, more ingredients due within three days, and earliest dates.
+Past Use By stock is excluded; past Best Before stock stays visible with a quality-check
+flag. Frozen stock is marked for thawing. Each matched food identifies its earliest-dated
+available pack. Duplicate recipe foods count once; no grams, units or quantities are inferred.
+Unparsed ingredients and missing mappings prevent an “all present” claim.
+
+Target: Mealie v3.28.0, user-selected URL https://mealie.collinshouse.uk (configured by
+user, never hard-coded). Checked the v3.28.0 recipe schema against the cached ingredient
+shape. Live authenticated Mealie and Home Assistant validation is still outstanding.
+AI-assisted suggestions remain a separate next milestone; accepted manual mappings work
+without AI. 136 automated tests pass, including ten matching/ranking cases; Python and
+JavaScript syntax checks pass.

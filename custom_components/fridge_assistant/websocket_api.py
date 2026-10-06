@@ -840,7 +840,9 @@ async def ws_reorder_locations(hass, connection, msg) -> None:
 
 @websocket_api.websocket_command({
     vol.Required("type"): f"{DOMAIN}/mealie",
-    vol.Optional("action", default="list"): vol.In(["list", "test", "sync"]),
+    vol.Optional("action", default="list"): vol.In(["list", "test", "sync", "map"]),
+    vol.Optional("food_id"): str,
+    vol.Optional("template_id"): vol.Any(str, None),
 })
 @websocket_api.async_response
 async def ws_mealie(hass, connection, msg):
@@ -861,7 +863,32 @@ async def ws_mealie(hass, connection, msg):
     except Exception:
         connection.send_error(msg["id"], "storage_error", shared_text(hass, "mealie_storage_error"))
         return
+    from .mealie_matching import food_links, rank_recipes
+    templates = [t for t in runtime.store.all_templates() if t.get("kind", "ingredient") == "ingredient"]
+    cache_key = mealie.cache.get("identity")
+    mappings = dict(runtime.store.mealie_mappings.get(cache_key, {}))
+    foods = mealie.cache.get("foods", [])
+    if msg["action"] == "map":
+        food_id, template_id = msg.get("food_id"), msg.get("template_id")
+        if food_id not in {f["id"] for f in foods} or (template_id and template_id not in {t["id"] for t in templates}):
+            connection.send_error(msg["id"], "invalid_mapping", "Choose a current Mealie food and Fridge Assistant template.")
+            return
+        if template_id: mappings[food_id] = template_id
+        else: mappings.pop(food_id, None)
+        previous = dict(runtime.store.mealie_mappings)
+        runtime.store.mealie_mappings[cache_key] = mappings
+        try:
+            await runtime.async_changed()
+        except Exception:
+            runtime.store.mealie_mappings = previous
+            connection.send_error(msg["id"], "storage_error", shared_text(hass, "mealie_storage_error"))
+            return
+    ranked = rank_recipes(mealie.cache.get("recipes", []), foods, templates,
+                          runtime.store.items.values(), runtime.store.locations, mappings,
+                          dt_util.now().date())
     recipes = [{**r, "url": mealie.client.url + "/g/" + quote(mealie.cache["group_slug"], safe="") + "/r/" + quote(r["slug"], safe=""),
                 "unparsed": sum(not i["food_id"] for i in r["ingredients"])}
-               for r in mealie.cache.get("recipes", [])] if mealie.client else []
-    connection.send_result(msg["id"], {"status": mealie.status(), "recipes": recipes})
+               for r in ranked] if mealie.client else []
+    connection.send_result(msg["id"], {"status": mealie.status(), "recipes": recipes,
+                       "foods": food_links(foods, templates, mappings),
+                       "templates": [{"id": t["id"], "name": t["name"]} for t in templates]})
