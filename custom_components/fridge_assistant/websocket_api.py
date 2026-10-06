@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import logging
+from urllib.parse import quote
 from datetime import timedelta
 from typing import Any
 
@@ -12,7 +13,7 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.util import dt as dt_util
 
 from .ai import AIEstimateError, async_estimate
@@ -108,6 +109,7 @@ TEMPLATE_SCHEMA = vol.Schema(
 
 
 def async_register_websocket(hass: HomeAssistant) -> None:
+    websocket_api.async_register_command(hass, ws_mealie)
     websocket_api.async_register_command(hass, ws_save_location)
     websocket_api.async_register_command(hass, ws_remove_location)
     websocket_api.async_register_command(hass, ws_reorder_locations)
@@ -203,6 +205,7 @@ def _serialize_state(hass: HomeAssistant, runtime: FridgeRuntime) -> dict[str, A
         # Only a count in the live state; the full log is paged via ws_history so
         # every state push stays small.
         "history_count": len(runtime.store.history),
+        "mealie": runtime.mealie.status(),
         "options": {
             "warn_days": warn,
             "ai_enabled": bool(opts.get(CONF_AI_ENABLED)),
@@ -833,3 +836,32 @@ async def ws_reorder_locations(hass, connection, msg) -> None:
         return
     await runtime.async_changed()
     connection.send_result(msg["id"], {"reordered": True})
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): f"{DOMAIN}/mealie",
+    vol.Optional("action", default="list"): vol.In(["list", "test", "sync"]),
+})
+@websocket_api.async_response
+async def ws_mealie(hass, connection, msg):
+    runtime = _runtime_or_error(hass, connection, msg)
+    if runtime is None: return
+    from .mealie import MealieError
+    mealie = runtime.mealie
+    try:
+        if msg["action"] == "test":
+            if not mealie.client: raise MealieError("not_configured")
+            await mealie.client.test()
+        elif msg["action"] == "sync":
+            await mealie.refresh()
+            async_dispatcher_send(hass, SIGNAL_UPDATED)
+    except MealieError as err:
+        connection.send_error(msg["id"], str(err), shared_text(hass, "mealie_" + str(err)))
+        return
+    except Exception:
+        connection.send_error(msg["id"], "storage_error", shared_text(hass, "mealie_storage_error"))
+        return
+    recipes = [{**r, "url": mealie.client.url + "/g/" + quote(mealie.cache["group_slug"], safe="") + "/r/" + quote(r["slug"], safe=""),
+                "unparsed": sum(not i["food_id"] for i in r["ingredients"])}
+               for r in mealie.cache.get("recipes", [])] if mealie.client else []
+    connection.send_result(msg["id"], {"status": mealie.status(), "recipes": recipes})

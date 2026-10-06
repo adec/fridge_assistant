@@ -56,6 +56,15 @@ tracking and sticker labels. Its work included code changes, documentation and a
 The enhancements were checked with automated tests, local browser previews and rendered sticker
 previews. A live Home Assistant installation and physical printer have not been tested.
 
+## Development backlog
+
+See [BACKLOG.md](BACKLOG.md) for unprioritised feature ideas and the
+[Mealie integration plan](docs/mealie-integration-plan.md) for current work.
+The Mealie catalogue preview lives on `feature/mealie-integration` and is not a stable release.
+It adds optional Mealie URL/API-token settings and a **What can I cook?** entry point with
+**Test connection** and **Refresh recipes**. Recipes also refresh at startup and every six hours.
+Matching, ranking, AI review and shopping-list writes are not implemented yet.
+
 ## Features
 
 - 📋 **Inventory** across named fridges, freezers and cupboards, with search and per-location filters.

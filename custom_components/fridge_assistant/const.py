@@ -157,6 +157,8 @@ def canonical_kind(value: Any) -> Any:
     return LEGACY_KINDS.get(value, value)
 
 # Config / options
+CONF_MEALIE_URL: Final = "mealie_url"
+CONF_MEALIE_TOKEN: Final = "mealie_token"
 CONF_WARN_DAYS: Final = "warn_days"
 CONF_AI_ENABLED: Final = "ai_enabled"
 CONF_AI_AGENT: Final = "ai_agent"
@@ -258,6 +260,18 @@ def localized(strings: dict[str, dict[str, str]], lang: str, key: str, **kwargs:
 # them for the same conditions), kept in one place to avoid drift.
 _SHARED_STRINGS: dict[str, dict[str, str]] = {
     "nl": {
+        "mealie_not_configured": "Configureer eerst de Mealie URL en het API-token in de instellingen.",
+        "mealie_invalid_url": "Gebruik een geldig http(s) basisadres voor Mealie.",
+        "mealie_missing_token": "Voer een Mealie API-token in.",
+        "mealie_authentication": "Mealie heeft het token of de rechten geweigerd.",
+        "mealie_unsupported_api": "Mealie API niet gevonden. Controleer het adres en de versie.",
+        "mealie_server_error": "Mealie geeft een fout. Probeer het later opnieuw.",
+        "mealie_invalid_response": "Onverwacht Mealie-antwoord. Controleer de API-versie.",
+        "mealie_timeout": "Mealie reageerde niet op tijd. Opgeslagen recepten blijven behouden.",
+        "mealie_connection": "Mealie is niet bereikbaar. Controleer netwerk en certificaten.",
+        "mealie_too_large": "Te veel recepten voor deze synchronisatie. Opgeslagen recepten blijven behouden.",
+        "mealie_busy": "Mealie-synchronisatie is al bezig.",
+        "mealie_storage_error": "Recepten konden niet worden opgeslagen. De vorige recepten blijven behouden.",
         'location_not_found': 'Opslaglocatie niet gevonden.',
         'location_name_required': 'Voer een locatienaam van 1–80 tekens in.',
         'location_type_invalid': 'Kies koelkast, vriezer of kast als opslagtype.',
@@ -276,6 +290,18 @@ _SHARED_STRINGS: dict[str, dict[str, str]] = {
         "no_open_portions": "Geen open porties meer.",
     },
     "en": {
+        "mealie_not_configured": "Configure Mealie URL and API token in Fridge Assistant settings first.",
+        "mealie_invalid_url": "Use a valid http(s) Mealie base URL.",
+        "mealie_missing_token": "Enter a Mealie API token.",
+        "mealie_authentication": "Mealie rejected the token or permissions.",
+        "mealie_unsupported_api": "Mealie API endpoint not found. Check the URL and installed version.",
+        "mealie_server_error": "Mealie returned an error. Try again later.",
+        "mealie_invalid_response": "Unexpected Mealie response. Check API compatibility.",
+        "mealie_timeout": "Mealie request timed out. The previous recipe cache is kept.",
+        "mealie_connection": "Cannot reach Mealie. Check networking and certificates.",
+        "mealie_too_large": "Recipe library exceeds the current sync limit. The previous cache is kept.",
+        "mealie_busy": "Mealie synchronisation is already running.",
+        "mealie_storage_error": "Could not save the recipe cache. The previous cache is kept.",
         'location_not_found': 'Storage location not found.',
         'location_name_required': 'Enter a location name of 1–80 characters.',
         'location_type_invalid': 'Select fridge, freezer or cupboard as the storage type.',

@@ -28,6 +28,8 @@ from .const import (
     CONF_OPENAI_MODEL,
     CONF_PRINTER_ENABLED,
     CONF_PRINTER_URL,
+    CONF_MEALIE_URL,
+    CONF_MEALIE_TOKEN,
     CONF_WARN_DAYS,
     DOMAIN,
 )
@@ -68,9 +70,19 @@ class FridgeAssistantOptionsFlow(OptionsFlow):
             if CONF_LABEL_COPIES in data:
                 data[CONF_LABEL_COPIES] = int(data[CONF_LABEL_COPIES])
             for key in (CONF_AI_AGENT, CONF_OPENAI_KEY, CONF_OPENAI_MODEL,
-                        CONF_PRINTER_URL):
+                        CONF_PRINTER_URL, CONF_MEALIE_URL, CONF_MEALIE_TOKEN):
                 if key in data and isinstance(data[key], str):
                     data[key] = data[key].strip()
+            url, token = data.get(CONF_MEALIE_URL, ""), data.get(CONF_MEALIE_TOKEN, "")
+            error = None
+            if bool(url) != bool(token):
+                error = "mealie_incomplete"
+            elif url:
+                from .mealie import base_url, MealieError
+                try: data[CONF_MEALIE_URL] = base_url(url)
+                except MealieError: error = "mealie_invalid_url"
+            if error:
+                return self.async_show_form(step_id="init", data_schema=self._build_schema(), errors={"base": error})
             return self.async_create_entry(title="", data=data)
 
         return self.async_show_form(
@@ -85,6 +97,10 @@ class FridgeAssistantOptionsFlow(OptionsFlow):
 
         return vol.Schema(
             {
+                vol.Optional(CONF_MEALIE_URL, description=sv(CONF_MEALIE_URL)): selector.TextSelector(),
+                vol.Optional(CONF_MEALIE_TOKEN, description=sv(CONF_MEALIE_TOKEN)): selector.TextSelector(
+                    selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+                ),
                 vol.Optional(
                     CONF_WARN_DAYS, description=sv(CONF_WARN_DAYS)
                 ): selector.NumberSelector(

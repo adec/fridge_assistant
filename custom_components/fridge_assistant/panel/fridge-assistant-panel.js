@@ -1,3 +1,4 @@
+import { openMealie } from "./views/mealie.js";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -214,6 +215,7 @@ class FridgeAssistantPanel extends HTMLElement {
             <button class="icon-btn" id="btn-settings" title="${this.t("settings")}"><ha-icon icon="mdi:cog-outline"></ha-icon></button>
           </div>
           <div class="counts" id="counts"></div>
+          <button class="btn ghost" id="btn-mealie">${this.t("mealieTitle")}</button>
           <div class="searchrow">
             <div class="search"><ha-icon icon="mdi:magnify" style="--mdc-icon-size:18px;color:var(--fa-muted)"></ha-icon><input id="search" placeholder="${this.t("searchPlaceholder")}" autocomplete="off" enterkeyhint="search"></div>
             <button class="btn ghost icon-only" id="btn-clean" title="${this.t("cleanUp")}"><ha-icon icon="mdi:broom"></ha-icon></button>
@@ -230,6 +232,7 @@ class FridgeAssistantPanel extends HTMLElement {
     const $ = (s) => this.shadowRoot.getElementById(s);
     $("fab-add").addEventListener("click", () => this._openAddModal());
     $("fab-scan").addEventListener("click", () => this._openScanner());
+    $("btn-mealie").addEventListener("click", () => openMealie(this));
     $("btn-clean").addEventListener("click", () => this._openCleanModal());
     $("btn-history").addEventListener("click", () => this._openHistory());
     $("btn-templates").addEventListener("click", () => this._openTemplatesManager());

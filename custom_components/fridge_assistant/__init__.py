@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from datetime import timedelta
 
 from homeassistant.components import frontend, panel_custom
 from homeassistant.components.http import StaticPathConfig
@@ -11,7 +12,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.helpers.event import async_track_time_change
+from homeassistant.helpers.event import async_track_time_change, async_track_time_interval
 from homeassistant.loader import async_get_integration
 
 from .const import (
@@ -86,6 +87,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.async_on_unload(
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _initial)
         )
+
+    if runtime.mealie.client:
+        async def sync_mealie(_now=None):
+            from .mealie import MealieError
+            try: await runtime.mealie.refresh()
+            except MealieError: pass  # Safe error code is displayed in the recipe view.
+            except Exception:
+                runtime.mealie.error = "storage_error"
+            async_dispatcher_send(hass, SIGNAL_UPDATED)
+        entry.async_on_unload(async_track_time_interval(hass, sync_mealie, timedelta(hours=6)))
+        entry.async_create_background_task(hass, sync_mealie(), "fridge_assistant_mealie_sync")
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True

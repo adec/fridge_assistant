@@ -25,6 +25,8 @@ from .const import (
     CONF_OPENAI_MODEL,
     CONF_PRINTER_ENABLED,
     CONF_PRINTER_URL,
+    CONF_MEALIE_URL,
+    CONF_MEALIE_TOKEN,
     CONF_WARN_DAYS,
     DEFAULT_AI_ENABLED,
     DEFAULT_CODE_FORMAT,
@@ -51,6 +53,8 @@ from .store import FridgeStore, item_days_left
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_OPTIONS: dict[str, Any] = {
+    CONF_MEALIE_URL: "",
+    CONF_MEALIE_TOKEN: "",
     CONF_WARN_DAYS: DEFAULT_WARN_DAYS,
     CONF_AI_ENABLED: DEFAULT_AI_ENABLED,
     CONF_AI_AGENT: "",
@@ -101,6 +105,18 @@ class FridgeRuntime:
         self.hass = hass
         self.entry = entry
         self.store = store
+        from homeassistant.helpers.aiohttp_client import async_get_clientsession
+        from .mealie import MealieSync
+        async def persist(snapshot):
+            previous = self.store.mealie_cache
+            self.store.mealie_cache = snapshot
+            try: await self.store.async_save()
+            except Exception:
+                self.store.mealie_cache = previous
+                raise
+        self.mealie = MealieSync(async_get_clientsession(hass),
+                                 self.options[CONF_MEALIE_URL], self.options[CONF_MEALIE_TOKEN],
+                                 store.mealie_cache, persist)
 
     @property
     def options(self) -> dict[str, Any]:

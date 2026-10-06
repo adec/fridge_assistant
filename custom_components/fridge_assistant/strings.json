@@ -25,14 +25,22 @@
           "notify_time": "Daily check time",
           "printer_enabled": "Enable label printer",
           "printer_url": "Label Printer add-on URL",
-          "label_copies": "Copies per print"
+          "label_copies": "Copies per print",
+          "mealie_url": "Mealie URL",
+          "mealie_token": "Mealie API token"
         },
         "data_description": {
           "ai_agent": "Which conversation agent to use for estimates. Leave empty for the default Assist agent.",
           "openai_api_key": "If set, estimates call OpenAI directly instead of the conversation agent.",
-          "printer_url": "Address of the optional Label Printer add-on. The default works when the bundled add-on is installed."
+          "printer_url": "Address of the optional Label Printer add-on. The default works when the bundled add-on is installed.",
+          "mealie_url": "Optional. Base server address reachable from Home Assistant, e.g. http://mealie:9000. Leave both Mealie fields blank to disable.",
+          "mealie_token": "Token created in Mealie user settings. Used only by the Home Assistant backend."
         }
       }
+    },
+    "error": {
+      "mealie_incomplete": "Enter both the Mealie URL and token, or leave both blank.",
+      "mealie_invalid_url": "Use an http(s) base URL without a path, query or embedded credentials."
     }
   },
   "entity": {
