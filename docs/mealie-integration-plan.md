@@ -46,3 +46,12 @@ with links to their Mealie recipe pages; they are excluded from main results and
 No dedicated pending-parsing route was found in the v3.28.0 page inventory. Parsed recipes
 with unmapped food IDs still appear for mapping review. Manifest version 0.10.0b2 identifies
 this feature preview and refreshes the panel URL. Stable release remains v0.9.0.
+
+## Recipe tabs and tiles — beta 3
+Inventory remains the default tab; Recipes retains its search/filter when switching tabs.
+Recipe cards show photos, availability, due-soon count and handling flags. Tapping opens
+stock/missing-ingredient details. Manage reveals connection configuration, sync, mappings
+and parsing links. v3.28.0 /api/media/recipes/{id}/images/min-original.webp serves token-free
+images; no API credentials are exposed. Lazy-loaded images use a placeholder on failure.
+Local browser checks covered tabs, management controls, detail opening/closing, missing
+photos and iPhone-width layout using fixtures. Live Mealie photo loading awaits user testing.

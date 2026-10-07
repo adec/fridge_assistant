@@ -888,6 +888,7 @@ async def ws_mealie(hass, connection, msg):
                           runtime.store.items.values(), runtime.store.locations, mappings,
                           dt_util.now().date())
     recipes = [{**r, "url": mealie.client.url + "/g/" + quote(mealie.cache["group_slug"], safe="") + "/r/" + quote(r["slug"], safe=""),
+                "image_url": mealie.client.url + "/api/media/recipes/" + quote(r["id"], safe="") + "/images/min-original.webp",
                 "unparsed": sum(not i["food_id"] for i in r["ingredients"])}
                for r in ranked] if mealie.client else []
     pending_links = [{"name": r["name"], "url": mealie.client.url + "/g/" + quote(mealie.cache["group_slug"], safe="") + "/r/" + quote(r["slug"], safe="")} for r in pending] if mealie.client else []

@@ -35,6 +35,7 @@ class FridgeAssistantPanel extends HTMLElement {
     this._search = "";
     this._unsub = null;
     this._shellBuilt = false;
+    this._activeTab = "inventory";
   }
 
   set hass(hass) {
@@ -214,8 +215,8 @@ class FridgeAssistantPanel extends HTMLElement {
             <button class="icon-btn" id="btn-templates" title="${this.t("manageTemplates")}"><ha-icon icon="mdi:book-multiple"></ha-icon></button>
             <button class="icon-btn" id="btn-settings" title="${this.t("settings")}"><ha-icon icon="mdi:cog-outline"></ha-icon></button>
           </div>
+          <nav class="main-tabs" role="tablist"><button class="btn ghost" id="tab-inventory" role="tab" aria-selected="true">${this.t("inventoryTab")}</button><button class="btn ghost" id="tab-recipes" role="tab" aria-selected="false">${this.t("recipesTab")}</button></nav>
           <div class="counts" id="counts"></div>
-          <button class="btn ghost" id="btn-mealie">${this.t("mealieTitle")}</button>
           <div class="searchrow">
             <div class="search"><ha-icon icon="mdi:magnify" style="--mdc-icon-size:18px;color:var(--fa-muted)"></ha-icon><input id="search" placeholder="${this.t("searchPlaceholder")}" autocomplete="off" enterkeyhint="search"></div>
             <button class="btn ghost icon-only" id="btn-clean" title="${this.t("cleanUp")}"><ha-icon icon="mdi:broom"></ha-icon></button>
@@ -223,6 +224,7 @@ class FridgeAssistantPanel extends HTMLElement {
         </header>
         <nav class="filters" id="filters"></nav>
         <main id="list"><div class="loading">${this.t("loading")}</div></main>
+        <main id="recipes-view" hidden></main>
       </div>
       <button class="fab fab-scan" id="fab-scan" aria-label="${this.t("scanAria")}"><ha-icon icon="mdi:barcode-scan"></ha-icon></button>
       <button class="fab" id="fab-add" aria-label="${this.t("addItemAria")}"><ha-icon icon="mdi:plus"></ha-icon></button>
@@ -232,7 +234,8 @@ class FridgeAssistantPanel extends HTMLElement {
     const $ = (s) => this.shadowRoot.getElementById(s);
     $("fab-add").addEventListener("click", () => this._openAddModal());
     $("fab-scan").addEventListener("click", () => this._openScanner());
-    $("btn-mealie").addEventListener("click", () => openMealie(this));
+    $("tab-inventory").addEventListener("click", () => this._selectTab("inventory"));
+    $("tab-recipes").addEventListener("click", () => this._selectTab("recipes"));
     $("btn-clean").addEventListener("click", () => this._openCleanModal());
     $("btn-history").addEventListener("click", () => this._openHistory());
     $("btn-templates").addEventListener("click", () => this._openTemplatesManager());
@@ -244,6 +247,19 @@ class FridgeAssistantPanel extends HTMLElement {
     $("search").addEventListener("input", (e) => { this._search = e.target.value; this._renderList(); });
     this._applyChrome();
     if (this._state) this._onState();
+  }
+
+  _selectTab(tab) {
+    this._activeTab = tab;
+    const recipes = tab === "recipes";
+    for (const id of ["counts", "filters", "list", "fab-add", "fab-scan"]) this.shadowRoot.getElementById(id).hidden = recipes;
+    this.shadowRoot.querySelector(".searchrow").hidden = recipes;
+    this.shadowRoot.getElementById("recipes-view").hidden = !recipes;
+    for (const name of ["inventory", "recipes"]) this.shadowRoot.getElementById(`tab-${name}`).setAttribute("aria-selected", String(tab === name));
+    if (recipes && !this._recipesMounted) {
+      this._recipesMounted = true;
+      openMealie(this, this.shadowRoot.getElementById("recipes-view"));
+    } else if (recipes && this._refreshRecipes) this._refreshRecipes();
   }
 
   /* Render the native HA hamburger so the sidebar is reachable on mobile
@@ -269,6 +285,7 @@ class FridgeAssistantPanel extends HTMLElement {
     // Keep an open inspector (drawer or sheet) in sync with the new state.
     if (this._refreshSurface) this._refreshSurface();
     if (this._refreshLocations) this._refreshLocations();
+    if (this._activeTab === "recipes" && this._refreshRecipes) this._refreshRecipes();
   }
 
   _renderCounts() {
