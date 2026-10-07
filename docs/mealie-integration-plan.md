@@ -71,3 +71,14 @@ normalisation already applies to names and aliases. The mapping dropdown now ide
 the effective automatic target (e.g. “Automatic matching — Onion”) instead of showing only
 “Automatic matching”. This is a display clarification, not a confirmed fix for any missing
 stock; stock template linkage and date eligibility still require checking if symptoms remain.
+
+## Beta 6: focused ingredient mapping administration
+Manage opens a dedicated mapping screen, defaulting to Needs review and foods used in
+synced recipes (including parsed foods in partially unparsed recipes). Status filters,
+case-insensitive search across food/target names and 25-row pagination keep large catalogues
+manageable. Change opens a searchable, paginated template picker; Automatic matching
+removes a manual override. The review count is scoped to the selected recipe/catalogue
+scope. Save failures leave the picker open for retry. Existing mappings are preserved.
+140 tests pass, including large-catalogue filtering/page clamping checks. Local browser
+fixtures verified default scope/status, search and nested template picker. Live saves
+using the new UI await user testing.

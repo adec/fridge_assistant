@@ -68,7 +68,10 @@ Mealie’s token-free media endpoint and fall back to a placeholder if unavailab
 It adds optional Mealie URL/API-token settings and a **What can I cook?** view with
 **Test connection** and **Refresh recipes**. Recipes also refresh at startup and every six hours.
 Recipes now show ingredient presence, missing/unresolved foods, date priority and thawing flags.
-Use **Link Mealie foods to templates** to save reviewed links; unique exact names and aliases
+Use **Manage → Link Mealie foods to templates** for a searchable mapping screen,
+status/scope filters and 25-row pages. It defaults to recipe ingredients needing review.
+Choose **Change** to search templates, or **Automatic matching** to remove an override.
+Use it to save reviewed links; unique exact names and aliases
 match automatically. Past Use By stock is excluded; past Best Before stock is flagged.
 Recipes with any ingredients lacking Mealie food IDs are excluded from cooking results.
 A collapsed **Recipes needing parsing in Mealie** section links to each recipe; parse and

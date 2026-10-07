@@ -1,5 +1,7 @@
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b5";
+import { esc } from "../lib/format.js?v=0.10.0b6";
+
+import { openMealieMappings } from "./mealie-mappings.js?v=0.10.0b6";
 
 export async function openMealie(panel, container) {
   const markup = `
@@ -13,7 +15,7 @@ export async function openMealie(panel, container) {
     <label class="field"><span>${panel.t("mealieFilter")}</span><select id="mr-filter"><option value="all">${panel.t("mealieAll")}</option><option value="ready">${panel.t("mealieReady")}</option><option value="near">${panel.t("mealieNear")}</option></select></label>
     <div id="mr-list"></div>
     <div id="mr-management" hidden><details id="mr-pending"><summary id="mr-pending-title"></summary><p class="location-help">${panel.t("mealieParseHelp")}</p><div id="mr-pending-list"></div></details>
-    <details><summary>${panel.t("mealieMappings")}</summary><div id="mr-mappings"></div></details></div>
+    <button class="btn ghost" id="mr-mappings">${panel.t("mealieMappings")}</button></div>
   `;
   const h = container ? { modal: container, close() {} } : panel._openModal(markup);
   if (container) container.innerHTML = markup;
@@ -62,9 +64,6 @@ export async function openMealie(panel, container) {
     q("#mr-pending").hidden = !pending.length;
     q("#mr-pending-title").textContent = `${panel.t("mealieNeedsParsing")} (${pending.length})`;
     q("#mr-pending-list").innerHTML = pending.map(r => `<p><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a></p>`).join("");
-    q("#mr-mappings").innerHTML = data.foods.map(f => `<label class="field"><span>${esc(f.name)} · ${panel.t(f.source === "saved" ? "mealieSaved" : f.source === "exact" ? "mealieExact" : "mealieReview")}</span>
-      <select data-food="${esc(f.id)}" ${busy ? "disabled" : ""}><option value="">${panel.t("mealieAutomatic")}${f.source === "exact" ? ` — ${esc(data.templates.find(t => t.id === f.template_id)?.name || "")}` : ""}</option>${data.templates.map(t => `<option value="${esc(t.id)}" ${f.source === "saved" && f.template_id === t.id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label>`).join("");
-    q("#mr-mappings").querySelectorAll("select").forEach(select => select.addEventListener("change", () => load("map", { food_id: select.dataset.food, template_id: select.value || null })));
 
   };
   const load = async (action, extra = {}) => {
@@ -75,9 +74,11 @@ export async function openMealie(panel, container) {
       if (closed || !h.modal.isConnected) return;
       data = result;
       if (action === "test") panel._toast(panel.t("mealieConnected"));
-    } catch (error) { if (!closed && h.modal.isConnected) panel._toast(error.message || String(error), { type: "bad" }); }
+      return true;
+    } catch (error) { if (!closed && h.modal.isConnected) panel._toast(error.message || String(error), { type: "bad" }); return false; }
     finally { busy = false; render(); }
   };
+  q("#mr-mappings").addEventListener("click", () => openMealieMappings(panel, () => data, (food_id, template_id) => load("map", { food_id, template_id })));
   q("#mr-config").addEventListener("click", () => {
     history.pushState(null, "", "/config/integrations/integration/fridge_assistant");
     window.dispatchEvent(new CustomEvent("location-changed"));

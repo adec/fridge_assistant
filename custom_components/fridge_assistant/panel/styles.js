@@ -576,4 +576,9 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .recipe-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .recipe-tile-body{padding:14px}.recipe-tile-body b{overflow-wrap:anywhere}.recipe-tile-body p{font-size:13px;margin:8px 0;color:var(--fa-muted)}
 @media(max-width:480px){.recipe-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.recipe-tile-body{padding:10px}.recipe-tile-body b{font-size:14px}}
+
+.mapping-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--fa-line)}
+.mapping-row>div{min-width:0;overflow-wrap:anywhere}.mapping-row p{margin:6px 0}.mapping-row small{color:var(--fa-muted)}
+.mapping-pager{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0}
+.mapping-choice{display:block;width:100%;text-align:left;margin:8px 0;white-space:normal}
 `;

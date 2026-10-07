@@ -1,6 +1,6 @@
 /* Small date/text helpers (timezone-safe, YYYY-MM-DD). */
 
-import { MONTHS } from "../strings.js?v=0.10.0b5";
+import { MONTHS } from "../strings.js?v=0.10.0b6";
 
 export function todayISO() {
   const n = new Date();

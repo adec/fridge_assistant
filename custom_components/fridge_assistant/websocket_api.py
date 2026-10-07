@@ -891,8 +891,9 @@ async def ws_mealie(hass, connection, msg):
                 "image_url": mealie.client.url + "/api/media/recipes/" + quote(r["id"], safe="") + "/images/min-original.webp",
                 "unparsed": sum(not i["food_id"] for i in r["ingredients"])}
                for r in ranked] if mealie.client else []
+    used_foods = {i.get("food_id") for r in mealie.cache.get("recipes", []) for i in r["ingredients"] if i.get("food_id")}
     pending_links = [{"name": r["name"], "url": mealie.client.url + "/g/" + quote(mealie.cache["group_slug"], safe="") + "/r/" + quote(r["slug"], safe="")} for r in pending] if mealie.client else []
     connection.send_result(msg["id"], {"status": mealie.status(), "recipes": recipes,
                        "needs_parsing": pending_links,
-                       "foods": food_links(foods, templates, mappings),
+                       "foods": [{**f, "used_in_recipes": f["id"] in used_foods} for f in food_links(foods, templates, mappings)],
                        "templates": [{"id": t["id"], "name": t["name"]} for t in templates]})
