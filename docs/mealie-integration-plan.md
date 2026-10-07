@@ -55,3 +55,11 @@ and parsing links. v3.28.0 /api/media/recipes/{id}/images/min-original.webp serv
 images; no API credentials are exposed. Lazy-loaded images use a placeholder on failure.
 Local browser checks covered tabs, management controls, detail opening/closing, missing
 photos and iPhone-width layout using fixtures. Live Mealie photo loading awaits user testing.
+
+## Beta 4: invalidate all frontend modules
+Live beta-3 feedback showed undefined tab labels and an empty Recipes view, consistent
+with an updated entry module importing stale strings/view/style modules. Every relative
+ES-module import now includes the manifest version, not just the panel entry URL.
+Run `python3 scripts/version_panel.py` after each manifest bump; an automated test
+requires every import to match the manifest and resolve to an existing file.
+138 tests pass and all non-vendor panel modules pass JavaScript syntax checks.
