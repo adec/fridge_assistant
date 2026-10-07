@@ -63,3 +63,11 @@ ES-module import now includes the manifest version, not just the panel entry URL
 Run `python3 scripts/version_panel.py` after each manifest bump; an automated test
 requires every import to match the manifest and resolve to an existing file.
 138 tests pass and all non-vendor panel modules pass JavaScript syntax checks.
+
+## Beta 5: show effective automatic mappings
+Reports of Onion and Bell pepper not matching prompted regression tests using the actual
+seed templates and lower/upper/mixed-case Mealie names. All match correctly: casefold
+normalisation already applies to names and aliases. The mapping dropdown now identifies
+the effective automatic target (e.g. “Automatic matching — Onion”) instead of showing only
+“Automatic matching”. This is a display clarification, not a confirmed fix for any missing
+stock; stock template linkage and date eligibility still require checking if symptoms remain.

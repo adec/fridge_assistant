@@ -61,3 +61,15 @@ class MatchingTests(unittest.TestCase):
         # Parsing after a refresh returns the recipe to cooking results.
         partial['ingredients'][1]['food_id']='salt'
         self.assertEqual(m.split_parsed_recipes([partial]),([partial],[]))
+
+    def test_onion_and_bell_pepper_match_regardless_of_case(self):
+        import json
+        from pathlib import Path
+        templates = json.loads((Path(__file__).resolve().parents[1] / 'custom_components/fridge_assistant/data/seed_templates.json').read_text())['templates']
+        for onion, pepper in [('onion','bell pepper'),('ONION','BELL PEPPER'),('OnIoN','Bell Pepper')]:
+            foods = [{'id':'onion','name':onion},{'id':'pepper','name':pepper}]
+            links = m.food_links(foods,templates,{})
+            self.assertEqual([f['template_id'] for f in links],['ui','paprika'])
+            recipe = {'id':'r','name':'Vegetables','ingredients':[{'food_id':f['id'],'name':f['name']} for f in foods]}
+            stock = [{'id':'i1','name':onion,'template_id':'ui'}, {'id':'i2','name':pepper,'template_id':'paprika'}]
+            self.assertTrue(m.rank_recipes([recipe],foods,templates,stock,{}, {},date(2026,10,7))[0]['all_present'])

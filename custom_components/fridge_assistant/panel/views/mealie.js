@@ -1,5 +1,5 @@
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b4";
+import { esc } from "../lib/format.js?v=0.10.0b5";
 
 export async function openMealie(panel, container) {
   const markup = `
@@ -63,7 +63,7 @@ export async function openMealie(panel, container) {
     q("#mr-pending-title").textContent = `${panel.t("mealieNeedsParsing")} (${pending.length})`;
     q("#mr-pending-list").innerHTML = pending.map(r => `<p><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a></p>`).join("");
     q("#mr-mappings").innerHTML = data.foods.map(f => `<label class="field"><span>${esc(f.name)} · ${panel.t(f.source === "saved" ? "mealieSaved" : f.source === "exact" ? "mealieExact" : "mealieReview")}</span>
-      <select data-food="${esc(f.id)}" ${busy ? "disabled" : ""}><option value="">${panel.t("mealieAutomatic")}</option>${data.templates.map(t => `<option value="${esc(t.id)}" ${f.source === "saved" && f.template_id === t.id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label>`).join("");
+      <select data-food="${esc(f.id)}" ${busy ? "disabled" : ""}><option value="">${panel.t("mealieAutomatic")}${f.source === "exact" ? ` — ${esc(data.templates.find(t => t.id === f.template_id)?.name || "")}` : ""}</option>${data.templates.map(t => `<option value="${esc(t.id)}" ${f.source === "saved" && f.template_id === t.id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label>`).join("");
     q("#mr-mappings").querySelectorAll("select").forEach(select => select.addEventListener("change", () => load("map", { food_id: select.dataset.food, template_id: select.value || null })));
 
   };
