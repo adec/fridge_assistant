@@ -66,6 +66,10 @@ It adds optional Mealie URL/API-token settings and a **What can I cook?** entry 
 Recipes now show ingredient presence, missing/unresolved foods, date priority and thawing flags.
 Use **Link Mealie foods to templates** to save reviewed links; unique exact names and aliases
 match automatically. Past Use By stock is excluded; past Best Before stock is flagged.
+Recipes with any ingredients lacking Mealie food IDs are excluded from cooking results.
+A collapsed **Recipes needing parsing in Mealie** section links to each recipe; parse and
+save in Mealie, then refresh recipes here. Parsed foods without template mappings remain
+visible for review.
 This checks presence only, not sufficient amounts. Parsed foods and template-linked stock
 are required. AI-assisted mapping and shopping-list writes are still planned.
 

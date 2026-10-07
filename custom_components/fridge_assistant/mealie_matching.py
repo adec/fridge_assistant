@@ -75,3 +75,11 @@ def rank_recipes(recipes, foods, templates, items, locations, saved, today=None)
                                -r['due_soon_count'], r['earliest_days'] is None,
                                r['earliest_days'] if r['earliest_days'] is not None else 0, r['name'].casefold()))
     return results
+
+
+def split_parsed_recipes(recipes):
+    """Food IDs are required for presence matching, including partial parses."""
+    parsed, pending = [], []
+    for recipe in recipes:
+        (pending if any(not i.get('food_id') for i in recipe['ingredients']) else parsed).append(recipe)
+    return parsed, pending

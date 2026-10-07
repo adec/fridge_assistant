@@ -11,10 +11,11 @@ export async function openMealie(panel) {
     <label class="field"><span>${panel.t("mealieSearch")}</span><input id="mr-search" type="search"></label>
     <label class="field"><span>${panel.t("mealieFilter")}</span><select id="mr-filter"><option value="all">${panel.t("mealieAll")}</option><option value="ready">${panel.t("mealieReady")}</option><option value="near">${panel.t("mealieNear")}</option></select></label>
     <div id="mr-list"></div>
+    <details id="mr-pending"><summary id="mr-pending-title"></summary><p class="location-help">${panel.t("mealieParseHelp")}</p><div id="mr-pending-list"></div></details>
     <details><summary>${panel.t("mealieMappings")}</summary><div id="mr-mappings"></div></details>
   `);
   const q = s => h.modal.querySelector(s);
-  let data = { status: {}, recipes: [], foods: [], templates: [] }, busy = false, closed = false;
+  let data = { status: {}, recipes: [], foods: [], templates: [], needs_parsing: [] }, busy = false, closed = false;
   const close = () => { closed = true; h.close(); };
   q("#mr-close").addEventListener("click", close);
   const render = () => {
@@ -36,6 +37,10 @@ export async function openMealie(panel) {
       ${r.unresolved.length ? `<p>${panel.t("mealieReview")}: ${esc(r.unresolved.join(", "))}</p>` : ""}
       <a class="btn ghost" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${panel.t("mealieOpen")}</a></div>`).join("")
       || `<p class="location-help">${panel.t("mealieEmpty")}</p>`;
+    const pending = data.needs_parsing || [];
+    q("#mr-pending").hidden = !pending.length;
+    q("#mr-pending-title").textContent = `${panel.t("mealieNeedsParsing")} (${pending.length})`;
+    q("#mr-pending-list").innerHTML = pending.map(r => `<p><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a></p>`).join("");
     q("#mr-mappings").innerHTML = data.foods.map(f => `<label class="field"><span>${esc(f.name)} · ${panel.t(f.source === "saved" ? "mealieSaved" : f.source === "exact" ? "mealieExact" : "mealieReview")}</span>
       <select data-food="${esc(f.id)}" ${busy ? "disabled" : ""}><option value="">${panel.t("mealieAutomatic")}</option>${data.templates.map(t => `<option value="${esc(t.id)}" ${f.source === "saved" && f.template_id === t.id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label>`).join("");
     q("#mr-mappings").querySelectorAll("select").forEach(select => select.addEventListener("change", () => load("map", { food_id: select.dataset.food, template_id: select.value || null })));

@@ -38,3 +38,11 @@ shape. Live authenticated Mealie and Home Assistant validation is still outstand
 AI-assisted suggestions remain a separate next milestone; accepted manual mappings work
 without AI. 136 automated tests pass, including ten matching/ranking cases; Python and
 JavaScript syntax checks pass.
+
+## Test feedback — 7 October 2026
+User reports the initial build works on their live Home Assistant instance. Recipes with
+any unparsed (missing food-ID) ingredients now appear only in a collapsed parsing section
+with links to their Mealie recipe pages; they are excluded from main results and filters.
+No dedicated pending-parsing route was found in the v3.28.0 page inventory. Parsed recipes
+with unmapped food IDs still appear for mapping review. Manifest version 0.10.0b2 identifies
+this feature preview and refreshes the panel URL. Stable release remains v0.9.0.

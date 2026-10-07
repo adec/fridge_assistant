@@ -863,7 +863,7 @@ async def ws_mealie(hass, connection, msg):
     except Exception:
         connection.send_error(msg["id"], "storage_error", shared_text(hass, "mealie_storage_error"))
         return
-    from .mealie_matching import food_links, rank_recipes
+    from .mealie_matching import food_links, rank_recipes, split_parsed_recipes
     templates = [t for t in runtime.store.all_templates() if t.get("kind", "ingredient") == "ingredient"]
     cache_key = mealie.cache.get("identity")
     mappings = dict(runtime.store.mealie_mappings.get(cache_key, {}))
@@ -883,12 +883,15 @@ async def ws_mealie(hass, connection, msg):
             runtime.store.mealie_mappings = previous
             connection.send_error(msg["id"], "storage_error", shared_text(hass, "mealie_storage_error"))
             return
-    ranked = rank_recipes(mealie.cache.get("recipes", []), foods, templates,
+    parsed, pending = split_parsed_recipes(mealie.cache.get("recipes", []))
+    ranked = rank_recipes(parsed, foods, templates,
                           runtime.store.items.values(), runtime.store.locations, mappings,
                           dt_util.now().date())
     recipes = [{**r, "url": mealie.client.url + "/g/" + quote(mealie.cache["group_slug"], safe="") + "/r/" + quote(r["slug"], safe=""),
                 "unparsed": sum(not i["food_id"] for i in r["ingredients"])}
                for r in ranked] if mealie.client else []
+    pending_links = [{"name": r["name"], "url": mealie.client.url + "/g/" + quote(mealie.cache["group_slug"], safe="") + "/r/" + quote(r["slug"], safe="")} for r in pending] if mealie.client else []
     connection.send_result(msg["id"], {"status": mealie.status(), "recipes": recipes,
+                       "needs_parsing": pending_links,
                        "foods": food_links(foods, templates, mappings),
                        "templates": [{"id": t["id"], "name": t["name"]} for t in templates]})

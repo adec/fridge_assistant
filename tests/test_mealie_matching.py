@@ -50,3 +50,14 @@ class MatchingTests(unittest.TestCase):
     def test_meal_stock_does_not_supply_ingredients(self):
         self.items[0]['kind']='meal'
         self.assertFalse(self.rank()[0]['all_present'])
+
+    def test_unparsed_and_partial_recipes_hidden_but_unmapped_visible(self):
+        complete = {'name': 'Parsed', 'ingredients': [{'food_id': 'unknown'}]}
+        partial = {'name': 'Partial', 'ingredients': [{'food_id':'m'}, {'food_id':None}]}
+        raw = {'name': 'Unparsed', 'ingredients': [{'text':'salt'}]}
+        ready, pending = m.split_parsed_recipes([raw, complete, partial])
+        self.assertEqual(ready,[complete])
+        self.assertEqual(pending,[raw,partial])
+        # Parsing after a refresh returns the recipe to cooking results.
+        partial['ingredients'][1]['food_id']='salt'
+        self.assertEqual(m.split_parsed_recipes([partial]),([partial],[]))
