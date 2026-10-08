@@ -1,8 +1,8 @@
 /* Paged history (newest first) + restore. Drawer on desktop. */
 
-import { MONTHS } from "../strings.js?v=0.10.0b12";
-import { esc } from "../lib/format.js?v=0.10.0b12";
-import { openSurface } from "../lib/surface.js?v=0.10.0b12";
+import { MONTHS } from "../strings.js?v=0.10.0b13";
+import { esc } from "../lib/format.js?v=0.10.0b13";
+import { openSurface } from "../lib/surface.js?v=0.10.0b13";
 
 export function relTime(panel, ts) {
   if (!ts) return "";

@@ -1,6 +1,6 @@
-import { categoryIds } from "../lib/categories.js?v=0.10.0b12";
-import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b12";
-import { esc } from "../lib/format.js?v=0.10.0b12";
+import { categoryIds } from "../lib/categories.js?v=0.10.0b13";
+import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b13";
+import { esc } from "../lib/format.js?v=0.10.0b13";
 
 export function openCategoriesManager(panel) {
   const h = panel._openModal(`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
