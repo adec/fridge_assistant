@@ -1,6 +1,6 @@
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b6";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b7";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
@@ -16,6 +16,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     emoji: prefill.emoji || editItem?.emoji || "🍽️",
     template_id: prefill.template_id || editItem?.template_id || null,
     category: prefill.category || editItem?.category || null,
+    categoryManual: isEdit || !!prefill.category,
     kind: editItem?.kind || prefill.kind || "ingredient",
     kindManual: isEdit,
     portions: 1,
@@ -61,6 +62,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     <div id="f-expiry-suggestion" class="expiry-suggestion hidden"></div>
     <button class="link" id="f-adv">${panel.t("moreOptions")}</button>
     <div class="adv hidden" id="f-advbox">
+      <label class="field"><span>${panel.t("categoryLabel")}</span><div class="select-wrap"><select id="f-category">${Object.keys(panel._state.categories || {}).map(k => `<option value="${esc(k)}" ${k === (m.category || "other") ? "selected" : ""}>${esc(panel._catMeta(k).label)}</option>`).join("")}</select></div></label>
       <label class="field"><span>${panel.t("displayNameLabel")}</span><input id="f-dispname" placeholder="${panel.t("displayNamePlaceholder")}" value="${esc(editItem?.name || "")}"></label>
       <div class="grid2">
         <label class="field"><span>${panel.t("quantityLabel")}</span><input id="f-qty" placeholder="${panel.t("quantityPlaceholder")}" value="${esc(editItem?.quantity ?? prefill.quantity ?? "")}"></label>
@@ -71,6 +73,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     </div>
     <div class="modal-actions">
       <button class="btn ghost" id="f-template">${panel.t("chooseTemplateBtn")}</button>
+      <button class="btn ghost" id="f-create-template">${panel.t("createTemplateBtn")}</button>
       <button class="btn primary" id="f-submit">${isEdit ? panel.t("saveBtn") : panel.t("addBtn")}</button>
     </div>
   `, { wide: false });
@@ -81,6 +84,9 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   const lang = panel._lang();
 
   const setEmoji = (e) => { m.emoji = e; emojiEl.textContent = e; if (q("#f-emojiin")) q("#f-emojiin").value = e; };
+  const setCategory = (category, force = false) => {
+    if (force || !m.categoryManual) { m.category = category || "other"; q("#f-category").value = m.category; }
+  };
   const setKind = (k) => {
     if (!k) return;
     m.kind = k;
@@ -124,7 +130,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     updateHint();
   };
 
-  const aiCtx = () => ({ m, q, setEmoji, setKind, applySuggestion, suggestEl });
+  const aiCtx = () => ({ m, q, setEmoji, setKind, setCategory, applySuggestion, suggestEl });
   const wireActions = (query) => {
     const a = q("#s-ai");
     if (a) a.addEventListener("click", () => aiEstimate(panel, query, aiCtx()));
@@ -135,7 +141,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
 
   // Shown when nothing matched, or after the user rejected a wrong guess.
   const showManual = (query, heading) => {
-    m.template_id = null; m.category = null;
+    m.template_id = null; setCategory(null);
     suggestEl.className = "suggest";
     const aiBtn = panel._state.options.ai_enabled
       ? `<button class="s-mini ai" id="s-ai">${panel.t("aiEstimateMini")}</button>` : "";
@@ -165,7 +171,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     if (res.template) {
       const t = res.template;
       if (!m.dateTypeManual) setDateType(t.date_type);
-      m.template_id = t.id; m.category = t.category; setEmoji(t.emoji || "🍽️");
+      m.template_id = t.id; setCategory(t.category); setEmoji(t.emoji || "🍽️");
       if (!m.kindManual) setKind(panel._kindOf(t));
       const sl = t.shelf_life || {};
       const noHere = sl[panel._storageType(m.location)] === null || sl[panel._storageType(m.location)] === undefined;
@@ -247,6 +253,29 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     q("#f-adv").textContent = box.classList.contains("hidden") ? panel.t("moreOptions") : panel.t("lessOptions");
   });
   if (q("#f-emojiin")) q("#f-emojiin").addEventListener("input", (e) => setEmoji(e.target.value || "🍽️"));
+  q("#f-category").addEventListener("change", () => {
+    m.categoryManual = true; setCategory(q("#f-category").value, true);
+  });
+  q("#f-create-template").addEventListener("click", () => {
+    const name = nameEl.value.trim();
+    if (!name) { nameEl.focus(); return; }
+    // Prevent pending recognition from overwriting an explicitly created link.
+    ++matchVersion;
+    const seed = { name, emoji: m.emoji, kind: m.kind, category: m.category || "other",
+      date_type: m.dateType, shelf_life: { ...(m.aiResult?.shelf_life || {}) }, aliases: [], notes: "" };
+    panel._openTemplateEditor(seed, true, template => {
+      if (!template || !h.modal.isConnected) return;
+      ++matchVersion; m.noAutoMatch = true; m.aiResult = null;
+      m.template_id = template.id; nameEl.value = template.name;
+      m.categoryManual = true; setCategory(template.category, true);
+      m.kindManual = true; setKind(template.kind); setEmoji(template.emoji || m.emoji);
+      if (!m.dateTypeManual) setDateType(template.date_type);
+      const days = template.shelf_life?.[panel._storageType(m.location)];
+      applySuggestion(days != null ? addDays(addedEl.value, days) : null, "template");
+      suggestEl.className = "suggest ok";
+      suggestEl.textContent = `${panel.t("createdTemplateLinked")}: ${template.name}`;
+    });
+  });
   q("#f-template").addEventListener("click", () =>
     panel._openTemplatePicker((t) => { nameEl.value = t.name; doMatch(); })
   );
@@ -293,7 +322,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
           await panel._call("add_template", {
             template: {
               name: nameEl.value.trim(),
-              category: m.aiResult.category,
+              category: m.category || m.aiResult.category,
               kind: m.kind || m.aiResult.kind,
               emoji: m.aiResult.emoji,
               icon: m.aiResult.icon,
@@ -347,7 +376,9 @@ export async function aiEstimate(panel, name, ctx) {
     return;
   }
   const est = res.estimate;
-  m.aiResult = est; m.category = est.category; setEmoji(est.emoji || "✨");
+  m.aiResult = est;
+  if (ctx.setCategory) ctx.setCategory(est.category); else if (!m.categoryManual) m.category = est.category;
+  setEmoji(est.emoji || "✨");
   if (!m.kindManual && setKind) setKind(est.kind);
   const addedEl = ctx.addedEl || suggestEl.parentNode.querySelector("#f-added");
   const expEl = ctx.expEl || suggestEl.parentNode.querySelector("#f-expiry");

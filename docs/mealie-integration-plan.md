@@ -82,3 +82,14 @@ scope. Save failures leave the picker open for retry. Existing mappings are pres
 140 tests pass, including large-catalogue filtering/page clamping checks. Local browser
 fixtures verified default scope/status, search and nested template picker. Live saves
 using the new UI await user testing.
+
+## Beta 7: categories and in-flow template creation
+Add/edit stock now includes Category under More options, preserving explicit choices
+against automatic recognition and AI. Create template prefills the template editor from
+the item without copying the current pack deadline. Saving returns the saved template to
+the item editor, pins its ID, preserves other fields and suggests its storage lifetime
+without replacing a locked date. Existing manager callbacks remain compatible.
+Local browser fixtures verified category choice, template prefill/save, preserved quantity,
+five-day lifetime suggestion, and saving the linked item under Fruit. 140 automated tests
+and all panel syntax/import-version checks pass. Live Home Assistant validation remains
+for the user after upgrading.

@@ -3,8 +3,8 @@
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b6";
-import { openSurface } from "../lib/surface.js?v=0.10.0b6";
+import { esc } from "../lib/format.js?v=0.10.0b7";
+import { openSurface } from "../lib/surface.js?v=0.10.0b7";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -263,10 +263,10 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
     if (tpl && tpl.id) template.id = tpl.id; // keep id → overrides builtin / updates own
     q("#te-save").disabled = true;
     try {
-      await panel._call("add_template", { template });
+      const result = await panel._call("add_template", { template });
       h.close();
       panel._toast(isNew ? panel.t("templateAddedToast") : panel.t("templateSavedToast"));
-      onChanged && onChanged();
+      onChanged && onChanged(result.template);
     } catch (e) {
       q("#te-save").disabled = false;
       panel._toast(panel.t("errorPrefix") + (e.message || e), { type: "bad" });

@@ -1,5 +1,5 @@
 /* Focused, paginated ingredient mapping administration. */
-import { esc } from "../lib/format.js?v=0.10.0b6";
+import { esc } from "../lib/format.js?v=0.10.0b7";
 
 export function mappingPage(data, { query = "", source = "unmapped", usedOnly = true, page = 0 } = {}) {
   const templates = new Map(data.templates.map(t => [t.id, t.name]));

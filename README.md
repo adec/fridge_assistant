@@ -145,8 +145,19 @@ and belongs to one of two **kinds**:
 
 Kind is derived from a set of 15 finer categories (vegetables, fruit, dairy, meat, fish, breakfast,
 lunch, dinner, snack, bakery, sauces & spices, drinks, eggs, leftovers, other) but can always be
-overridden per item. Prepared meals are categorised by the meal-time they're usually eaten at, so
+overridden per item. In **Add/Edit item → More options → Category**, select the
+category explicitly; it is preserved during automatic matching and AI estimates. Templates
+have their own **Category** field in the template editor. Changing a template does not
+reclassify existing stock items. Prepared meals are categorised by the meal-time they're usually eaten at, so
 the inventory can be filtered on e.g. "what dinners are in the freezer?".
+
+### Create a template while adding stock
+
+In the add/edit item form, enter the ingredient name and choose **Create template**.
+The template editor prefills name, emoji, kind, category and date type. Set reusable
+storage lifetimes and save; the item form remains open with its entries preserved and
+the new template linked. A pack’s particular due date is not copied into the template.
+Cancelling template creation leaves the item form open.
 
 ### Use By and Best Before dates
 
