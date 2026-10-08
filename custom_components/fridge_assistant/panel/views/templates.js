@@ -1,11 +1,11 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b11";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b12";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b11";
-import { openSurface } from "../lib/surface.js?v=0.10.0b11";
+import { esc } from "../lib/format.js?v=0.10.0b12";
+import { openSurface } from "../lib/surface.js?v=0.10.0b12";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -37,7 +37,7 @@ export function openTemplatePicker(panel, onPick) {
       const sl = t.shelf_life || {};
       return `<button class="tp-item" data-id="${t.id}">
         <span class="tp-emoji">${t.emoji || c.emoji || "🍽️"}</span>
-        <span class="tp-name"><b>${esc(t.name)}</b><small>${panel._kindMeta(panel._kindOf(t)).emoji || ""} ${esc(c.label || t.category)}${t.source === "user" || t.source === "ai" ? panel.t("ownSuffix") : ""}</small></span>
+        <span class="tp-name"><b>${esc(t.name)}</b><small>${kindFilter === "all" ? (panel._kindMeta(panel._kindOf(t)).emoji || "") + " " : ""}${esc(c.label || t.category)}${t.source === "user" || t.source === "ai" ? panel.t("ownSuffix") : ""}</small></span>
         <span class="tp-sl">${["fridge", "freezer", "pantry"].map((l) => sl[l] ? `<i>${panel._storageMeta(l).emoji || ""}${sl[l]}d</i>` : "").join("")}</span>
       </button>`;
     }).join("") || `<div class="empty small"><p>${panel.t("nothingFound")}</p></div>`;
@@ -114,7 +114,7 @@ export function openTemplatesManager(panel) {
         : "";
       return `<button class="tp-item" data-id="${t.id}">
         <span class="tp-emoji">${t.emoji || c.emoji || "🍽️"}</span>
-        <span class="tp-name"><b>${esc(t.name)}${badge}</b><small>${panel._kindMeta(panel._kindOf(t)).emoji || ""} ${esc(c.label || t.category)}</small></span>
+        <span class="tp-name"><b>${esc(t.name)}${badge}</b><small>${kindFilter === "all" ? (panel._kindMeta(panel._kindOf(t)).emoji || "") + " " : ""}${esc(c.label || t.category)}</small></span>
         <span class="tp-sl">${["fridge", "freezer", "pantry"].map((l) => sl[l] ? `<i>${panel._storageMeta(l).emoji || ""}${sl[l]}d</i>` : "").join("")}</span>
       </button>`;
     }).join("") || `<div class="empty small"><p>${panel.t("nothingInGroup")}</p></div>`;

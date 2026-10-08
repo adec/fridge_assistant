@@ -1,7 +1,7 @@
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b11";
+import { esc } from "../lib/format.js?v=0.10.0b12";
 
-import { openMealieMappings } from "./mealie-mappings.js?v=0.10.0b11";
+import { openMealieMappings } from "./mealie-mappings.js?v=0.10.0b12";
 
 export async function openMealie(panel, container) {
   const markup = `
@@ -44,7 +44,7 @@ export async function openMealie(panel, container) {
     q("#mr-list").className = "recipe-grid";
     q("#mr-list").innerHTML = recipes.map((r, index) => `<button class="recipe-tile" data-recipe="${index}">
       <div class="recipe-photo"><span aria-hidden="true">🍽️</span><img src="${esc(r.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer"></div>
-      <div class="recipe-tile-body"><b>${esc(r.name)}</b><p>${r.all_present ? panel.t("mealieReady") : `${r.missing.length} ${panel.t("mealieMissing")} · ${r.unresolved.length} ${panel.t("mealieReview")}`}</p>
+      <div class="recipe-tile-body"><b>${esc(r.name)}</b><p>${r.all_present ? panel.t("mealieReady") : [r.missing.length ? `${r.missing.length} ${panel.t("mealieMissing")}` : "", r.unresolved.length ? `${r.unresolved.length} ${panel.t("mealieReview")}` : ""].filter(Boolean).join(" · ")}</p>
       ${r.due_soon_count ? `<p>${panel.t("mealieUseSoon")}: ${r.due_soon_count}</p>` : ""}
       ${r.matched.some(i => i.thaw) ? `<p>${panel.t("mealieThaw")}</p>` : ""}
       ${r.matched.some(i => i.past_best_before) ? `<p>${panel.t("mealiePastBest")}</p>` : ""}</div></button>`).join("")
@@ -54,7 +54,7 @@ export async function openMealie(panel, container) {
       const r = recipes[Number(button.dataset.recipe)];
       const detail = panel._openModal(`<div class="modal-head"><h3>${esc(r.name)}</h3><button class="icon-btn" id="recipe-close" aria-label="${panel.t("closeBtn")}">×</button></div>
         <p class="location-help">${panel.t("mealiePresence")}</p>
-        ${r.matched.map(i => `<p>${esc(i.ingredient)} — ${esc(i.name)}${i.days !== null ? ` · ${i.days} ${panel.t("mealieDays")}` : ""}${i.past_best_before ? ` · ${panel.t("mealiePastBest")}` : ""}${i.thaw ? ` · ${panel.t("mealieThaw")}` : ""}</p>`).join("")}
+        ${r.matched.map(i => `<p>${esc(i.ingredient)}${i.ingredient.normalize("NFKC").trim().toLocaleLowerCase() === i.name.normalize("NFKC").trim().toLocaleLowerCase() ? "" : " — " + esc(i.name)}${i.days !== null ? ` · ${i.days} ${panel.t("mealieDays")}` : ""}${i.past_best_before ? ` · ${panel.t("mealiePastBest")}` : ""}${i.thaw ? ` · ${panel.t("mealieThaw")}` : ""}</p>`).join("")}
         ${r.missing.length ? `<p>${panel.t("mealieMissing")}: ${esc(r.missing.join(", "))}</p>` : ""}
         ${r.unresolved.length ? `<p>${panel.t("mealieReview")}: ${esc(r.unresolved.join(", "))}</p>` : ""}
         <a class="btn primary" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${panel.t("mealieOpen")}</a>`);

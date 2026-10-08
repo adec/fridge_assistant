@@ -2,10 +2,10 @@
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b11";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b11";
-import { openSurface } from "../lib/surface.js?v=0.10.0b11";
-import { relTime } from "./history.js?v=0.10.0b11";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b12";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b12";
+import { openSurface } from "../lib/surface.js?v=0.10.0b12";
+import { relTime } from "./history.js?v=0.10.0b12";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length
@@ -92,7 +92,6 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         ${i.added_by_name ? `<div class="d-row"><span>${panel.t("addedByLabel")}</span><b class="who">${panel._avatar(i.added_by_name, i.added_by_picture, 24)} ${esc(i.added_by_name)}</b></div>` : ""}
         ${i.contents && i.contents !== i.name ? `<div class="d-row"><span>${panel.t("contentsLabel")}</span><b>${esc(i.contents)}</b></div>` : ""}
         <div class="d-row"><span>${panel.t("dateInDetailLabel")}</span><b>${fmtDate(i.added_date, lang)}${i.age_days != null ? ` · ${esc(panel.t("daysAgoShort", i.age_days))}` : ""}</b></div>
-        <div class="d-row"><span>${panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")}</span><b>${i.expiry_date ? fmtDate(i.expiry_date, lang) : "—"}</b></div>
         ${i.quantity ? `<div class="d-row"><span>${panel.t("quantityLabel")}</span><b>${esc(i.quantity)}</b></div>` : ""}
         ${i.notes ? `<div class="d-row"><span>${panel.t("notesLabel")}</span><b>${esc(i.notes)}</b></div>` : ""}
       </div>

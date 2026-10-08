@@ -1,6 +1,6 @@
-import { bindReorder } from "../lib/reorder.js?v=0.10.0b11";
+import { bindReorder } from "../lib/reorder.js?v=0.10.0b12";
 /* Named physical locations share the catalogue's three storage types. */
-import { esc } from "../lib/format.js?v=0.10.0b11";
+import { esc } from "../lib/format.js?v=0.10.0b12";
 
 export function openLocationsManager(panel) {
   const h = panel._openModal(`
@@ -42,7 +42,6 @@ export function openLocationsManager(panel) {
           <button class="btn ghost" data-archive="${id}" ${busy || last || loc.deleted ? "disabled" : ""} title="${last ? panel.t("locationKeepOne") : ""}">${panel.t(loc.archived ? "locationRestore" : "locationArchive")}</button>
           <button class="btn ghost danger-text" data-remove="${id}" ${busy || last || count || loc.deleted ? "disabled" : ""} title="${last ? panel.t("locationKeepOne") : count ? panel.t("locationRemoveHelp") : ""}">${panel.t("locationRemove")}</button>
         </div>
-        <p class="location-help location-id">${panel.t("locationId")}: <code>${esc(id)}</code></p>
       </div>`;
     }).join("");
     list.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => editLocation(panel, b.dataset.edit)));
@@ -76,10 +75,15 @@ function editLocation(panel, id = null) {
     </select></div></label>
     <label class="field"><span>${panel.t("locationEmoji")}</span><input id="le-emoji" maxlength="16" value="${esc(loc.emoji || "")}" placeholder="📦"></label>
     <p class="location-help">${panel.t("locationDateHelp")}</p>
+    ${id ? `<details><summary>${panel.t("automationDetails")}</summary><label class="field"><span>${panel.t("locationId")}</span><input id="le-id" readonly value="${esc(id)}"></label><button type="button" class="btn ghost" id="le-copy">${panel.t("copyId")}</button></details>` : ""}
     <div class="modal-actions"><button class="btn primary" id="le-save">${panel.t("saveBtn")}</button></div>
   `);
   const q = s => h.modal.querySelector(s);
   q("#le-close").addEventListener("click", h.close);
+  if (id) q("#le-copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(id); panel._toast(panel.t("idCopied")); }
+    catch { q("#le-id").focus(); q("#le-id").select(); panel._toast(panel.t("copyIdManually")); }
+  });
   q("#le-save").addEventListener("click", async () => {
     const name = q("#le-name").value.trim();
     if (!name) { q("#le-name").focus(); return; }

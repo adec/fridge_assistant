@@ -1,5 +1,5 @@
 /* Focused, paginated ingredient mapping administration. */
-import { esc } from "../lib/format.js?v=0.10.0b11";
+import { esc } from "../lib/format.js?v=0.10.0b12";
 
 export function mappingPage(data, { query = "", source = "unmapped", usedOnly = true, page = 0 } = {}) {
   const templates = new Map(data.templates.map(t => [t.id, t.name]));
@@ -30,7 +30,7 @@ export function openMealieMappings(panel, getData, save) {
     q("#mm-count").textContent = `${panel.t("mappingReview")}: ${result.review} · ${panel.t("mappingResults")}: ${result.total}`;
     q("#mm-page").textContent = `${page + 1} / ${result.pages}`;
     q("#mm-prev").disabled = page === 0; q("#mm-next").disabled = page + 1 === result.pages;
-    q("#mm-rows").innerHTML = result.rows.map((f, index) => `<div class="mapping-row"><div><b>${esc(f.name)}</b><p>→ ${esc(result.templates.get(f.template_id) || panel.t("mappingUnlinked"))}</p><small>${panel.t(f.source === "saved" ? "mappingSaved" : f.source === "exact" ? "mappingExact" : "mappingReview")}</small></div><button class="btn ghost" data-change="${index}">${panel.t("mappingChange")}</button></div>`).join("") || `<p>${panel.t("mappingEmpty")}</p>`;
+    q("#mm-rows").innerHTML = result.rows.map((f, index) => `<div class="mapping-row"><div><b>${esc(f.name)}</b><p>→ ${esc(result.templates.get(f.template_id) || panel.t("mappingUnlinked"))}</p>${q("#mm-source").value === "all" ? `<small>${panel.t(f.source === "saved" ? "mappingSaved" : f.source === "exact" ? "mappingExact" : "mappingReview")}</small>` : ""}</div><button class="btn ghost" data-change="${index}">${panel.t("mappingChange")}</button></div>`).join("") || `<p>${panel.t("mappingEmpty")}</p>`;
     q("#mm-rows").querySelectorAll("[data-change]").forEach(button => button.addEventListener("click", () => openPicker(result.rows[Number(button.dataset.change)])));
   };
   const openPicker = food => {
