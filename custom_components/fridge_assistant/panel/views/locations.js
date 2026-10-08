@@ -1,5 +1,6 @@
+import { bindReorder } from "../lib/reorder.js?v=0.10.0b10";
 /* Named physical locations share the catalogue's three storage types. */
-import { esc } from "../lib/format.js?v=0.10.0b9";
+import { esc } from "../lib/format.js?v=0.10.0b10";
 
 export function openLocationsManager(panel) {
   const h = panel._openModal(`
@@ -9,12 +10,12 @@ export function openLocationsManager(panel) {
     <button class="btn primary" id="lm-add"><ha-icon icon="mdi:plus"></ha-icon> ${panel.t("newLocation")}</button>
     <div id="lm-list"></div>
     <p class="location-help">${panel.t("locationArchivedHelp")}</p>
-  `, { onClose: () => { if (panel._refreshLocations === render) panel._refreshLocations = null; } });
+  `, { onClose: () => { disposeReorder(); if (panel._refreshLocations === render) panel._refreshLocations = null; } });
   const list = h.modal.querySelector("#lm-list");
-  let busy = false;
+  let busy = false, disposeReorder = () => {};
   const run = async (button, action) => {
     if (busy) return;
-    busy = true; button.disabled = true;
+    busy = true; button.disabled = true; render();
     try {
       await action();
       // The response and subscription can arrive in either order.
@@ -23,19 +24,19 @@ export function openLocationsManager(panel) {
     finally { busy = false; render(); }
   };
   const render = () => {
+    disposeReorder();
     const ids = panel._state.locations;
     const active = panel._state.active_locations || ids;
-    list.innerHTML = ids.map((id, index) => {
+    list.innerHTML = ids.map(id => {
       const loc = panel._locMeta(id);
       const type = panel._storageMeta(loc.storage_type);
       const last = active.length === 1 && active.includes(id);
       const count = panel._state.counts.by_location[id] || 0;
-      return `<div class="location-row">
+      return `<div class="location-row" data-reorder-id="${esc(id)}">
         <div class="location-row-head"><div class="location-row-main">
           <b>${esc(loc.emoji || "📦")} ${esc(loc.label)}</b>
           <small>${esc(type.label)} · ${count} ${panel.t("itemsUnit")}${loc.archived ? " · " + panel.t("locationArchived") : ""}</small>
-        </div><button class="icon-btn" data-up="${id}" aria-label="${panel.t("locationMoveUp")}" ${index === 0 || busy ? "disabled" : ""}><ha-icon icon="mdi:arrow-up"></ha-icon></button>
-        <button class="icon-btn" data-down="${id}" aria-label="${panel.t("locationMoveDown")}" ${index === ids.length - 1 || busy ? "disabled" : ""}><ha-icon icon="mdi:arrow-down"></ha-icon></button></div>
+        </div><button class="icon-btn reorder-handle" data-reorder-handle ${busy ? "disabled" : ""}><ha-icon icon="mdi:drag-horizontal"></ha-icon></button></div>
         <div class="location-actions">
           <button class="btn ghost" data-edit="${id}" ${busy || loc.deleted ? "disabled" : ""}>${panel.t("editLocation")}</button>
           <button class="btn ghost" data-archive="${id}" ${busy || last || loc.deleted ? "disabled" : ""} title="${last ? panel.t("locationKeepOne") : ""}">${panel.t(loc.archived ? "locationRestore" : "locationArchive")}</button>
@@ -52,14 +53,11 @@ export function openLocationsManager(panel) {
     })));
     list.querySelectorAll("[data-remove]").forEach(b => b.addEventListener("click", () => run(b,
       () => panel._call("remove_location", { location_id: b.dataset.remove }))));
-    for (const direction of ["up", "down"]) list.querySelectorAll(`[data-${direction}]`).forEach(b =>
-      b.addEventListener("click", () => run(b, () => {
-        const order = panel._state.locations.slice();
-        const index = order.indexOf(b.dataset[direction]);
-        const next = index + (direction === "up" ? -1 : 1);
-        [order[index], order[next]] = [order[next], order[index]];
-        return panel._call("reorder_locations", { location_ids: order });
-      })));
+    disposeReorder = bindReorder(list, {
+      label: id => panel.t("reorderHandle", panel._locMeta(id).label),
+      announcement: (position,total) => panel.t("reorderPosition",position,total),
+      save: ids => run(list, () => panel._call("reorder_locations", {location_ids:ids})),
+    });
   };
   panel._refreshLocations = render;
   render();

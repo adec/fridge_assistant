@@ -1,7 +1,7 @@
 /* Barcode scanner: live camera (BarcodeDetector or ZXing), photo capture and
  * manual entry, plus routing of scanned codes (own labels vs retail EAN/UPC). */
 
-import { esc } from "../lib/format.js?v=0.10.0b9";
+import { esc } from "../lib/format.js?v=0.10.0b10";
 
 async function makeDetector() {
   const wanted = ["code_39", "code_128", "ean_13", "ean_8", "upc_a", "upc_e"];

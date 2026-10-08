@@ -1,10 +1,11 @@
-import { esc } from "../lib/format.js?v=0.10.0b9";
+import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b10";
+import { esc } from "../lib/format.js?v=0.10.0b10";
 
 export function openCategoriesManager(panel) {
   const h = panel._openModal(`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
     <p class="location-help">${panel.t("categoriesHelp")}</p><button class="btn primary" id="cm-add">${panel.t("newCategory")}</button><div id="cm-list"></div>`,
-    {onClose: () => { if (panel._refreshCategories === render) panel._refreshCategories = null; }});
-  let busy = false;
+    {onClose: () => { disposeReorder(); if (panel._refreshCategories === render) panel._refreshCategories = null; }});
+  let busy = false, disposeReorder = () => {};
   const run = async action => {
     if (busy) return;
     busy = true; render();
@@ -13,22 +14,23 @@ export function openCategoriesManager(panel) {
     finally { busy = false; render(); }
   };
   function render() {
+    disposeReorder();
     const ids = Object.keys(panel._state.categories).filter(id => !panel._state.categories[id].deleted);
     const list = h.modal.querySelector("#cm-list");
-    list.innerHTML = ids.map((id, index) => {
+    list.innerHTML = ids.map(id => {
       const c = panel._catMeta(id);
-      return `<div class="location-row"><div class="location-row-head"><div class="location-row-main"><b>${esc(c.emoji)} ${esc(c.label)}</b><small>${esc(panel._kindMeta(c.kind).short)}${c.archived ? " · " + panel.t("locationArchived") : ""}</small></div>
-        <button class="icon-btn" data-up="${esc(id)}" aria-label="${panel.t("locationMoveUp")}" ${busy || index===0 ? "disabled" : ""}><ha-icon icon="mdi:arrow-up"></ha-icon></button><button class="icon-btn" data-down="${esc(id)}" aria-label="${panel.t("locationMoveDown")}" ${busy || index===ids.length-1 ? "disabled" : ""}><ha-icon icon="mdi:arrow-down"></ha-icon></button></div>
+      return `<div class="location-row" data-reorder-id="${esc(id)}"><div class="location-row-head"><div class="location-row-main"><b>${esc(c.emoji)} ${esc(c.label)}</b><small>${esc(panel._kindMeta(c.kind).short)}${c.archived ? " · " + panel.t("locationArchived") : ""}</small></div>
+        <button class="icon-btn reorder-handle" data-reorder-handle ${busy ? "disabled" : ""}><ha-icon icon="mdi:drag-horizontal"></ha-icon></button></div>
         <div class="location-actions"><button class="btn ghost" data-edit="${esc(id)}" ${busy ? "disabled" : ""}>${panel.t("editCategory")}</button><button class="btn ghost" data-archive="${esc(id)}" ${busy || id==="other" ? "disabled" : ""}>${panel.t(c.archived ? "locationRestore" : "locationArchive")}</button><button class="btn ghost danger-text" data-remove="${esc(id)}" ${busy || id==="other" ? "disabled" : ""}>${panel.t("removeCategory")}</button></div></div>`;
     }).join("");
     list.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => editCategory(panel,b.dataset.edit,run));
     list.querySelectorAll("[data-archive]").forEach(b => b.onclick = () => run(() => panel._call("categories", {action:"save",category:{...panel._state.categories[b.dataset.archive],archived:!panel._state.categories[b.dataset.archive].archived}})));
     list.querySelectorAll("[data-remove]").forEach(b => b.onclick = () => removeCategory(panel,b.dataset.remove,run));
-    for(const direction of ["up","down"]) list.querySelectorAll(`[data-${direction}]`).forEach(b => b.onclick = () => run(() => {
-      const order=Object.keys(panel._state.categories), id=b.dataset[direction], next=ids[ids.indexOf(id)+(direction==="up"?-1:1)];
-      const a=order.indexOf(id), z=order.indexOf(next); [order[a],order[z]]=[order[z],order[a]];
-      return panel._call("categories",{action:"reorder",ids:order});
-    }));
+    disposeReorder = bindReorder(list, {
+      label: id => panel.t("reorderHandle", panel._catMeta(id).label),
+      announcement: (position,total) => panel.t("reorderPosition",position,total),
+      save: ids => run(() => panel._call("categories", {action:"reorder",ids:mergeVisibleOrder(Object.keys(panel._state.categories),ids)})),
+    });
   }
   panel._refreshCategories=render; render();
   h.modal.querySelector("#cm-close").onclick=h.close;

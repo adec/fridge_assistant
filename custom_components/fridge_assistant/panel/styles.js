@@ -581,4 +581,8 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .mapping-row>div{min-width:0;overflow-wrap:anywhere}.mapping-row p{margin:6px 0}.mapping-row small{color:var(--fa-muted)}
 .mapping-pager{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0}
 .mapping-choice{display:block;width:100%;text-align:left;margin:8px 0;white-space:normal}
+.reorder-handle{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;min-width:44px;min-height:44px;flex:none;}
+.reorder-handle:active{cursor:grabbing;}
+.reorder-dragging{border-color:var(--fa-accent);background:var(--fa-card);box-shadow:0 0 0 2px var(--fa-accent);}
+.reorder-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);}
 `;
