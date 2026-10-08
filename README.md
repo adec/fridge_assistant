@@ -508,3 +508,9 @@ When AI estimates are enabled, the template editor offers **Suggest emoji with A
 It uses the configured estimate provider and applies only the suggested emoji, leaving
 category and storage lifetimes unchanged. Manual entry and the category default remain
 available without AI or if the request fails. Suggestions run only when requested.
+
+To work recipe by recipe, open a recipe with unresolved mappings and choose
+**Match ingredients for this recipe**. The mapping screen lists only its Mealie foods,
+with Needs review selected initially. Link existing, Create template and Save and next
+stay within that recipe. Links are shared across recipes using the same Mealie food.
+Mapped ingredients absent from inventory remain missing stock rather than unmatched mappings.

@@ -1,7 +1,7 @@
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b18";
+import { esc } from "../lib/format.js?v=0.10.0b19";
 
-import { openMealieMappings } from "./mealie-mappings.js?v=0.10.0b18";
+import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b19";
 
 export async function openMealie(panel, container) {
   const markup = `
@@ -57,8 +57,15 @@ export async function openMealie(panel, container) {
         ${r.matched.map(i => `<p>${esc(i.ingredient)}${i.ingredient.normalize("NFKC").trim().toLocaleLowerCase() === i.name.normalize("NFKC").trim().toLocaleLowerCase() ? "" : " — " + esc(i.name)}${i.days !== null ? ` · ${i.days} ${panel.t("mealieDays")}` : ""}${i.past_best_before ? ` · ${panel.t("mealiePastBest")}` : ""}${i.thaw ? ` · ${panel.t("mealieThaw")}` : ""}</p>`).join("")}
         ${r.missing.length ? `<p>${panel.t("mealieMissing")}: ${esc(r.missing.join(", "))}</p>` : ""}
         ${r.unresolved.length ? `<p>${panel.t("mealieReview")}: ${esc(r.unresolved.join(", "))}</p>` : ""}
+        ${r.unresolved.length ? `<button class="btn primary" id="recipe-match">${panel.t("matchRecipeIngredients")}</button>` : ""}
         <a class="btn primary" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${panel.t("mealieOpen")}</a>`);
       detail.modal.querySelector("#recipe-close").addEventListener("click", detail.close);
+      detail.modal.querySelector("#recipe-match")?.addEventListener("click", () => {
+        const ids = (r.ingredients || []).map(i => i.food_id).filter(Boolean);
+        detail.close();
+        openMealieMappings(panel, () => recipeMappingData(data, ids),
+          (food_id,template_id) => load("map", {food_id,template_id}), {recipeName:r.name});
+      });
     }));
     const pending = data.needs_parsing || [];
     q("#mr-pending").hidden = !pending.length;

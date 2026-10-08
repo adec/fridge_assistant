@@ -8,8 +8,13 @@ class MappingPageTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         code = r'''
 import assert from 'node:assert/strict';
-import { mappingPage } from './custom_components/fridge_assistant/panel/views/mealie-mappings.js';
+import { mappingPage, recipeMappingData } from './custom_components/fridge_assistant/panel/views/mealie-mappings.js';
 const data = {templates:[{id:'t',name:'Bell pepper'}],foods:Array.from({length:80},(_,i)=>({id:String(i),name:`Ingredient ${String(i).padStart(3,'0')}`,used_in_recipes:i<60,source:i<55?'unmapped':i<70?'exact':'saved',template_id:i>=55?'t':null}))};
+const scoped = recipeMappingData(data, ['1','1','2','75']);
+assert.deepEqual(scoped.foods.map(f=>f.id),['1','2','75']);
+assert.equal(mappingPage(scoped).total,2);
+assert.equal(mappingPage(scoped,{source:'all',usedOnly:false}).total,3);
+assert.equal(recipeMappingData(data,[]).foods.length,0);
 assert.equal(mappingPage(data).total,55);
 assert.equal(mappingPage(data).rows.length,25);
 assert.equal(mappingPage(data,{page:2}).rows.length,5);

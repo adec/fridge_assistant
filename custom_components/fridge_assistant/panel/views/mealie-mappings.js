@@ -1,5 +1,5 @@
 /* Focused, paginated ingredient mapping administration. */
-import { esc } from "../lib/format.js?v=0.10.0b18";
+import { esc } from "../lib/format.js?v=0.10.0b19";
 
 export function mappingPage(data, { query = "", source = "unmapped", usedOnly = true, page = 0 } = {}) {
   const templates = new Map(data.templates.map(t => [t.id, t.name]));
@@ -14,11 +14,17 @@ export function mappingPage(data, { query = "", source = "unmapped", usedOnly = 
     total: filtered.length, review: scope.filter(f => f.source === "unmapped").length, templates };
 }
 
-export function openMealieMappings(panel, getData, save) {
+export function recipeMappingData(data, foodIds) {
+  const ids = new Set(foodIds);
+  return {...data, foods:data.foods.filter(food => ids.has(food.id))};
+}
+
+export function openMealieMappings(panel, getData, save, {recipeName = null} = {}) {
   const h = panel._openModal(`<div class="modal-head"><h3>${panel.t("mealieMappings")}</h3><button class="icon-btn" id="mm-close" aria-label="${panel.t("closeBtn")}">×</button></div>
+    ${recipeName ? `<p class="location-help">${esc(panel.t("mappingRecipeScope", recipeName))}</p>` : ""}
     <label class="field"><span>${panel.t("mappingSearch")}</span><input id="mm-search" type="search"></label>
     <label class="field"><span>${panel.t("mappingStatus")}</span><select id="mm-source"><option value="unmapped">${panel.t("mappingReview")}</option><option value="exact">${panel.t("mappingExact")}</option><option value="saved">${panel.t("mappingSaved")}</option><option value="all">${panel.t("mappingAll")}</option></select></label>
-    <label class="field"><span>${panel.t("mappingScope")}</span><select id="mm-scope"><option value="used">${panel.t("mappingUsed")}</option><option value="all">${panel.t("mappingCatalogue")}</option></select></label>
+    <label class="field" ${recipeName ? "hidden" : ""}><span>${panel.t("mappingScope")}</span><select id="mm-scope"><option value="used">${panel.t("mappingUsed")}</option><option value="all">${panel.t("mappingCatalogue")}</option></select></label>
     <p id="mm-count" role="status"></p><div id="mm-rows"></div>
     <div class="mapping-pager"><button class="btn ghost" id="mm-prev">${panel.t("mappingPrevious")}</button><span id="mm-page"></span><button class="btn ghost" id="mm-next">${panel.t("mappingNext")}</button></div>`);
   const q = s => h.modal.querySelector(s);
