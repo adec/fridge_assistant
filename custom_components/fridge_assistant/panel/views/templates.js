@@ -3,8 +3,8 @@
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b7";
-import { openSurface } from "../lib/surface.js?v=0.10.0b7";
+import { esc } from "../lib/format.js?v=0.10.0b8";
+import { openSurface } from "../lib/surface.js?v=0.10.0b8";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -188,7 +188,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
   const kinds = panel._state.kinds || {};
   const curKind = t.kind || panel._kindOf(t);
   const sl = t.shelf_life || {};
-  const catOptions = Object.keys(cats).map((k) => {
+  const catOptions = Object.keys(cats).filter(k => !panel._state.categories[k].archived || k === t.category).map((k) => {
     const cm = panel._catMeta(k);
     return `<option value="${k}" ${k === (t.category || "other") ? "selected" : ""}>${cm.emoji} ${cm.label}</option>`;
   }).join("");

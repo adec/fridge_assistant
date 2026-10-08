@@ -143,13 +143,26 @@ and belongs to one of two **kinds**:
 - 🥕 **ingredient** — a single product (milk, lettuce, cheese, ...)
 - 🍲 **dish** — something prepared (leftovers, a home-cooked meal, ...)
 
-Kind is derived from a set of 15 finer categories (vegetables, fruit, dairy, meat, fish, breakfast,
-lunch, dinner, snack, bakery, sauces & spices, drinks, eggs, leftovers, other) but can always be
-overridden per item. In **Add/Edit item → More options → Category**, select the
+The initial catalogue contains 15 finer categories (vegetables, fruit, dairy, meat, fish, breakfast,
+lunch, dinner, snack, bakery, sauces & spices, drinks, eggs, leftovers, other). Kind defaults
+from the category and can always be overridden per item. In **Add/Edit item → More options → Category**, select the
 category explicitly; it is preserved during automatic matching and AI estimates. Templates
 have their own **Category** field in the template editor. Changing a template does not
 reclassify existing stock items. Prepared meals are categorised by the meal-time they're usually eaten at, so
 the inventory can be filtered on e.g. "what dinners are in the freezer?".
+
+### Manage food categories
+
+Use the **Manage categories** icon beside Settings to add your own categories, rename
+existing ones, edit their emoji and `mdi:` icon, and reorder them. Each category has a
+default kind (ingredient or dish), used for new entries. Custom categories appear in
+item and template editors and inventory filters. Names can change without breaking links.
+
+Archive a category to hide it from new selections while keeping existing assignments;
+you can restore it later. Removing a category requires choosing a replacement for its
+items and templates. Their kinds, dates and template storage lifetimes are preserved.
+**Other** stays available as a fallback. Categories are stored with the inventory and
+survive restarts and updates; existing installations keep their current categories.
 
 ### Create a template while adding stock
 

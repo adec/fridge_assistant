@@ -109,6 +109,7 @@ TEMPLATE_SCHEMA = vol.Schema(
 
 
 def async_register_websocket(hass: HomeAssistant) -> None:
+    websocket_api.async_register_command(hass, ws_categories)
     websocket_api.async_register_command(hass, ws_mealie)
     websocket_api.async_register_command(hass, ws_save_location)
     websocket_api.async_register_command(hass, ws_remove_location)
@@ -193,9 +194,9 @@ def _serialize_state(hass: HomeAssistant, runtime: FridgeRuntime) -> dict[str, A
         "items": items,
         "templates": runtime.store.templates_for_ui(),
         "hidden": runtime.store.hidden_templates(),
-        "categories": CATEGORIES,
+        "categories": runtime.store.categories,
         "kinds": KINDS,
-        "category_kind": CATEGORY_KIND,
+        "category_kind": {k: c["kind"] for k,c in runtime.store.categories.items()},
         "locations": list(runtime.store.locations_for_ui()),
         "active_locations": runtime.store.active_locations(),
         "location_meta": runtime.store.locations_for_ui(),
@@ -897,3 +898,29 @@ async def ws_mealie(hass, connection, msg):
                        "needs_parsing": pending_links,
                        "foods": [{**f, "used_in_recipes": f["id"] in used_foods} for f in food_links(foods, templates, mappings)],
                        "templates": [{"id": t["id"], "name": t["name"]} for t in templates]})
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): f"{DOMAIN}/categories",
+    vol.Required("action"): vol.In(["save", "remove", "reorder"]),
+    vol.Optional("category"): dict,
+    vol.Optional("category_id"): str,
+    vol.Optional("replacement"): vol.Any(str, None),
+    vol.Optional("ids"): [str],
+})
+@websocket_api.async_response
+async def ws_categories(hass, connection, msg):
+    runtime = _runtime_or_error(hass, connection, msg)
+    if runtime is None: return
+    import copy
+    previous = copy.deepcopy((runtime.store.categories, runtime.store.items, runtime.store.user_templates))
+    try:
+        if msg["action"] == "save": runtime.store.save_category(msg.get("category", {}))
+        elif msg["action"] == "remove": runtime.store.remove_category(msg.get("category_id"), msg.get("replacement"))
+        else: runtime.store.reorder_categories(msg.get("ids", []))
+        await runtime.async_changed()
+    except Exception as err:
+        runtime.store.categories, runtime.store.items, runtime.store.user_templates = previous
+        connection.send_error(msg["id"], "category_error", str(err) if isinstance(err, ValueError) else "Could not save categories")
+        return
+    connection.send_result(msg["id"], {"saved": True})

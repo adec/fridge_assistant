@@ -1,6 +1,6 @@
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b7";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b8";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
@@ -62,7 +62,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     <div id="f-expiry-suggestion" class="expiry-suggestion hidden"></div>
     <button class="link" id="f-adv">${panel.t("moreOptions")}</button>
     <div class="adv hidden" id="f-advbox">
-      <label class="field"><span>${panel.t("categoryLabel")}</span><div class="select-wrap"><select id="f-category">${Object.keys(panel._state.categories || {}).map(k => `<option value="${esc(k)}" ${k === (m.category || "other") ? "selected" : ""}>${esc(panel._catMeta(k).label)}</option>`).join("")}</select></div></label>
+      <label class="field"><span>${panel.t("categoryLabel")}</span><div class="select-wrap"><select id="f-category">${Object.keys(panel._state.categories || {}).filter(k => !panel._state.categories[k].archived || k === m.category).map(k => `<option value="${esc(k)}" ${k === (m.category || "other") ? "selected" : ""}>${esc(panel._catMeta(k).label)}</option>`).join("")}</select></div></label>
       <label class="field"><span>${panel.t("displayNameLabel")}</span><input id="f-dispname" placeholder="${panel.t("displayNamePlaceholder")}" value="${esc(editItem?.name || "")}"></label>
       <div class="grid2">
         <label class="field"><span>${panel.t("quantityLabel")}</span><input id="f-qty" placeholder="${panel.t("quantityPlaceholder")}" value="${esc(editItem?.quantity ?? prefill.quantity ?? "")}"></label>

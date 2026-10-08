@@ -1,4 +1,5 @@
-import { openMealie } from "./views/mealie.js?v=0.10.0b7";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b8";
+import { openMealie } from "./views/mealie.js?v=0.10.0b8";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -11,18 +12,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b7";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b7";
-import { STYLES } from "./styles.js?v=0.10.0b7";
-import { daysLabel, esc, fmtDate } from "./lib/format.js?v=0.10.0b7";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b7";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b7";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b7";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b7";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b7";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b7";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b7";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b7";
-import { printSticker } from "./views/print.js?v=0.10.0b7";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b8";
+import { STYLES } from "./styles.js?v=0.10.0b8";
+import { daysLabel, esc, fmtDate } from "./lib/format.js?v=0.10.0b8";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b8";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b8";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b8";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b8";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b8";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b8";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b8";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b8";
+import { printSticker } from "./views/print.js?v=0.10.0b8";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -97,7 +98,7 @@ class FridgeAssistantPanel extends HTMLElement {
   _catMeta(key) {
     const base = (this._state && this._state.categories || {})[key] || {};
     const table = CATEGORY_LABELS[this._lang()] || CATEGORY_LABELS.en;
-    return { ...base, label: table[key] || base.label || key };
+    return { ...base, label: base.name || table[key] || base.label || key };
   }
   _kindMeta(key) {
     const base = (this._state && this._state.kinds || {})[key] || {};
@@ -213,6 +214,7 @@ class FridgeAssistantPanel extends HTMLElement {
             <span class="spacer"></span>
             <button class="icon-btn" id="btn-history" title="${this.t("historyTooltip", 0)}"><ha-icon icon="mdi:history"></ha-icon></button>
             <button class="icon-btn" id="btn-templates" title="${this.t("manageTemplates")}"><ha-icon icon="mdi:book-multiple"></ha-icon></button>
+            <button class="icon-btn" id="btn-categories" title="${this.t("manageCategories")}"><ha-icon icon="mdi:shape-outline"></ha-icon></button>
             <button class="icon-btn" id="btn-settings" title="${this.t("settings")}"><ha-icon icon="mdi:cog-outline"></ha-icon></button>
           </div>
           <nav class="main-tabs" role="tablist"><button class="btn ghost" id="tab-inventory" role="tab" aria-selected="true">${this.t("inventoryTab")}</button><button class="btn ghost" id="tab-recipes" role="tab" aria-selected="false">${this.t("recipesTab")}</button></nav>
@@ -239,6 +241,7 @@ class FridgeAssistantPanel extends HTMLElement {
     $("btn-clean").addEventListener("click", () => this._openCleanModal());
     $("btn-history").addEventListener("click", () => this._openHistory());
     $("btn-templates").addEventListener("click", () => this._openTemplatesManager());
+    $("btn-categories").addEventListener("click", () => openCategoriesManager(this));
     $("btn-settings").addEventListener("click", () => {
       // SPA navigation: a hard location change reloads the whole HA frontend.
       history.pushState(null, "", "/config/integrations/integration/fridge_assistant");
@@ -285,6 +288,7 @@ class FridgeAssistantPanel extends HTMLElement {
     // Keep an open inspector (drawer or sheet) in sync with the new state.
     if (this._refreshSurface) this._refreshSurface();
     if (this._refreshLocations) this._refreshLocations();
+    if (this._refreshCategories) this._refreshCategories();
     if (this._activeTab === "recipes" && this._refreshRecipes) this._refreshRecipes();
   }
 

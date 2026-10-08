@@ -233,6 +233,7 @@ class FridgeStore:
         self._store: Store = FridgeDataStore(
             hass, STORAGE_VERSION, STORAGE_KEY, atomic_writes=True
         )
+        self.categories = {key: {**meta, "id": key, "name": None, "kind": CATEGORY_KIND.get(key, DEFAULT_KIND), "archived": False} for key, meta in CATEGORIES.items()}
         self.mealie_cache = {}
         self.mealie_mappings = {}
         self.locations = default_locations()
@@ -247,6 +248,10 @@ class FridgeStore:
     async def async_load(self) -> None:
         data = await self._store.async_load()
         if data:
+            if "categories" in data:
+                self.categories = {c["id"]: c for c in data["categories"]}
+                self.categories.setdefault("other", {**CATEGORIES["other"], "id": "other", "name": None, "kind": DEFAULT_KIND})
+                self.categories["other"].update(archived=False, deleted=False)
             self.mealie_cache = data.get("mealie_cache") or {}
             self.mealie_mappings = data.get("mealie_mappings") or {}
             if "locations" in data:
@@ -293,6 +298,7 @@ class FridgeStore:
     async def async_save(self) -> None:
         await self._store.async_save(
             {
+                "categories": list(self.categories.values()),
                 "mealie_cache": self.mealie_cache,
                 "mealie_mappings": self.mealie_mappings,
                 "locations": list(self.locations.values()),
@@ -379,6 +385,45 @@ class FridgeStore:
         if key != current and (loc.get("archived") or loc.get("deleted")):
             raise LocationError("location_archived")
         return key
+
+    def category_kind(self, key):
+        return self.categories.get(key, {}).get("kind", CATEGORY_KIND.get(key, DEFAULT_KIND))
+
+    def save_category(self, data):
+        key = data.get("id")
+        old = self.categories.get(key, {})
+        if key and (not old or old.get("deleted")): raise ValueError("Category not found")
+        name = str(data.get("name", old.get("name") or old.get("label", ""))).strip()
+        if not name or len(name) > 80: raise ValueError("Enter a category name of 1–80 characters")
+        if any(k != key and not c.get("deleted") and (c.get("name") or c.get("label", "")).casefold() == name.casefold() for k,c in self.categories.items()): raise ValueError("Category name already exists")
+        kind = data.get("kind", old.get("kind", DEFAULT_KIND))
+        if kind not in ("ingredient", "dish"): raise ValueError("Choose Ingredient or Dish")
+        emoji = str(data.get("emoji", old.get("emoji", DEFAULT_EMOJI))).strip() or DEFAULT_EMOJI
+        icon = str(data.get("icon", old.get("icon", DEFAULT_ICON))).strip() or DEFAULT_ICON
+        if len(emoji) > 16 or not icon.startswith("mdi:") or len(icon) > 80: raise ValueError("Choose a short emoji and an mdi: icon")
+        archived = bool(data.get("archived", old.get("archived", False)))
+        if key == "other" and archived: raise ValueError("Keep Other available as a fallback")
+        key = key or "cat_" + uuid.uuid4().hex
+        self.categories[key] = {**old, "id": key, "name": name, "kind": kind, "emoji": emoji, "icon": icon, "archived": archived, "deleted": False}
+        return self.categories[key]
+
+    def remove_category(self, key, target=None):
+        if key == "other": raise ValueError("Keep Other available as a fallback")
+        if key not in self.categories or self.categories[key].get("deleted"): raise ValueError("Category not found")
+        templates = {**self._seed, **self.user_templates}
+        used = any(i.get("category") == key for i in self.items.values()) or any(t.get("category") == key for t in templates.values())
+        if used:
+            if target == key or target not in self.categories or self.categories[target].get("archived") or self.categories[target].get("deleted"): raise ValueError("Select an active replacement category")
+            for item in self.items.values():
+                if item.get("category") == key: item["category"] = target
+            for id, template in templates.items():
+                if template.get("category") == key: self.user_templates[id] = {**template, "category": target}
+        # Retain metadata for history/undo. Do not change explicit kinds or dates.
+        self.categories[key].update(archived=True, deleted=True)
+
+    def reorder_categories(self, ids):
+        if len(ids) != len(set(ids)) or set(ids) != set(self.categories): raise ValueError("Category order changed; reload and try again")
+        self.categories = {key: self.categories[key] for key in ids}
 
     # ---- templates --------------------------------------------------------
 
@@ -513,7 +558,7 @@ class FridgeStore:
         tpl["kind"] = canonical_kind(
             data.get("kind")
             or existing.get("kind")
-            or CATEGORY_KIND.get(tpl["category"], DEFAULT_KIND)
+            or self.category_kind(tpl["category"])
         )
         if "opened_fridge" in data or "opened_fridge" in existing:
             tpl["opened_fridge"] = data.get(
@@ -564,9 +609,9 @@ class FridgeStore:
                 item["category"] = template.get("category") or DEFAULT_CATEGORY
         cat = item.get("category")
         if not item.get("emoji"):
-            item["emoji"] = CATEGORIES.get(cat, {}).get("emoji", DEFAULT_EMOJI)
+            item["emoji"] = self.categories.get(cat, {}).get("emoji", DEFAULT_EMOJI)
         if not item.get("icon"):
-            item["icon"] = CATEGORIES.get(cat, {}).get("icon", DEFAULT_ICON)
+            item["icon"] = self.categories.get(cat, {}).get("icon", DEFAULT_ICON)
 
     def build_item(
         self, data: dict[str, Any], code_format: str = DEFAULT_CODE_FORMAT
@@ -645,7 +690,7 @@ class FridgeStore:
             kind = (
                 template_kind(template)
                 if template
-                else CATEGORY_KIND.get(item.get("category"), DEFAULT_KIND)
+                else self.category_kind(item.get("category"))
             )
         item["kind"] = kind
         return item
