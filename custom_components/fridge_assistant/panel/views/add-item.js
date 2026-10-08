@@ -1,3 +1,4 @@
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b10";
 /* Add/edit modal + AI shelf-life estimate. */
 
 import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b10";
@@ -85,14 +86,16 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
 
   const setEmoji = (e) => { m.emoji = e; emojiEl.textContent = e; if (q("#f-emojiin")) q("#f-emojiin").value = e; };
   const setCategory = (category, force = false) => {
-    if (force || !m.categoryManual) { m.category = category || "other"; q("#f-category").value = m.category; }
+    if (force || !m.categoryManual) m.category = fillCategorySelect(panel, q("#f-category"), m.kind, category, isEdit && m.kind === editItem.kind ? editItem.category : null);
   };
   const setKind = (k) => {
     if (!k) return;
     m.kind = k;
+    m.category = fillCategorySelect(panel, q("#f-category"), m.kind, m.category, isEdit && m.kind === editItem.kind ? editItem.category : null);
     const ke = q("#f-kind");
     if (ke) ke.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x.dataset.kind === k));
   };
+  m.category = fillCategorySelect(panel, q("#f-category"), m.kind, m.category, isEdit && m.kind === editItem.kind ? editItem.category : null);
   const updateHint = () => {
     const val = expEl.value;
     if (!val) { hintEl.textContent = ""; return; }
@@ -171,8 +174,9 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     if (res.template) {
       const t = res.template;
       if (!m.dateTypeManual) setDateType(t.date_type);
-      m.template_id = t.id; setCategory(t.category); setEmoji(t.emoji || "🍽️");
+      m.template_id = t.id;
       if (!m.kindManual) setKind(panel._kindOf(t));
+      setCategory(t.category); setEmoji(t.emoji || "🍽️");
       const sl = t.shelf_life || {};
       const noHere = sl[panel._storageType(m.location)] === null || sl[panel._storageType(m.location)] === undefined;
       applySuggestion(res.suggestion?.expiry_date, "template");
@@ -267,8 +271,8 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       if (!template || !h.modal.isConnected) return;
       ++matchVersion; m.noAutoMatch = true; m.aiResult = null;
       m.template_id = template.id; nameEl.value = template.name;
-      m.categoryManual = true; setCategory(template.category, true);
-      m.kindManual = true; setKind(template.kind); setEmoji(template.emoji || m.emoji);
+      m.kindManual = true; setKind(template.kind);
+      m.categoryManual = true; setCategory(template.category, true); setEmoji(template.emoji || m.emoji);
       if (!m.dateTypeManual) setDateType(template.date_type);
       const days = template.shelf_life?.[panel._storageType(m.location)];
       applySuggestion(days != null ? addDays(addedEl.value, days) : null, "template");
@@ -281,6 +285,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   );
 
   q("#f-submit").addEventListener("click", async () => {
+    if (!m.category) { panel._toast(panel.t("noKindCategories"), {type:"bad"}); return; }
     const dispName = (q("#f-dispname")?.value || "").trim();
     const payload = {
       name: dispName || nameEl.value.trim(),
@@ -377,9 +382,9 @@ export async function aiEstimate(panel, name, ctx) {
   }
   const est = res.estimate;
   m.aiResult = est;
+  if (!m.kindManual && setKind) setKind(est.kind);
   if (ctx.setCategory) ctx.setCategory(est.category); else if (!m.categoryManual) m.category = est.category;
   setEmoji(est.emoji || "✨");
-  if (!m.kindManual && setKind) setKind(est.kind);
   const addedEl = ctx.addedEl || suggestEl.parentNode.querySelector("#f-added");
   const expEl = ctx.expEl || suggestEl.parentNode.querySelector("#f-expiry");
   const hintEl = suggestEl.parentNode.querySelector("#f-hint");

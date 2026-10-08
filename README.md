@@ -155,7 +155,9 @@ the inventory can be filtered on e.g. "what dinners are in the freezer?".
 
 Use the **Manage categories** icon beside Settings to add your own categories, rename
 existing ones, edit their emoji and `mdi:` icon, and reorder them using the drag handle. Drag handles also reorder storage locations,
-support touch, and accept arrow keys or Home/End when focused. Each category has a
+support touch, and accept arrow keys or Home/End when focused. The manager has separate Ingredients and Dishes tabs. Category dropdowns follow the
+selected kind; existing assignments to a category of the other kind remain available
+and unchanged when editing. Each category has a
 default kind (ingredient or dish), used for new entries. Custom categories appear in
 item and template editors and inventory filters. Names can change without breaking links.
 

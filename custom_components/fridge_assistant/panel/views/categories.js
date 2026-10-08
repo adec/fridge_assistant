@@ -1,10 +1,12 @@
+import { categoryIds } from "../lib/categories.js?v=0.10.0b10";
 import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b10";
 import { esc } from "../lib/format.js?v=0.10.0b10";
 
 export function openCategoriesManager(panel) {
   const h = panel._openModal(`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
-    <p class="location-help">${panel.t("categoriesHelp")}</p><button class="btn primary" id="cm-add">${panel.t("newCategory")}</button><div id="cm-list"></div>`,
+    <p class="location-help">${panel.t("categoriesHelp")}</p><button class="btn primary" id="cm-add">${panel.t("newCategory")}</button><div class="seg" id="cm-kind"><button data-kind="ingredient" class="on">${esc(panel._kindMeta("ingredient").short)}</button><button data-kind="dish">${esc(panel._kindMeta("dish").short)}</button></div><div id="cm-list"></div>`,
     {onClose: () => { disposeReorder(); if (panel._refreshCategories === render) panel._refreshCategories = null; }});
+  let selectedKind = "ingredient";
   let busy = false, disposeReorder = () => {};
   const run = async action => {
     if (busy) return;
@@ -15,7 +17,7 @@ export function openCategoriesManager(panel) {
   };
   function render() {
     disposeReorder();
-    const ids = Object.keys(panel._state.categories).filter(id => !panel._state.categories[id].deleted);
+    const ids = Object.keys(panel._state.categories).filter(id => !panel._state.categories[id].deleted && panel._state.categories[id].kind === selectedKind);
     const list = h.modal.querySelector("#cm-list");
     list.innerHTML = ids.map(id => {
       const c = panel._catMeta(id);
@@ -34,10 +36,14 @@ export function openCategoriesManager(panel) {
   }
   panel._refreshCategories=render; render();
   h.modal.querySelector("#cm-close").onclick=h.close;
-  h.modal.querySelector("#cm-add").onclick=()=>editCategory(panel,null,run);
+  h.modal.querySelector("#cm-add").onclick=()=>editCategory(panel,null,run,selectedKind);
+  h.modal.querySelectorAll("#cm-kind button").forEach(button => button.onclick = () => {
+    if (busy) return; selectedKind = button.dataset.kind;
+    h.modal.querySelectorAll("#cm-kind button").forEach(b => b.classList.toggle("on",b===button)); render();
+  });
 }
-function editCategory(panel,id,run) {
-  const c=id ? panel._catMeta(id) : {label:"",emoji:"🍽️",icon:"mdi:food",kind:"ingredient"};
+function editCategory(panel,id,run,defaultKind="ingredient") {
+  const c=id ? panel._catMeta(id) : {label:"",emoji:"🍽️",icon:"mdi:food",kind:defaultKind};
   const h=panel._openModal(`<div class="modal-head"><h3>${panel.t(id?"editCategory":"newCategory")}</h3><button class="icon-btn" id="ce-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
     <label class="field"><span>${panel.t("categoryName")}</span><input id="ce-name" maxlength="80" value="${esc(c.label)}"></label>
     <label class="field"><span>${panel.t("categoryDefaultKind")}</span><select id="ce-kind"><option value="ingredient" ${c.kind==="ingredient"?"selected":""}>${esc(panel._kindMeta("ingredient").short)}</option><option value="dish" ${c.kind==="dish"?"selected":""}>${esc(panel._kindMeta("dish").short)}</option></select></label>
@@ -51,8 +57,8 @@ function editCategory(panel,id,run) {
   }; q("#ce-name").focus();
 }
 function removeCategory(panel,id,run) {
-  const options=Object.keys(panel._state.categories).filter(k=>k!==id&&!panel._state.categories[k].archived);
-  const h=panel._openModal(`<div class="modal-head"><h3>${panel.t("removeCategory")}: ${esc(panel._catMeta(id).label)}</h3></div><p>${panel.t("categoryRemoveHelp")}</p><label class="field"><span>${panel.t("categoryReplacement")}</span><select id="cr-target">${options.map(k=>`<option value="${esc(k)}" ${k==="other"?"selected":""}>${esc(panel._catMeta(k).label)}</option>`).join("")}</select></label><div class="modal-actions"><button class="btn ghost" id="cr-cancel">${panel.t("closeBtn")}</button><button class="btn primary" id="cr-remove">${panel.t("categoryRemoveReassign")}</button></div>`);
+  const options=categoryIds(panel._state.categories,panel._catMeta(id).kind).filter(k=>k!==id);
+  const h=panel._openModal(`<div class="modal-head"><h3>${panel.t("removeCategory")}: ${esc(panel._catMeta(id).label)}</h3></div><p>${panel.t("categoryRemoveHelp")}</p><label class="field"><span>${panel.t("categoryReplacement")}</span><select id="cr-target">${options.map(k=>`<option value="${esc(k)}" ${k==="other"?"selected":""}>${esc(panel._catMeta(k).label)}</option>`).join("")}</select></label><div class="modal-actions"><button class="btn ghost" id="cr-cancel">${panel.t("closeBtn")}</button><button class="btn primary" id="cr-remove" ${options.length ? "" : "disabled"}>${panel.t("categoryRemoveReassign")}</button></div>`);
   h.modal.querySelector("#cr-cancel").onclick=h.close;
   h.modal.querySelector("#cr-remove").onclick=()=>run(async()=>{await panel._call("categories",{action:"remove",category_id:id,replacement:h.modal.querySelector("#cr-target").value});h.close();});
 }

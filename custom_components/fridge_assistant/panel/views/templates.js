@@ -1,3 +1,4 @@
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b10";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
@@ -232,10 +233,12 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
   q("#te-emoji").addEventListener("input", syncPrev);
   q("#te-cat").addEventListener("change", syncPrev);
   let selKind = curKind;
+  fillCategorySelect(panel, q("#te-cat"), selKind, t.category, tpl && selKind === curKind ? t.category : null);
   const kindEl = q("#te-kind");
   if (kindEl) kindEl.querySelectorAll("button").forEach((b) =>
     b.addEventListener("click", () => {
       selKind = b.dataset.kind;
+      fillCategorySelect(panel, q("#te-cat"), selKind, q("#te-cat").value, tpl && selKind === curKind ? t.category : null);
       kindEl.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
     }));
   q("#te-close").addEventListener("click", h.close);
@@ -248,6 +251,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
       shelf[inp.dataset.loc] = v && v > 0 ? v : null;
     });
     const cat = q("#te-cat").value;
+    if (!cat) { panel._toast(panel.t("noKindCategories"), {type:"bad"}); return; }
     const template = {
       name,
       emoji: (q("#te-emoji").value || "").trim() || catOf(cat).emoji,

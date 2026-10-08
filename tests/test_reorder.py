@@ -33,3 +33,18 @@ dispose();
 '''.replace('MODULE', repr(module))
         result = subprocess.run(['node','--input-type=module','-e',script], capture_output=True, text=True)
         self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_category_kind_filter_preserves_existing_exceptions(self):
+        module = (Path(__file__).resolve().parents[1] / 'custom_components/fridge_assistant/panel/lib/categories.js').as_uri()
+        script = """
+import assert from 'node:assert/strict';
+const {categoryIds}=await import(MODULE);
+const cats={fruit:{kind:'ingredient'},dinner:{kind:'dish'},old:{kind:'dish',archived:true},deleted:{kind:'ingredient',deleted:true}};
+assert.deepEqual(categoryIds(cats,'ingredient'),['fruit']);
+assert.deepEqual(categoryIds(cats,'dish'),['dinner']);
+assert.deepEqual(categoryIds(cats,'ingredient','dinner',true),['fruit','dinner']);
+assert.deepEqual(categoryIds(cats,'ingredient','old',true),['fruit','old']);
+assert.deepEqual(categoryIds(cats,'ingredient','dinner'),['fruit']);
+""".replace('MODULE', repr(module))
+        result = subprocess.run(['node','--input-type=module','-e',script], capture_output=True, text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
