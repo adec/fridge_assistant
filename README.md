@@ -491,3 +491,15 @@ hard-refresh.
 ## License
 
 MIT
+
+### Create templates from unmatched Mealie ingredients
+
+In Recipes → Manage → ingredient mappings, use **Needs review** and **Used by synced
+recipes**. Choose **Link existing** to reuse a template, or **Create template** to open
+the editor with the Mealie ingredient name and Ingredient kind prefilled. Category
+and storage lifetimes can be configured; lifetimes may be left empty.
+
+**Save and link** creates the template and explicitly links the Mealie ingredient.
+**Save and next** also opens the next unmatched ingredient while retaining the mapping
+list's filters and page. If linking fails after creation, retry uses the saved template
+instead of creating a duplicate. Closing leaves that template available to Link existing.

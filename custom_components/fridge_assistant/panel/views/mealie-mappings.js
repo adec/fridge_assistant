@@ -1,5 +1,5 @@
 /* Focused, paginated ingredient mapping administration. */
-import { esc } from "../lib/format.js?v=0.10.0b14";
+import { esc } from "../lib/format.js?v=0.10.0b15";
 
 export function mappingPage(data, { query = "", source = "unmapped", usedOnly = true, page = 0 } = {}) {
   const templates = new Map(data.templates.map(t => [t.id, t.name]));
@@ -23,6 +23,7 @@ export function openMealieMappings(panel, getData, save) {
     <div class="mapping-pager"><button class="btn ghost" id="mm-prev">${panel.t("mappingPrevious")}</button><span id="mm-page"></span><button class="btn ghost" id="mm-next">${panel.t("mappingNext")}</button></div>`);
   const q = s => h.modal.querySelector(s);
   let page = 0;
+  const currentPage = () => mappingPage(getData(), {query:q("#mm-search").value,source:q("#mm-source").value,usedOnly:q("#mm-scope").value === "used",page});
   const render = () => {
     if (!h.modal.isConnected) return;
     const result = mappingPage(getData(), { query: q("#mm-search").value, source: q("#mm-source").value, usedOnly: q("#mm-scope").value === "used", page });
@@ -30,8 +31,25 @@ export function openMealieMappings(panel, getData, save) {
     q("#mm-count").textContent = `${panel.t("mappingReview")}: ${result.review} · ${panel.t("mappingResults")}: ${result.total}`;
     q("#mm-page").textContent = `${page + 1} / ${result.pages}`;
     q("#mm-prev").disabled = page === 0; q("#mm-next").disabled = page + 1 === result.pages;
-    q("#mm-rows").innerHTML = result.rows.map((f, index) => `<div class="mapping-row"><div><b>${esc(f.name)}</b><p>→ ${esc(result.templates.get(f.template_id) || panel.t("mappingUnlinked"))}</p>${q("#mm-source").value === "all" ? `<small>${panel.t(f.source === "saved" ? "mappingSaved" : f.source === "exact" ? "mappingExact" : "mappingReview")}</small>` : ""}</div><button class="btn ghost" data-change="${index}">${panel.t("mappingChange")}</button></div>`).join("") || `<p>${panel.t("mappingEmpty")}</p>`;
+    q("#mm-rows").innerHTML = result.rows.map((f, index) => `<div class="mapping-row"><div><b>${esc(f.name)}</b><p>→ ${esc(result.templates.get(f.template_id) || panel.t("mappingUnlinked"))}</p>${q("#mm-source").value === "all" ? `<small>${panel.t(f.source === "saved" ? "mappingSaved" : f.source === "exact" ? "mappingExact" : "mappingReview")}</small>` : ""}</div><div class="location-actions"><button class="btn ghost" data-change="${index}">${panel.t(f.source === "unmapped" ? "mappingLinkExisting" : "mappingChange")}</button>${f.source === "unmapped" ? `<button class="btn primary" data-create="${index}">${panel.t("createTemplateBtn")}</button>` : ""}</div></div>`).join("") || `<p>${panel.t("mappingEmpty")}</p>`;
     q("#mm-rows").querySelectorAll("[data-change]").forEach(button => button.addEventListener("click", () => openPicker(result.rows[Number(button.dataset.change)])));
+    q("#mm-rows").querySelectorAll("[data-create]").forEach(button => button.addEventListener("click", () => createTemplate(result.rows[Number(button.dataset.create)])));
+  };
+  const createTemplate = food => {
+    const candidates = currentPage().rows.filter(f => f.source === "unmapped" && f.id !== food.id);
+    const nextId = candidates.find(f => f.name.localeCompare(food.name) > 0)?.id || candidates[0]?.id;
+    panel._openTemplateEditor({name:food.name, kind:"ingredient", category:"other", shelf_life:{}, aliases:[], notes:""}, true, (_template,next) => {
+      render();
+      if (next && h.modal.isConnected) {
+        const following = getData().foods.find(f => f.id === nextId && f.source === "unmapped") || currentPage().rows.find(f => f.source === "unmapped" && f.id !== food.id);
+        if (following) createTemplate(following);
+        else panel._toast(panel.t("mappingQueueDone"));
+      }
+    }, {afterSave: async template => {
+      const linked = await save(food.id,template.id);
+      if (linked) { panel._state = await panel._call("get_state"); panel._onState(); }
+      return linked;
+    }});
   };
   const openPicker = food => {
     const picker = panel._openModal(`<div class="modal-head"><h3>${esc(food.name)}</h3><button class="icon-btn" id="mp-close" aria-label="${panel.t("closeBtn")}">×</button></div>

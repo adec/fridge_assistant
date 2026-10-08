@@ -20,8 +20,8 @@ STORAGE_KEY: Final = "fridge_assistant.data"
 URL_BASE: Final = "/fridge_assistant_static"
 
 PANEL_URL_PATH: Final = "fridge-assistant"
-PANEL_TITLE: Final = "Koelkast"
-PANEL_TITLE_EN: Final = "Fridge"
+PANEL_TITLE: Final = "Fridge Assistant"
+PANEL_TITLE_EN: Final = "Fridge Assistant"
 PANEL_ICON: Final = "mdi:fridge-outline"
 PANEL_WEBCOMPONENT: Final = "fridge-assistant-panel"
 

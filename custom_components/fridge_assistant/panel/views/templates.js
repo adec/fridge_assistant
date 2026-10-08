@@ -1,11 +1,11 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b14";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b15";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b14";
-import { openSurface } from "../lib/surface.js?v=0.10.0b14";
+import { esc } from "../lib/format.js?v=0.10.0b15";
+import { openSurface } from "../lib/surface.js?v=0.10.0b15";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -181,7 +181,7 @@ export function aiNewTemplate(panel, onChanged) {
   setTimeout(() => nameEl.focus(), 60);
 }
 
-export function openTemplateEditor(panel, tpl, isNew, onChanged) {
+export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
   const cats = panel._state.categories;
   const locs = panel._state.storage_types || ["fridge", "freezer", "pantry"];
   const t = tpl || { name: "", emoji: "", category: "other", shelf_life: {}, aliases: [], notes: "" };
@@ -224,7 +224,8 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
     <div class="modal-actions ${!isNew ? "with-del" : ""}">
       ${isOverride ? `<button class="btn ghost" id="te-reset">${panel.t("restoreDefaultBtn")}</button>` : ""}
       ${!isNew ? `<button class="btn ghost danger-text" id="te-del">${isBuiltin ? panel.t("builtinRemoveBtn") : panel.t("customRemoveBtn")}</button>` : ""}
-      <button class="btn primary" id="te-save">${panel.t("saveBtn")}</button>
+      ${options.afterSave ? `<button class="btn ghost" id="te-save-next">${panel.t("mappingSaveNext")}</button>` : ""}
+      <button class="btn primary" id="te-save">${panel.t(options.afterSave ? "mappingSaveLink" : "saveBtn")}</button>
     </div>
   `);
   const q = (s) => h.modal.querySelector(s);
@@ -242,7 +243,11 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
       kindEl.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
     }));
   q("#te-close").addEventListener("click", h.close);
+  let savedTemplate = null, saveNext = false, submitting = false;
+  q("#te-save-next")?.addEventListener("click", () => { saveNext = true; q("#te-save").click(); });
   q("#te-save").addEventListener("click", async () => {
+    if (submitting) return;
+    const next = saveNext; saveNext = false;
     const name = (q("#te-name").value || "").trim();
     if (!name) { q("#te-name").focus(); return; }
     const shelf = {};
@@ -265,16 +270,24 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged) {
       source: "user",
     };
     if (tpl && tpl.id) template.id = tpl.id; // keep id → overrides builtin / updates own
-    q("#te-save").disabled = true;
+    submitting = true; q("#te-save").disabled = true;
+    if (q("#te-save-next")) q("#te-save-next").disabled = true;
     try {
-      const result = await panel._call("add_template", { template });
+      const result = savedTemplate ? {template:savedTemplate} : await panel._call("add_template", { template });
+      if (options.afterSave) {
+        savedTemplate = result.template;
+        // A failed mapping retries this same template, never creates a duplicate.
+        h.modal.querySelectorAll("input,select,#te-kind button").forEach(el => el.disabled = true);
+        if (!await options.afterSave(savedTemplate)) throw new Error(panel.t("mappingTemplateSavedLinkFailed"));
+      }
       h.close();
       panel._toast(isNew ? panel.t("templateAddedToast") : panel.t("templateSavedToast"));
-      onChanged && onChanged(result.template);
+      onChanged && onChanged(result.template, next);
     } catch (e) {
       q("#te-save").disabled = false;
+      if (q("#te-save-next")) q("#te-save-next").disabled = false;
       panel._toast(panel.t("errorPrefix") + (e.message || e), { type: "bad" });
-    }
+    } finally { submitting = false; }
   });
   const reset = q("#te-reset");
   if (reset) reset.addEventListener("click", async () => {

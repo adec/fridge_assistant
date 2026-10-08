@@ -1,5 +1,5 @@
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b14";
-import { openMealie } from "./views/mealie.js?v=0.10.0b14";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b15";
+import { openMealie } from "./views/mealie.js?v=0.10.0b15";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -12,18 +12,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b14";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b14";
-import { STYLES } from "./styles.js?v=0.10.0b14";
-import { daysLabel, esc, fmtDate } from "./lib/format.js?v=0.10.0b14";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b14";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b14";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b14";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b14";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b14";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b14";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b14";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b14";
-import { printSticker } from "./views/print.js?v=0.10.0b14";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b15";
+import { STYLES } from "./styles.js?v=0.10.0b15";
+import { daysLabel, esc, fmtDate } from "./lib/format.js?v=0.10.0b15";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b15";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b15";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b15";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b15";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b15";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b15";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b15";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b15";
+import { printSticker } from "./views/print.js?v=0.10.0b15";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -177,7 +177,7 @@ class FridgeAssistantPanel extends HTMLElement {
   _openTemplatePicker(onPick) { return openTemplatePicker(this, onPick); }
   _openTemplatesManager() { return openTemplatesManager(this); }
   _aiNewTemplate(onChanged) { return aiNewTemplate(this, onChanged); }
-  _openTemplateEditor(tpl, isNew, onChanged) { return openTemplateEditor(this, tpl, isNew, onChanged); }
+  _openTemplateEditor(tpl, isNew, onChanged, options) { return openTemplateEditor(this, tpl, isNew, onChanged, options); }
   _openItemModal(item, opts) { return openInspector(this, item, opts); }
   _completeItem(item, action, close) { return completeItem(this, item, action, close); }
   _eatScanned(raw, setStatus, count) { return eatScanned(this, raw, setStatus, count); }
