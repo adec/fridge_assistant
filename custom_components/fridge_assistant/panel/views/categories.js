@@ -1,11 +1,12 @@
-import { categoryIds } from "../lib/categories.js?v=0.10.0b13";
-import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b13";
-import { esc } from "../lib/format.js?v=0.10.0b13";
+import { openSurface } from "../lib/surface.js?v=0.10.0b14";
+import { categoryIds } from "../lib/categories.js?v=0.10.0b14";
+import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b14";
+import { esc } from "../lib/format.js?v=0.10.0b14";
 
 export function openCategoriesManager(panel) {
-  const h = panel._openModal(`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
+  const h = openSurface(panel,`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
     <p class="location-help">${panel.t("categoriesHelp")}</p><button class="btn primary" id="cm-add">${panel.t("newCategory")}</button><div class="seg" id="cm-kind"><button data-kind="ingredient" class="on">${esc(panel._kindMeta("ingredient").short)}</button><button data-kind="dish">${esc(panel._kindMeta("dish").short)}</button></div><div id="cm-list"></div>`,
-    {onClose: () => { disposeReorder(); if (panel._refreshCategories === render) panel._refreshCategories = null; }});
+    {prefer: "drawer", wide: true, onClose: () => { disposeReorder(); if (panel._refreshCategories === render) panel._refreshCategories = null; }});
   let selectedKind = "ingredient";
   let busy = false, disposeReorder = () => {};
   const run = async action => {

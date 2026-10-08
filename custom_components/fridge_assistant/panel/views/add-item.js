@@ -1,7 +1,7 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b13";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b14";
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b13";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b14";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
