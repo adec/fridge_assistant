@@ -1,7 +1,8 @@
+import { serializeRequests } from "../lib/request-queue.js?v=0.10.0b20";
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b19";
+import { esc } from "../lib/format.js?v=0.10.0b20";
 
-import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b19";
+import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b20";
 
 export async function openMealie(panel, container) {
   const markup = `
@@ -73,8 +74,8 @@ export async function openMealie(panel, container) {
     q("#mr-pending-list").innerHTML = pending.map(r => `<p><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a></p>`).join("");
 
   };
-  const load = async (action, extra = {}) => {
-    if (busy) return;
+  const load = serializeRequests(async (action, extra = {}) => {
+    if (closed || !h.modal.isConnected) return false;
     busy = true; render();
     try {
       const result = await panel._call("mealie", { action, ...extra });
@@ -84,7 +85,7 @@ export async function openMealie(panel, container) {
       return true;
     } catch (error) { if (!closed && h.modal.isConnected) panel._toast(error.message || String(error), { type: "bad" }); return false; }
     finally { busy = false; render(); }
-  };
+  });
   q("#mr-mappings").addEventListener("click", () => openMealieMappings(panel, () => data, (food_id, template_id) => load("map", { food_id, template_id })));
   q("#mr-config").addEventListener("click", () => {
     history.pushState(null, "", "/config/integrations/integration/fridge_assistant");
