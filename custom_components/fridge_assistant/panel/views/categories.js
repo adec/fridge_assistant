@@ -1,4 +1,4 @@
-import { esc } from "../lib/format.js?v=0.10.0b8";
+import { esc } from "../lib/format.js?v=0.10.0b9";
 
 export function openCategoriesManager(panel) {
   const h = panel._openModal(`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>

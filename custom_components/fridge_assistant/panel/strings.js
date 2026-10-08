@@ -349,7 +349,7 @@ export const STRINGS = {
     printerAddonDownNote: (url) =>
       `De Label Printer add-on is niet bereikbaar op <code>${url}</code>. Draait de add-on?`,
     printerNoPrintersNote:
-      "De add-on draait, maar er is geen labelprinter gevonden op USB. Sluit de printer aan en zet 'm aan, herstart daarna de add-on.",
+      "Er zijn geen labelprinters beschikbaar. Controleer of je printer aan staat en bereikbaar is.",
     printStickerModalTitle: "Sticker printen",
     previewLoading: "Voorbeeld laden…",
     closeBtn: "Sluiten",
@@ -696,7 +696,7 @@ export const STRINGS = {
     printerAddonDownNote: (url) =>
       `The Label Printer add-on is unreachable at <code>${url}</code>. Is it running?`,
     printerNoPrintersNote:
-      "The add-on is running, but no label printer was found on USB. Connect and power on the printer, then restart the add-on.",
+      "No label printers are available. Check that your printer is powered on and reachable.",
     printStickerModalTitle: "Print sticker",
     previewLoading: "Loading preview…",
     closeBtn: "Close",

@@ -12,8 +12,8 @@
  * a big label, the DYMO for the classic sticker.
  */
 
-import { esc } from "../lib/format.js?v=0.10.0b8";
-import { openPortions } from "./inspector.js?v=0.10.0b8";
+import { esc } from "../lib/format.js?v=0.10.0b9";
+import { openPortions } from "./inspector.js?v=0.10.0b9";
 
 // Where to point people who don't have the (optional) print add-on yet.
 const ADDON_URL = "https://github.com/MaxGramser/label-printer-addon";
@@ -65,7 +65,7 @@ export function printSticker(panel, id, itemHint = null, { portion = null } = {}
   let previewToken = 0;
   // Printability state machine: "off" (printing disabled in the settings),
   // "searching" (discovery in flight), "down" (add-on unreachable),
-  // "none" (add-on up, no printer on USB), "ready".
+  // "none" (add-on up, no available printers), "ready".
   let status = opts.printer_enabled ? "searching" : "off";
 
   const canPrint = () => status === "ready";
@@ -175,7 +175,7 @@ export function printSticker(panel, id, itemHint = null, { portion = null } = {}
   (async () => {
     // Discover the live queues first so the first preview already renders at
     // the right label size. Printing off = instant invite (no add-on call);
-    // a dead add-on or an empty USB bus each get their own honest note, with
+    // an unreachable add-on or no available printers each get their own honest note, with
     // the print button disabled — the design-canvas preview always shows.
     updateNote();
     syncPrintBtn();

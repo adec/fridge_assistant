@@ -3,8 +3,8 @@
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b8";
-import { openSurface } from "../lib/surface.js?v=0.10.0b8";
+import { esc } from "../lib/format.js?v=0.10.0b9";
+import { openSurface } from "../lib/surface.js?v=0.10.0b9";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
