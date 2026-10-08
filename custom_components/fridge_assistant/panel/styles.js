@@ -35,7 +35,7 @@ export const STYLES = `
 /* ------------------------------------------------------------ top chrome */
 /* Full-bleed glass bar; its inner padding equals the page gutter, so the
    brand, search and every icon line up exactly with the cards below. */
-.topbar{position:sticky;top:0;z-index:5;
+.topbar{container-type:inline-size;position:sticky;top:0;z-index:5;
   margin:0 calc(-1 * var(--fa-gr)) 0 calc(-1 * var(--fa-gl));
   padding:env(safe-area-inset-top) var(--fa-gr) 12px var(--fa-gl);
   background:color-mix(in srgb,var(--fa-bg) 78%,transparent);
@@ -45,12 +45,16 @@ export const STYLES = `
 /* First row exactly as tall as HA's own header, so the hamburger/brand sit
    on the same centerline as HA's sidebar header next to it. */
 .topbar-row{display:flex;align-items:center;gap:4px;min-height:var(--header-height,56px);}
-.brand{display:flex;align-items:center;gap:10px;min-width:0;}
+.brand{flex:1;display:flex;align-items:center;gap:10px;min-width:0;}
 .brand-emoji{--mdc-icon-size:20px;width:36px;height:36px;border-radius:12px;flex:none;
   background:var(--fa-grad);color:#fff;display:inline-flex;align-items:center;justify-content:center;
   box-shadow:0 6px 16px rgba(10,132,255,.35);}
-.brand h1{font-size:22px;font-weight:800;margin:0;letter-spacing:-.01em;white-space:nowrap;}
-.spacer{flex:1;}
+.brand h1{min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:22px;font-weight:800;margin:0;letter-spacing:-.01em;white-space:nowrap;}
+.spacer{flex:0;}
+.topbar-row > .icon-btn,.menu-slot{flex:none;}
+.brand-title-short{display:none;}
+@container(max-width:639px){.brand-title-full{display:none;}.brand-title-short{display:inline;}}
+@container(max-width:359px){.brand-emoji{display:none;}.brand h1{font-size:18px;}}
 .menu-slot{display:flex;align-items:center;}
 .menu-slot ha-menu-button{--mdc-icon-button-size:44px;color:var(--fa-text);margin-right:2px;}
 ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}

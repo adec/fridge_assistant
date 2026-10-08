@@ -84,6 +84,7 @@ export const STRINGS = {
     locationTypeChanged: "Bestaande houdbaarheidsdatums blijven ongewijzigd.",
 
     appTitle: "Fridge Assistant",
+    appTitleShort: "Fridge",
     historyTooltip: (n) => (n ? `Geschiedenis (${n})` : "Geschiedenis"),
     manageTemplates: "Templates beheren",
     settings: "Instellingen",
@@ -443,6 +444,7 @@ export const STRINGS = {
     locationTypeChanged: "Existing expiry dates are unchanged.",
 
     appTitle: "Fridge Assistant",
+    appTitleShort: "Fridge",
     historyTooltip: (n) => (n ? `History (${n})` : "History"),
     manageTemplates: "Manage templates",
     settings: "Settings",
