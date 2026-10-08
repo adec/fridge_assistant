@@ -1,6 +1,6 @@
-import { categoryIds } from "../lib/categories.js?v=0.10.0b10";
-import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b10";
-import { esc } from "../lib/format.js?v=0.10.0b10";
+import { categoryIds } from "../lib/categories.js?v=0.10.0b11";
+import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b11";
+import { esc } from "../lib/format.js?v=0.10.0b11";
 
 export function openCategoriesManager(panel) {
   const h = panel._openModal(`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
@@ -47,13 +47,13 @@ function editCategory(panel,id,run,defaultKind="ingredient") {
   const h=panel._openModal(`<div class="modal-head"><h3>${panel.t(id?"editCategory":"newCategory")}</h3><button class="icon-btn" id="ce-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
     <label class="field"><span>${panel.t("categoryName")}</span><input id="ce-name" maxlength="80" value="${esc(c.label)}"></label>
     <label class="field"><span>${panel.t("categoryDefaultKind")}</span><select id="ce-kind"><option value="ingredient" ${c.kind==="ingredient"?"selected":""}>${esc(panel._kindMeta("ingredient").short)}</option><option value="dish" ${c.kind==="dish"?"selected":""}>${esc(panel._kindMeta("dish").short)}</option></select></label>
-    <label class="field"><span>${panel.t("locationEmoji")}</span><input id="ce-emoji" maxlength="16" value="${esc(c.emoji)}"></label>
-    <label class="field"><span>${panel.t("categoryIcon")}</span><input id="ce-icon" maxlength="80" value="${esc(c.icon)}" placeholder="mdi:food"></label>
+    <label class="field"><span>${panel.t("locationEmoji")}</span><input id="ce-emoji" maxlength="16" value="${esc(c.emoji)}" aria-describedby="ce-emoji-help"></label>
+    <p class="location-help" id="ce-emoji-help">${panel.t("categoryEmojiHelp")}</p>
     <div class="modal-actions"><button class="btn primary" id="ce-save">${panel.t("saveBtn")}</button></div>`);
   const q=s=>h.modal.querySelector(s); q("#ce-close").onclick=h.close;
   q("#ce-save").onclick=async()=>{
     const name=q("#ce-name").value.trim(); if(!name){q("#ce-name").focus();return;}
-    await run(async()=>{await panel._call("categories",{action:"save",category:{...(id?{id}:{}),name,kind:q("#ce-kind").value,emoji:q("#ce-emoji").value.trim(),icon:q("#ce-icon").value.trim()}});h.close();});
+    await run(async()=>{await panel._call("categories",{action:"save",category:{...(id?{id}:{}),name,kind:q("#ce-kind").value,emoji:q("#ce-emoji").value.trim()}});h.close();});
   }; q("#ce-name").focus();
 }
 function removeCategory(panel,id,run) {

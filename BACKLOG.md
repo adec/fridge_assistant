@@ -50,3 +50,11 @@ without structured quantities or a Grocy-style workflow. Design proposal, not im
   prefer user/package-specific instructions over a universal defrost lifetime.
 
 Record only at this stage; implementation belongs to a later feature branch/release.
+
+## Deferred: unified category display symbol
+
+Consider a single selector with a preview for choosing an emoji or an MDI icon per
+category. Keep emojis as the default. Category MDI fields originated upstream and
+remain stored for compatibility, but are not currently displayed in the panel. The
+category editor hides the unused icon field and preserves existing icon values.
+Check upstream usage before implementing this option. No implementation commitment.
