@@ -1,7 +1,7 @@
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b17";
+import { esc } from "../lib/format.js?v=0.10.0b18";
 
-import { openMealieMappings } from "./mealie-mappings.js?v=0.10.0b17";
+import { openMealieMappings } from "./mealie-mappings.js?v=0.10.0b18";
 
 export async function openMealie(panel, container) {
   const markup = `

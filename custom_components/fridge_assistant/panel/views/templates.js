@@ -1,11 +1,11 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b17";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b18";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b17";
-import { openSurface } from "../lib/surface.js?v=0.10.0b17";
+import { esc } from "../lib/format.js?v=0.10.0b18";
+import { openSurface } from "../lib/surface.js?v=0.10.0b18";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -232,15 +232,31 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
   const q = (s) => h.modal.querySelector(s);
   const prev = q("#te-prev");
   const syncPrev = () => { prev.textContent = (q("#te-emoji").value || "").trim() || catOf(q("#te-cat").value).emoji; };
-  q("#te-emoji").addEventListener("input", syncPrev);
-  q("#te-cat").addEventListener("change", syncPrev);
+  const emojiInput = q("#te-emoji");
+  let emojiOverridden = !!t.emoji && t.emoji !== catOf(t.category).emoji;
+  const syncCategoryEmoji = () => {
+    if (!emojiOverridden) emojiInput.value = catOf(q("#te-cat").value).emoji || "";
+    syncPrev();
+  };
+  // Select after the pointer's default cursor positioning, including on touch.
+  emojiInput.addEventListener("focus", () => requestAnimationFrame(() => {
+    if (emojiInput.getRootNode().activeElement === emojiInput) emojiInput.select();
+  }));
+  emojiInput.addEventListener("click", () => emojiInput.select());
+  emojiInput.addEventListener("input", () => {
+    emojiOverridden = !!emojiInput.value.trim();
+    if (!emojiOverridden) syncCategoryEmoji(); else syncPrev();
+  });
+  q("#te-cat").addEventListener("change", syncCategoryEmoji);
   let selKind = curKind;
   fillCategorySelect(panel, q("#te-cat"), selKind, t.category, tpl && selKind === curKind ? t.category : null);
+  syncCategoryEmoji();
   const kindEl = q("#te-kind");
   if (kindEl) kindEl.querySelectorAll("button").forEach((b) =>
     b.addEventListener("click", () => {
       selKind = b.dataset.kind;
       fillCategorySelect(panel, q("#te-cat"), selKind, q("#te-cat").value, tpl && selKind === curKind ? t.category : null);
+      syncCategoryEmoji();
       kindEl.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
     }));
   q("#te-close").addEventListener("click", h.close);
@@ -259,7 +275,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       }
       const emoji = result.estimate?.emoji?.trim();
       if (!emoji || emoji.length > 16 || !/\p{Extended_Pictographic}/u.test(emoji)) throw new Error(panel.t("emojiSuggestionEmpty"));
-      q("#te-emoji").value = emoji; syncPrev();
+      emojiOverridden = true; q("#te-emoji").value = emoji; syncPrev();
       status.textContent = panel.t("emojiSuggested");
     } catch (error) {
       if (h.modal.isConnected) status.textContent = panel.t("emojiSuggestionFailed");
