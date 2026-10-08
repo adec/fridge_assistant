@@ -1,11 +1,11 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b16";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b17";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b16";
-import { openSurface } from "../lib/surface.js?v=0.10.0b16";
+import { esc } from "../lib/format.js?v=0.10.0b17";
+import { openSurface } from "../lib/surface.js?v=0.10.0b17";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -209,8 +209,9 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     </div>
     <div class="grid2">
       <label class="field"><span>${panel.t("nameLabel")}</span><input id="te-name" value="${esc(t.name)}" placeholder="${panel.t("namePlaceholderTemplate")}"></label>
-      <label class="field"><span>${panel.t("emojiLabel")}</span><input id="te-emoji" maxlength="4" value="${esc(t.emoji || "")}" placeholder="🥫"></label>
+      <label class="field"><span>${panel.t("emojiLabel")}</span><input id="te-emoji" maxlength="16" value="${esc(t.emoji || "")}" placeholder="🥫"></label>
     </div>
+    ${panel._state.options.ai_enabled ? `<button type="button" class="btn ghost" id="te-emoji-ai"><ha-icon icon="mdi:creation"></ha-icon> ${panel.t("suggestEmoji")}</button><p class="location-help" id="te-emoji-status" role="status"></p>` : ""}
     <label class="field"><span>${panel.t("kindLabel")}</span>
       <div class="seg" id="te-kind">${Object.keys(kinds).map((k) => { const km = panel._kindMeta(k); return `<button type="button" data-kind="${k}" class="${curKind === k ? "on" : ""}">${km.emoji || ""} ${km.short}</button>`; }).join("")}</div>
     </label>
@@ -244,6 +245,28 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     }));
   q("#te-close").addEventListener("click", h.close);
   let savedTemplate = null, saveNext = false, submitting = false;
+  q("#te-emoji-ai")?.addEventListener("click", async () => {
+    const name = q("#te-name").value.trim();
+    if (!name) { q("#te-name").focus(); return; }
+    const button = q("#te-emoji-ai"), status = q("#te-emoji-status");
+    const before = q("#te-emoji").value;
+    button.disabled = true; status.textContent = panel.t("emojiThinking");
+    try {
+      const result = await panel._call("estimate", {name});
+      if (!h.modal.isConnected || submitting || savedTemplate) return;
+      if (q("#te-name").value.trim() !== name || q("#te-emoji").value !== before) {
+        status.textContent = panel.t("emojiSuggestionStale"); return;
+      }
+      const emoji = result.estimate?.emoji?.trim();
+      if (!emoji || emoji.length > 16 || !/\p{Extended_Pictographic}/u.test(emoji)) throw new Error(panel.t("emojiSuggestionEmpty"));
+      q("#te-emoji").value = emoji; syncPrev();
+      status.textContent = panel.t("emojiSuggested");
+    } catch (error) {
+      if (h.modal.isConnected) status.textContent = panel.t("emojiSuggestionFailed");
+    } finally {
+      if (h.modal.isConnected && !savedTemplate) button.disabled = false;
+    }
+  });
   q("#te-save-next")?.addEventListener("click", () => { saveNext = true; q("#te-save").click(); });
   q("#te-save").addEventListener("click", async () => {
     if (submitting) return;
@@ -277,7 +300,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       if (options.afterSave) {
         savedTemplate = result.template;
         // A failed mapping retries this same template, never creates a duplicate.
-        h.modal.querySelectorAll("input,select,#te-kind button").forEach(el => el.disabled = true);
+        h.modal.querySelectorAll("input,select,#te-kind button,#te-emoji-ai").forEach(el => el.disabled = true);
         if (!await options.afterSave(savedTemplate)) throw new Error(panel.t("mappingTemplateSavedLinkFailed"));
       }
       h.close();

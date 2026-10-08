@@ -503,3 +503,8 @@ and storage lifetimes can be configured; lifetimes may be left empty.
 **Save and next** also opens the next unmatched ingredient while retaining the mapping
 list's filters and page. If linking fails after creation, retry uses the saved template
 instead of creating a duplicate. Closing leaves that template available to Link existing.
+
+When AI estimates are enabled, the template editor offers **Suggest emoji with AI**.
+It uses the configured estimate provider and applies only the suggested emoji, leaving
+category and storage lifetimes unchanged. Manual entry and the category default remain
+available without AI or if the request fails. Suggestions run only when requested.
