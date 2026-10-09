@@ -1,6 +1,6 @@
-import { bindReorder } from "../lib/reorder.js?v=0.10.0b20";
+import { bindReorder } from "../lib/reorder.js?v=0.10.0b21";
 /* Named physical locations share the catalogue's three storage types. */
-import { esc } from "../lib/format.js?v=0.10.0b20";
+import { esc } from "../lib/format.js?v=0.10.0b21";
 
 export function openLocationsManager(panel) {
   const h = panel._openModal(`

@@ -12,8 +12,8 @@
  * a big label, the DYMO for the classic sticker.
  */
 
-import { esc } from "../lib/format.js?v=0.10.0b20";
-import { openPortions } from "./inspector.js?v=0.10.0b20";
+import { esc } from "../lib/format.js?v=0.10.0b21";
+import { openPortions } from "./inspector.js?v=0.10.0b21";
 
 // Where to point people who don't have the (optional) print add-on yet.
 const ADDON_URL = "https://github.com/MaxGramser/label-printer-addon";

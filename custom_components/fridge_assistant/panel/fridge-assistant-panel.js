@@ -1,5 +1,5 @@
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b20";
-import { openMealie } from "./views/mealie.js?v=0.10.0b20";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b21";
+import { openMealie } from "./views/mealie.js?v=0.10.0b21";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -12,18 +12,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b20";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b20";
-import { STYLES } from "./styles.js?v=0.10.0b20";
-import { daysLabel, esc, fmtDate } from "./lib/format.js?v=0.10.0b20";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b20";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b20";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b20";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b20";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b20";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b20";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b20";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b20";
-import { printSticker } from "./views/print.js?v=0.10.0b20";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b21";
+import { STYLES } from "./styles.js?v=0.10.0b21";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b21";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b21";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b21";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b21";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b21";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b21";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b21";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b21";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b21";
+import { printSticker } from "./views/print.js?v=0.10.0b21";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -475,7 +475,7 @@ class FridgeAssistantPanel extends HTMLElement {
       </div>
       <div class="card-right">
         <div class="status" style="--c:${STATUS_COLOR[i.status]}">${daysLabel(i.days_left, lang, i.date_type)}</div>
-        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${this.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} · ${fmtDate(i.expiry_date, lang)}</span>` : ""}</div>
+        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${this.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} · ${fmtCardDate(i.expiry_date, lang, this._state.today)}</span>` : ""}</div>
       </div>
       <button class="card-print icon-btn" data-print="${i.id}" title="${this.t("printSticker")}" aria-label="${this.t("printSticker")}"><ha-icon icon="mdi:tag-outline"></ha-icon></button>
     </div>`;

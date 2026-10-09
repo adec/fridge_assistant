@@ -2,7 +2,7 @@
  * wiring and toasts. All functions take the panel instance as their first
  * argument (for shadowRoot access); state lives on the panel, not here. */
 
-import { esc, fmtDate, parseISO } from "./format.js?v=0.10.0b20";
+import { esc, fmtDate, parseISO } from "./format.js?v=0.10.0b21";
 
 /* On desktop, data-rich views open in a drawer that slides in from the right
  * (Attio-style side peek): no scrim, the list stays visible and clickable, and
