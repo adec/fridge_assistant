@@ -112,6 +112,9 @@ def apply_event(store, item_id, selected, action, when, location, lifetime, now,
             if p.get('opened_at'):
                 raise ValueError('Already opened; undo the previous event to correct it')
             delta = {'opened_at':when_dt.isoformat(),'opening_hours':lifetime}
+            destination = template.get('after_opening_location') if location is None else location
+            if destination:
+                delta['location'] = store.validate_item_location(destination, current=current)
         elif action == 'start_defrost':
             if p.get('defrost_started_at') or p.get('defrosted_at'):
                 raise ValueError('Defrosting already recorded; undo it before correcting')

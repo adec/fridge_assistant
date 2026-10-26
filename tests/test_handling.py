@@ -167,3 +167,73 @@ class HandlingTests(unittest.TestCase):
             self.assertEqual(len(self.store.expired_items()),1)
             self.assertEqual(len(self.store.soon_items(3)),0)
             self.assertEqual(self.store.expiring_items(3)[0]['id'],self.item['id'])
+
+
+class OpeningStorageTests(unittest.TestCase):
+    def setUp(self):
+        self.store = make_store('en')
+        self.tpl = self.store.upsert_user_template({'name':'Marmalade','after_opening_hours':48,'after_opening_location':'fridge'})
+        self.item = self.store.add_item(self.store.build_item({'template_id':self.tpl['id'],'location':'pantry','portions':2,'expiry_date':'2027-12-31','expiry_source':'manual'}))
+        self.before = deepcopy(self.item)
+
+    def open(self, selected=None, location=None):
+        return h.apply_event(self.store,self.item['id'],selected or [1],'opened',NOW.isoformat(),location,'template',NOW)
+
+    def test_template_destination_one_portion_and_atomic_undo(self):
+        event = self.open()
+        portion = self.item['portions'][0]
+        self.assertEqual(portion['location'],'fridge')
+        self.assertEqual(portion['opening_hours'],48)
+        self.assertEqual(portion['opened_at'],NOW.isoformat())
+        self.assertEqual(self.item['portions'][1],self.before['portions'][1])
+        self.assertEqual(self.item['expiry_date'],self.before['expiry_date'])
+        self.assertEqual(self.item['code'],self.before['code'])
+        self.assertEqual(len(h.inventory_groups(self.item,NOW)),2)
+        self.assertIsNotNone(self.store.restore_item(event['id']))
+        self.assertEqual(self.item['portions'],self.before['portions'])
+
+    def test_keep_current_override_and_custom_destination(self):
+        self.open(location='')
+        self.assertEqual(self.item['portions'][0].get('location', self.item['location']),'pantry')
+        destination = self.store.upsert_location({'name':'Utility fridge','storage_type':'fridge'})
+        self.open([2],location=destination['id'])
+        self.assertEqual(self.item['portions'][1]['location'],destination['id'])
+
+    def test_no_configuration_preserves_old_behaviour(self):
+        self.store.upsert_user_template({'id':self.tpl['id'],'after_opening_location':None})
+        self.open()
+        self.assertEqual(self.item['portions'][0].get('location', self.item['location']),'pantry')
+
+    def test_archived_or_unknown_destination_changes_nothing(self):
+        self.store.upsert_location({'id':'fridge','archived':True})
+        for location in [None,'missing']:
+            with self.assertRaises(ValueError): self.open([1,2],location)
+            self.assertEqual(self.item,self.before)
+            self.assertEqual(self.store.history,[])
+        self.open(location='')
+        self.assertEqual(self.item['portions'][0].get('location', self.item['location']),'pantry')
+
+    def test_later_move_blocks_undo_and_template_edit_is_not_retroactive(self):
+        event = self.open()
+        self.store.upsert_user_template({'id':self.tpl['id'],'after_opening_location':'pantry','after_opening_hours':240})
+        self.assertEqual(self.item['portions'][0]['location'],'fridge')
+        self.assertEqual(self.item['portions'][0]['opening_hours'],48)
+        self.item['portions'][0]['location']='freezer'
+        self.assertIsNone(self.store.restore_item(event['id']))
+        self.assertEqual(self.item['portions'][0]['location'],'freezer')
+
+    def test_destination_persists_across_reload(self):
+        async def round_trip():
+            await self.store.async_save()
+            restored = make_store('en')
+            restored._store.async_load = AsyncMock(return_value=self.store._store.saved)
+            restored.hass.async_add_executor_job = AsyncMock(side_effect=lambda func:func())
+            await restored.async_load()
+            self.assertEqual(restored.get_template(self.tpl['id'])['after_opening_location'],'fridge')
+        asyncio.run(round_trip())
+
+    def test_template_validation_and_partial_edit_preserve_destination(self):
+        self.store.upsert_user_template({'id':self.tpl['id'],'name':'Orange marmalade'})
+        self.assertEqual(self.store.get_template(self.tpl['id'])['after_opening_location'],'fridge')
+        with self.assertRaises(ValueError): self.store.upsert_user_template({'id':self.tpl['id'],'after_opening_location':'missing'})
+        self.assertEqual(self.store.get_template(self.tpl['id'])['after_opening_location'],'fridge')

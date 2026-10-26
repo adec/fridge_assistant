@@ -98,6 +98,7 @@ TEMPLATE_SCHEMA = vol.Schema(
         vol.Optional("name"): cv.string,
         vol.Optional("aliases"): [cv.string],
         vol.Optional("barcodes"): [cv.string],
+        vol.Optional("after_opening_location"): _OPT_STR,
         vol.Optional("stock_mode"): vol.In(["packs", "count"]),
         vol.Optional("stock_unit"): str,
         vol.Optional("reorder_limit"): vol.Any(None, vol.All(int, vol.Range(min=0, max=1000000))),

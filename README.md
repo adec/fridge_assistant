@@ -261,6 +261,20 @@ remain a fallback; they are not automatically promoted to permanent links.
 Removing a link leaves stock and history unchanged. Deleting a template, hiding a built-in template,
 or resetting its customisations removes its links; restoring the built-in does not restore them.
 
+### Storage after opening
+
+With opened/defrosted tracking enabled, templates offer **Storage after opening**, defaulting to
+**Keep current location**. For foods such as marmalade, choose a fridge location. Marking stock
+as opened proposes that destination; confirm it, choose another active location, or keep the
+current location. Only selected portions move. Opening time, the post-opening lifetime and the
+location change form one history event and are undone together. Original label dates and other
+portions are unchanged. Existing inventory can use the template setting without being recreated;
+later template changes do not move portions already opened.
+
+If a configured destination is archived or removed, choose an active destination or **Keep current
+location** before saving. Templates without this setting keep the previous behaviour. Simple-count
+stock retains its separate consumption workflow.
+
 ### Simple counts and low-stock reminders
 
 For consumables such as dishwasher tablets, open the template's **Stock & reordering** section:

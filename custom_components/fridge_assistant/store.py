@@ -574,6 +574,10 @@ class FridgeStore:
             "notes": data.get("notes", existing.get("notes", "")),
             "source": data.get("source", "user"),
         }
+        destination = data.get('after_opening_location', existing.get('after_opening_location')) or None
+        if destination is not None:
+            destination = self.validate_item_location(destination, existing.get('after_opening_location'))
+        tpl['after_opening_location'] = destination
         from .stock import template_fields
         tpl.update(template_fields(data, existing))
         tpl["kind"] = canonical_kind(

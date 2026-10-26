@@ -1,12 +1,12 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b30";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b31";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b30";
-import { esc } from "../lib/format.js?v=0.10.0b30";
-import { openSurface } from "../lib/surface.js?v=0.10.0b30";
+import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b31";
+import { esc } from "../lib/format.js?v=0.10.0b31";
+import { openSurface } from "../lib/surface.js?v=0.10.0b31";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -228,7 +228,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     <div class="te-sec">${panel.t("shelfLifeSectionLabel")}</div>
     <div class="grid3">${locs.map(dayField).join("")}</div>
     <p class="location-help">${panel.t("shelfDurationHelp")}</p>
-    ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] && t[key]%24===0 ? t[key]/24 : t[key]??''}" placeholder="${panel.t('handlingNoAutomatic')}"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0?'selected':''}>${panel.t('handlingDays')}</option></select></div></label>`).join('')}</details>`:''}
+    ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p><label class="field"><span>${panel.t('openingStorage')}</span><div class="select-wrap"><select id="te-opening-location"><option value="">${panel.t('openingKeepLocation')}</option>${[...(panel._state.active_locations || []), ...((t.after_opening_location && !(panel._state.active_locations || []).includes(t.after_opening_location)) ? [t.after_opening_location] : [])].map(id=>`<option value="${esc(id)}" ${t.after_opening_location===id?'selected':''}>${esc(panel._locMeta(id).label)}${!(panel._state.active_locations || []).includes(id)?' · '+panel.t('locationArchived'):''}</option>`).join('')}</select></div><small class="location-help">${panel.t('openingStorageHelp')}</small></label>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] && t[key]%24===0 ? t[key]/24 : t[key]??''}" placeholder="${panel.t('handlingNoAutomatic')}"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0?'selected':''}>${panel.t('handlingDays')}</option></select></div></label>`).join('')}</details>`:''}
     <label class="field"><span>${panel.t("aliasesLabel")}</span><input id="te-aliases" value="${esc((t.aliases || []).join(", "))}" placeholder="${panel.t("aliasesPlaceholder")}"></label>
     <label class="field"><span>${panel.t('templateBarcodes')}</span><textarea id="te-barcodes" rows="2" spellcheck="false" placeholder="0123456789012">${esc((t.barcodes || []).join('\n'))}</textarea><small class="location-help">${panel.t('templateBarcodesHelp')}</small></label>
     <label class="field"><span>${panel.t("labelNote")}</span><textarea id="te-label-note" maxlength="500" rows="2">${esc(t.label_note || "")}</textarea><small class="location-help">${panel.t("labelNoteTemplateHelp")}</small></label>
@@ -320,6 +320,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     const reorder = reorderText === '' ? null : Number(reorderText);
     if (reorder !== null && (!Number.isInteger(reorder) || reorder < 0 || reorder > 1000000)) { q('#te-reorder').focus(); return; }
     const template = {
+      after_opening_location:q('#te-opening-location') ? q('#te-opening-location').value || null : t.after_opening_location || null,
       stock_mode:q('#te-stock-mode').value, stock_unit:q('#te-stock-unit').value.trim(), reorder_limit:reorder,
       name,
       emoji: (q("#te-emoji").value || "").trim() || catOf(cat).emoji,

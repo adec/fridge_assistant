@@ -1,8 +1,8 @@
-import { serializeRequests } from "../lib/request-queue.js?v=0.10.0b30";
+import { serializeRequests } from "../lib/request-queue.js?v=0.10.0b31";
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b30";
+import { esc } from "../lib/format.js?v=0.10.0b31";
 
-import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b30";
+import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b31";
 
 export async function openMealie(panel, container) {
   const markup = `
