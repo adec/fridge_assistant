@@ -1,11 +1,12 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b26";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b27";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b26";
-import { openSurface } from "../lib/surface.js?v=0.10.0b26";
+import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b27";
+import { esc } from "../lib/format.js?v=0.10.0b27";
+import { openSurface } from "../lib/surface.js?v=0.10.0b27";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -195,7 +196,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
   }).join("");
   const dayField = (loc) => {
     const lm = panel._storageMeta(loc);
-    return `<label class="field"><span>${lm.emoji} ${lm.label}</span><input type="number" inputmode="numeric" min="0" max="3650" class="te-day" data-loc="${loc}" value="${sl[loc] ?? ""}" placeholder="${panel.t("notApplicablePlaceholder")}"></label>`;
+    return `<label class="field"><span>${lm.emoji} ${lm.label}</span><input type="text" autocapitalize="none" spellcheck="false" class="te-day" data-loc="${loc}" value="${formatShelfDuration(sl[loc])}" placeholder="${panel.t("notApplicablePlaceholder")}"></label>`;
   };
   const isBuiltin = !!t.builtin;
   const isOverride = !!(t.custom && t.builtin);
@@ -220,6 +221,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     <p class="date-type-help">${panel.t("useByUnchecked")}</p>
     <div class="te-sec">${panel.t("shelfLifeSectionLabel")}</div>
     <div class="grid3">${locs.map(dayField).join("")}</div>
+    <p class="location-help">${panel.t("shelfDurationHelp")}</p>
     ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] && t[key]%24===0 ? t[key]/24 : t[key]??''}" placeholder="${panel.t('handlingNoAutomatic')}"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0?'selected':''}>${panel.t('handlingDays')}</option></select></div></label>`).join('')}</details>`:''}
     <label class="field"><span>${panel.t("aliasesLabel")}</span><input id="te-aliases" value="${esc((t.aliases || []).join(", "))}" placeholder="${panel.t("aliasesPlaceholder")}"></label>
     <label class="field"><span>${panel.t("labelNote")}</span><textarea id="te-label-note" maxlength="500" rows="2">${esc(t.label_note || "")}</textarea><small class="location-help">${panel.t("labelNoteTemplateHelp")}</small></label>
@@ -232,6 +234,12 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     </div>
   `);
   const q = (s) => h.modal.querySelector(s);
+  h.modal.querySelectorAll('.te-day').forEach(input => {
+    input.addEventListener('blur', () => {
+      try { input.value = formatShelfDuration(parseShelfDuration(input.value)); }
+      catch { /* Keep invalid text visible; saving explains the supported format. */ }
+    });
+  });
   const prev = q("#te-prev");
   const syncPrev = () => { prev.textContent = (q("#te-emoji").value || "").trim() || catOf(q("#te-cat").value).emoji; };
   const emojiInput = q("#te-emoji");
@@ -292,10 +300,13 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     const name = (q("#te-name").value || "").trim();
     if (!name) { q("#te-name").focus(); return; }
     const shelf = {};
-    h.modal.querySelectorAll(".te-day").forEach((inp) => {
-      const v = inp.value.trim() === "" ? null : Math.min(3650, Math.max(0, parseInt(inp.value, 10) || 0));
-      shelf[inp.dataset.loc] = v && v > 0 ? v : null;
-    });
+    for (const inp of h.modal.querySelectorAll(".te-day")) {
+      try {
+        shelf[inp.dataset.loc] = parseShelfDuration(inp.value);
+      } catch {
+        inp.focus(); panel._toast(panel.t("shelfDurationInvalid"), {type:"bad"}); return;
+      }
+    }
     const cat = q("#te-cat").value;
     if (!cat) { panel._toast(panel.t("noKindCategories"), {type:"bad"}); return; }
     const template = {

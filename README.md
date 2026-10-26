@@ -251,7 +251,10 @@ lets you eat, toss or reprint per portion, and resize the batch without disturbi
 ### Automatic expiry estimation
 
 A seed database of 99 recipes/products with English names (84 ingredients, 15 dishes) maps product names to
-shelf-life in days, per location. Typing a name matches conservatively — an exact or near-exact
+shelf-life in days, per location. In the template editor, enter `5` or `5d` for five days,
+or `5w` for five weeks. Blank (or zero) means not applicable. Values remain stored as whole
+days, with a maximum of 3650 days; hours, months and fractional values are not accepted here.
+Typing a name matches conservatively — an exact or near-exact
 match is auto-suggested, but a loose one-word overlap is not (so "pizza" won't silently become
 "cheese"), and negations like *"macaroni zonder vlees"* ("without meat") correctly exclude templates
 that mention the excluded word. Every suggestion can be dismissed in favour of a manual date, a
