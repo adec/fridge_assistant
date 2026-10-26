@@ -1,7 +1,7 @@
 /* Barcode scanner: live camera (BarcodeDetector or ZXing), photo capture and
  * manual entry, plus routing of scanned codes (own labels vs retail EAN/UPC). */
 
-import { esc } from "../lib/format.js?v=0.10.0b28";
+import { esc } from "../lib/format.js?v=0.10.0b29";
 
 async function makeDetector() {
   const wanted = ["code_39", "code_128", "ean_13", "ean_8", "upc_a", "upc_e"];
@@ -301,6 +301,8 @@ export async function onRetailBarcode(panel, code) {
   const known = !!(res && res.known);
   panel._openAddModal({
     name: src.name,
+    template_id: src.template_id || null,
+    date_type: src.date_type || undefined,
     category: src.category || null,
     quantity: src.quantity || "",
     photo: src.photo || "",

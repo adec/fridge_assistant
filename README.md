@@ -244,6 +244,23 @@ including leap years. The form confirms that deadline; inventory dates and label
 month/year display. Best Before / Use By is chosen separately. Existing stock keeps exact dates.
 An earlier opened/defrosted deadline still displays its precise date and time.
 
+### Permanent barcode links
+
+A template can hold multiple retail barcodes, so different supermarket products can all scan as
+**Tinned beans**. Open **Templates**, edit the template and use **Barcodes** (one per line).
+Leading zeroes are preserved. Template search also finds full or partial barcode numbers; linked
+barcode counts appear in the list. Remove a barcode and save before assigning it to another template.
+Duplicate ownership is rejected.
+
+When adding a scanned product, choose or create a template and leave **Remember barcode for this
+template** checked to save the permanent link with the item. Untick it for a one-off stock entry.
+Future scans use the template's current name, category and shelf-life settings without an online
+product lookup. Links survive consuming stock and clearing history. Old stock/history barcodes
+remain a fallback; they are not automatically promoted to permanent links.
+
+Removing a link leaves stock and history unchanged. Deleting a template, hiding a built-in template,
+or resetting its customisations removes its links; restoring the built-in does not restore them.
+
 ### Portions
 
 Cooked a big batch? Set a portion count when adding the item (or later, in the inspector) and the

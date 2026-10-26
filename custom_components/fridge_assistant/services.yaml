@@ -23,6 +23,14 @@ add_item:
           options:
             - day
             - month
+    barcode:
+      description: "Retail barcode, including leading zeroes."
+      selector:
+        text:
+    remember_barcode:
+      description: "Link this barcode permanently to the selected template when adding stock."
+      selector:
+        boolean:
     date_type:
       name: Date type
       description: "Use By for expiry dates, or Best Before for quality dates. Defaults to the template's date type."

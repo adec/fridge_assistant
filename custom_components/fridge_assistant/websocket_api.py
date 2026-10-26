@@ -83,10 +83,11 @@ _ITEM_FIELDS = {
     vol.Optional("label_note"): vol.Any(None, vol.All(str, vol.Length(max=500))),
     vol.Optional("notes"): _OPT_STR,
     vol.Optional("barcode"): _OPT_STR,
+    vol.Optional("remember_barcode"): bool,
 }
 ITEM_SCHEMA = vol.Schema(_ITEM_FIELDS, extra=vol.REMOVE_EXTRA)
 CHANGES_SCHEMA = vol.Schema(
-    {k: v for k, v in _ITEM_FIELDS.items() if k.schema != "portions"},
+    {k: v for k, v in _ITEM_FIELDS.items() if k.schema not in ("portions", "remember_barcode")},
     extra=vol.REMOVE_EXTRA,
 )
 TEMPLATE_SCHEMA = vol.Schema(
@@ -94,6 +95,7 @@ TEMPLATE_SCHEMA = vol.Schema(
         vol.Optional("id"): _OPT_STR,
         vol.Optional("name"): cv.string,
         vol.Optional("aliases"): [cv.string],
+        vol.Optional("barcodes"): [cv.string],
         vol.Optional("category"): _OPT_STR,
         vol.Optional("kind"): _OPT_STR,
         vol.Optional("emoji"): _OPT_STR,
@@ -296,6 +298,9 @@ async def ws_add_item(hass, connection, msg) -> None:
         item = await runtime.async_add_item(dict(msg["item"]), by=by, by_name=by_name)
     except LocationError as err:
         connection.send_error(msg["id"], str(err), shared_text(hass, str(err)))
+        return
+    except ValueError as err:
+        connection.send_error(msg["id"], "invalid_item", str(err))
         return
     connection.send_result(msg["id"], {"item": item})
 
@@ -540,6 +545,11 @@ async def ws_lookup_barcode(hass, connection, msg) -> None:
             "photo": src.get("photo"),
         }
 
+    template = runtime.store.template_for_barcode(code) if code else None
+    if template:
+        connection.send_result(msg['id'], {'barcode':code, 'known':{**_prefill(template), 'template_id':template['id'], 'date_type':template.get('date_type', 'use_by')}, 'product':None})
+        return
+
     # Recognise a product we've stored before — active items, then history.
     known = None
     if code:
@@ -629,7 +639,11 @@ async def ws_add_template(hass, connection, msg) -> None:
     runtime = _runtime_or_error(hass, connection, msg)
     if runtime is None:
         return
-    tpl = runtime.store.upsert_user_template(dict(msg["template"]))
+    try:
+        tpl = runtime.store.upsert_user_template(dict(msg["template"]))
+    except ValueError as err:
+        connection.send_error(msg["id"], "invalid_template", str(err))
+        return
     await runtime.async_changed()
     connection.send_result(msg["id"], {"template": tpl})
 

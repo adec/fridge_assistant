@@ -1,8 +1,8 @@
-import { monthEnd } from "../lib/date-precision.js?v=0.10.0b28";
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b28";
+import { monthEnd } from "../lib/date-precision.js?v=0.10.0b29";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b29";
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b28";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b29";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
@@ -77,6 +77,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       <label class="field"><span>${panel.t("labelNote")}</span><textarea id="f-label-note" maxlength="500" rows="2">${esc(editItem?.label_note ?? prefill.label_note ?? "")}</textarea><small class="location-help">${panel.t("labelNoteItemHelp")}</small><button type="button" class="link" id="f-label-note-reset">${panel.t("labelNoteUseTemplate")}</button></label>
       <label class="field"><span>${panel.t("photoUrlLabel")}</span><input id="f-photo" placeholder="${panel.t("photoUrlPlaceholder")}" value="${esc(editItem?.photo ?? prefill.photo ?? "")}"></label>
     </div>
+    ${!isEdit && prefill.barcode ? `<p class="location-help">${panel.t('scannedBarcode')}: ${esc(prefill.barcode)}</p><label class="date-type-check"><input type="checkbox" id="f-remember-barcode" checked><span>${panel.t('rememberBarcode')}</span></label><p class="date-type-help">${panel.t('rememberBarcodeHelp')}</p>` : ''}
     <div class="modal-actions">
       <button class="btn ghost" id="f-template">${panel.t("chooseTemplateBtn")}</button>
       <button class="btn ghost" id="f-create-template">${panel.t("createTemplateBtn")}</button>
@@ -187,6 +188,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   };
 
   let lastMatched = null;
+  let chosenTemplateId = prefill.barcode ? prefill.template_id : null;
   let matchVersion = 0;
   const matchNow = async () => {
     const version = ++matchVersion;
@@ -196,7 +198,14 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     if (query.length < 2) { suggestEl.innerHTML = ""; suggestEl.className = "suggest"; return; }
     lastMatched = query;
     let res;
-    try { res = await panel._call("match_template", { query, location, added_date: addedDate }); }
+    try {
+      const pinned = chosenTemplateId
+        ? panel._state.templates.find(t => t.id === chosenTemplateId) : null;
+      if (pinned) {
+        const days = pinned.shelf_life?.[panel._storageType(location)];
+        res = {template:pinned, suggestion:{expiry_date:days ? addDays(addedDate,days) : null}};
+      } else res = await panel._call("match_template", { query, location, added_date: addedDate });
+    }
     catch (e) { return; }
     if (m.noAutoMatch) return; // rejected while the request was in flight
     // Out-of-order responses: an older, slower reply must never overwrite
@@ -246,7 +255,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   };
   const doMatch = debounce(matchNow, 350);
 
-  nameEl.addEventListener("input", doMatch);
+  nameEl.addEventListener("input", () => { chosenTemplateId = null; doMatch(); });
   // Enter = add straight away, but let a fresh match land first so the
   // template's expiry date still comes along.
   nameEl.addEventListener("keydown", async (e) => {
@@ -312,7 +321,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     });
   });
   q("#f-template").addEventListener("click", () =>
-    panel._openTemplatePicker((t) => { nameEl.value = t.name; doMatch(); })
+    panel._openTemplatePicker((t) => { chosenTemplateId = t.id; m.noAutoMatch = false; nameEl.value = t.name; doMatch(); })
   );
 
   q("#f-submit").addEventListener("click", async () => {
@@ -347,6 +356,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       payload.expiry_date = expEl.value || null;
       payload.expiry_source = m.expiryManual ? "manual" : m.expirySource;
       payload.template_id = m.template_id;
+      if (!isEdit) payload.remember_barcode = !!(q("#f-remember-barcode")?.checked && m.template_id);
       payload.location = m.location;
       payload.added_date = addedEl.value || todayISO();
       payload.emoji = m.emoji; payload.category = m.category; payload.kind = m.kind;
@@ -358,7 +368,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
         // Save AI result as a template if the user opted in.
         const saveTpl = h.modal.querySelector("#s-savetpl");
         if (m.aiResult && (!saveTpl || saveTpl.checked)) {
-          await panel._call("add_template", {
+          const created = m.savedAiTemplate || await panel._call("add_template", {
             template: {
               name: nameEl.value.trim(),
               category: m.category || m.aiResult.category,
@@ -371,7 +381,10 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
               notes: m.aiResult.notes,
               source: "ai",
             },
-          }).catch(() => {});
+          });
+          m.savedAiTemplate = created;
+          payload.template_id = created.template.id;
+          payload.remember_barcode = !!q("#f-remember-barcode")?.checked;
         }
         const res = await panel._call("add_item", { item: payload });
         h.close();
@@ -389,7 +402,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       }
     } catch (e) {
       q("#f-submit").disabled = false;
-      panel._toast(panel.t("errorPrefix") + (e.message || e), { type: "bad" });
+      panel._toast(panel.t("errorPrefix") + esc(e.message || e), { type: "bad" });
     }
   });
 

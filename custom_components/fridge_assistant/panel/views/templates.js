@@ -1,12 +1,12 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b28";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b29";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b28";
-import { esc } from "../lib/format.js?v=0.10.0b28";
-import { openSurface } from "../lib/surface.js?v=0.10.0b28";
+import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b29";
+import { esc } from "../lib/format.js?v=0.10.0b29";
+import { openSurface } from "../lib/surface.js?v=0.10.0b29";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -31,7 +31,8 @@ export function openTemplatePicker(panel, onPick) {
     const filtered = templates.filter((t) => {
       if (kindFilter !== "all" && panel._kindOf(t) !== kindFilter) return false;
       if (!qq) return true;
-      return t.name.toLowerCase().includes(qq) || (t.aliases || []).some((a) => a.toLowerCase().includes(qq));
+      return t.name.toLowerCase().includes(qq) || (t.aliases || []).some((a) => a.toLowerCase().includes(qq))
+        || (t.barcodes || []).some(code => code.includes(qq));
     });
     listEl.innerHTML = filtered.map((t) => {
       const c = panel._catMeta(t.category);
@@ -89,7 +90,7 @@ export function openTemplatesManager(panel) {
       listEl.innerHTML = hidden.map((t) => {
         const c = panel._catMeta(t.category);
         return `<div class="tp-item"><span class="tp-emoji">${t.emoji || c.emoji || "🍽️"}</span>
-          <span class="tp-name"><b>${esc(t.name)}</b><small>${esc(c.label || t.category)}</small></span>
+          <span class="tp-name"><b>${esc(t.name)}</b><small>${esc(c.label || t.category)}${t.barcodes?.length ? ` · ▥ ${t.barcodes.length}` : ""}</small></span>
           <button class="s-mini" data-unhide="${t.id}">${panel.t("backBtn")}</button></div>`;
       }).join("") || `<div class="empty small"><p>${panel.t("nothingHidden")}</p></div>`;
       listEl.querySelectorAll("[data-unhide]").forEach((b) =>
@@ -105,6 +106,7 @@ export function openTemplatesManager(panel) {
       if (!qq) return true;
       return t.name.toLowerCase().includes(qq)
         || (t.aliases || []).some((a) => a.toLowerCase().includes(qq))
+        || (t.barcodes || []).some(code => code.includes(qq))
         || (panel._catMeta(t.category).label || "").toLowerCase().includes(qq);
     });
     listEl.innerHTML = templates.map((t) => {
@@ -115,7 +117,7 @@ export function openTemplatesManager(panel) {
         : "";
       return `<button class="tp-item" data-id="${t.id}">
         <span class="tp-emoji">${t.emoji || c.emoji || "🍽️"}</span>
-        <span class="tp-name"><b>${esc(t.name)}${badge}</b><small>${panel._kindMeta(panel._kindOf(t)).emoji || ""} ${esc(c.label || t.category)}</small></span>
+        <span class="tp-name"><b>${esc(t.name)}${badge}</b><small>${panel._kindMeta(panel._kindOf(t)).emoji || ""} ${esc(c.label || t.category)}${t.barcodes?.length ? ` · ▥ ${t.barcodes.length}` : ""}</small></span>
         <span class="tp-sl">${["fridge", "freezer", "pantry"].map((l) => sl[l] ? `<i>${panel._storageMeta(l).emoji || ""}${sl[l]}d</i>` : "").join("")}</span>
       </button>`;
     }).join("") || `<div class="empty small"><p>${panel.t("nothingInGroup")}</p></div>`;
@@ -224,6 +226,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     <p class="location-help">${panel.t("shelfDurationHelp")}</p>
     ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] && t[key]%24===0 ? t[key]/24 : t[key]??''}" placeholder="${panel.t('handlingNoAutomatic')}"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0?'selected':''}>${panel.t('handlingDays')}</option></select></div></label>`).join('')}</details>`:''}
     <label class="field"><span>${panel.t("aliasesLabel")}</span><input id="te-aliases" value="${esc((t.aliases || []).join(", "))}" placeholder="${panel.t("aliasesPlaceholder")}"></label>
+    <label class="field"><span>${panel.t('templateBarcodes')}</span><textarea id="te-barcodes" rows="2" spellcheck="false" placeholder="0123456789012">${esc((t.barcodes || []).join('\n'))}</textarea><small class="location-help">${panel.t('templateBarcodesHelp')}</small></label>
     <label class="field"><span>${panel.t("labelNote")}</span><textarea id="te-label-note" maxlength="500" rows="2">${esc(t.label_note || "")}</textarea><small class="location-help">${panel.t("labelNoteTemplateHelp")}</small></label>
     <label class="field"><span>${panel.t("notesTipLabel")}</span><input id="te-notes" value="${esc(t.notes || "")}" placeholder="${panel.t("notesTipPlaceholder")}"></label>
     <div class="modal-actions ${!isNew ? "with-del" : ""}">
@@ -317,6 +320,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       kind: selKind,
       date_type: q("#te-date-type").checked ? "best_before" : "use_by",
       shelf_life: shelf,
+      barcodes: q("#te-barcodes").value.split(/[\s,;]+/).filter(Boolean),
       aliases: (q("#te-aliases").value || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
       label_note: q("#te-label-note").value.trim(),
       notes: (q("#te-notes").value || "").trim(),
@@ -347,7 +351,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     } catch (e) {
       q("#te-save").disabled = false;
       if (q("#te-save-next")) q("#te-save-next").disabled = false;
-      panel._toast(panel.t("errorPrefix") + (e.message || e), { type: "bad" });
+      panel._toast(panel.t("errorPrefix") + esc(e.message || e), { type: "bad" });
     } finally { submitting = false; }
   });
   const reset = q("#te-reset");

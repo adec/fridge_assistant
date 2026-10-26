@@ -1,8 +1,8 @@
-import { handlingStatus } from "./handling.js?v=0.10.0b28";
+import { handlingStatus } from "./handling.js?v=0.10.0b29";
 /* Clean-up mode: bulk-remove expired/soon items. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b28";
-import { daysLabel, esc } from "../lib/format.js?v=0.10.0b28";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b29";
+import { daysLabel, esc } from "../lib/format.js?v=0.10.0b29";
 
 export function openCleanModal(panel) {
   const expired = panel._state.items.filter((i) => i.status === "expired");

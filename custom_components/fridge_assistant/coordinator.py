@@ -180,6 +180,8 @@ class FridgeRuntime:
             # The authenticated caller wins over anything in the payload.
             data = {**data, "added_by": by, "added_by_name": by_name}
         item = self.store.build_item(data, self.code_format)
+        if data.get("remember_barcode"):
+            self.store.link_item_barcode(item)
         self.store.add_item(item)
         await self.async_changed()
         self.hass.bus.async_fire(

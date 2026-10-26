@@ -15,6 +15,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .date_precision import normalise_expiry
+from .barcodes import BarcodeError, barcode_list
 from .codes import generate_code
 from .label_details import label_note
 from .const import (
@@ -554,8 +555,11 @@ class FridgeStore:
         # otherwise a new "Ui" would silently overwrite the builtin onion.
         explicit_id = data.get("id")
         tpl_id = explicit_id or self._unique_template_id(data.get("name", "template"))
-        existing = self.user_templates.get(tpl_id, {})
+        existing = self.get_template(tpl_id) or {}
+        barcodes = barcode_list(data.get("barcodes", existing.get("barcodes", [])))
+        self.validate_barcodes(tpl_id, barcodes)
         tpl = {
+            "barcodes": barcodes,
             "label_note": label_note(data.get("label_note",existing.get("label_note", ""))),
             "id": tpl_id,
             "name": data.get("name", existing.get("name", tpl_id)),
@@ -584,6 +588,25 @@ class FridgeStore:
             tpl[key] = hours(data.get(key, existing.get(key)))
         self.user_templates[tpl_id] = tpl
         return tpl
+
+    def template_for_barcode(self, code):
+        return next((t for t in self.all_templates() if code in t.get("barcodes", [])), None)
+
+    def validate_barcodes(self, template_id, codes):
+        # Include hidden templates so restoring one cannot create ambiguous links.
+        for template in {**self._seed, **self.user_templates}.values():
+            if template['id'] != template_id and set(codes).intersection(template.get('barcodes', [])):
+                raise BarcodeError(f"Barcode already linked to {template.get('name', template['id'])}. Remove it there before reassigning.")
+
+    def link_item_barcode(self, item):
+        template = self.get_template(item.get('template_id'))
+        if not template or template['id'] in self.hidden:
+            raise BarcodeError('Choose an active template before remembering this barcode')
+        codes = list(template.get('barcodes', []))
+        if item.get('barcode') not in codes:
+            codes.append(item.get('barcode'))
+        codes = barcode_list(codes)
+        return self.upsert_user_template({**template, 'barcodes': codes})
 
     def remove_user_template(self, template_id: str) -> bool:
         return self.user_templates.pop(template_id, None) is not None

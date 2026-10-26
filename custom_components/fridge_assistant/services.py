@@ -131,6 +131,8 @@ ADD_ITEM_SCHEMA = vol.Schema(
         vol.Optional("category"): cv.string,
         vol.Optional("kind"): cv.string,
         vol.Optional("template_id"): cv.string,
+        vol.Optional("barcode"): cv.string,
+        vol.Optional("remember_barcode"): cv.boolean,
         vol.Optional("added_date"): cv.string,
         vol.Optional("date_type"): vol.In(DATE_TYPES),
         vol.Optional("expiry_date"): cv.string,
