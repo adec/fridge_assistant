@@ -1,13 +1,13 @@
-import { fmtCardDate } from "../lib/format.js?v=0.10.0b31";
-import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b31";
+import { fmtCardDate } from "../lib/format.js?v=0.10.0b32";
+import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b32";
 /* Item inspector: drawer on desktop (list stays visible; selecting another
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b31";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b31";
-import { openSurface } from "../lib/surface.js?v=0.10.0b31";
-import { relTime } from "./history.js?v=0.10.0b31";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b32";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b32";
+import { openSurface } from "../lib/surface.js?v=0.10.0b32";
+import { relTime } from "./history.js?v=0.10.0b32";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length
@@ -50,26 +50,30 @@ export function openInspector(panel, item, { highlight = null } = {}) {
       const hl = highlight != null && p.n === highlight ? " hl" : "";
       let status;
       if (isOpen) {
-        status = `<span class="po-status">${panel.t("portionOpenLabel")}</span>`;
+        status = `<span class="po-status">${p.opened_at ? `<span class="portion-opened-badge">${panel.t("handlingOpened")}</span>` : panel.t("portionOpenLabel")}</span>`;
       } else {
         const icon = p.status === "eaten" ? "mdi:silverware-fork-knife" : "mdi:delete-outline";
         const who = p.by_name ? `${esc(p.by_name)} · ` : "";
         status = `<span class="po-status"><ha-icon icon="${icon}"></ha-icon>${who}${esc(relTime(panel, p.ts))}</span>`;
       }
+      const handlingButton = (action, icon) => `<button type="button" class="icon-btn" data-handling="${action}" data-portion="${p.n}" title="${esc(panel.t('handlingAction_'+action))}" aria-label="${esc(panel.t('handlingAction_'+action))}"><ha-icon icon="${icon}"></ha-icon></button>`;
+      const handlingControls = isOpen && panel._state.options.handling_enabled
+        ? `${!p.opened_at ? handlingButton('opened','mdi:package-variant') : ''}${!p.defrost_started_at && panel._storageType(p.location||i.location)==='freezer' ? handlingButton('start_defrost','mdi:snowflake-melt') : ''}${p.defrost_started_at && !p.defrosted_at ? handlingButton('defrosted','mdi:check-circle-outline') : ''}`
+        : '';
       const actions = isOpen
         ? `<span class="po-act">
-            <button class="icon-btn" data-eat="${p.n}" title="${panel.t("eatPortionTitle")}"><ha-icon icon="mdi:silverware-fork-knife"></ha-icon></button>
-            <button class="icon-btn" data-toss="${p.n}" title="${panel.t("tossPortionTitle")}"><ha-icon icon="mdi:delete-outline"></ha-icon></button>
-            <button class="icon-btn" data-pprint="${p.n}" title="${panel.t("printPortionTitle")}"><ha-icon icon="mdi:tag-outline"></ha-icon></button>
+            ${handlingControls}
+            <button type="button" class="icon-btn" data-eat="${p.n}" title="${panel.t("eatPortionTitle")}" aria-label="${panel.t("eatPortionTitle")}"><ha-icon icon="mdi:silverware-fork-knife"></ha-icon></button>
+            <button type="button" class="icon-btn" data-toss="${p.n}" title="${panel.t("tossPortionTitle")}" aria-label="${panel.t("tossPortionTitle")}"><ha-icon icon="mdi:delete-outline"></ha-icon></button>
+            <button type="button" class="icon-btn" data-pprint="${p.n}" title="${panel.t("printPortionTitle")}" aria-label="${panel.t("printPortionTitle")}"><ha-icon icon="mdi:tag-outline"></ha-icon></button>
           </span>`
         : (p.event_id
           ? `<button class="po-undo" data-undo="${esc(p.event_id)}" title="${panel.t("undoPortionTitle")}">${panel.t("backBtn")}</button>`
           : "");
       const state=(i.portion_states||[]).find(v=>v.portion_number===p.n);
-      const handlingControls=isOpen && panel._state.options.handling_enabled ? `<div class="handling-row-actions">${!p.opened_at?`<button class="btn ghost" data-handling="opened" data-portion="${p.n}">${panel.t('handlingAction_opened')}</button>`:''}${!p.defrost_started_at && panel._storageType(p.location||i.location)==='freezer'?`<button class="btn ghost" data-handling="start_defrost" data-portion="${p.n}">${panel.t('handlingAction_start_defrost')}</button>`:''}${p.defrost_started_at&&!p.defrosted_at?`<button class="btn ghost" data-handling="defrosted" data-portion="${p.n}">${panel.t('handlingAction_defrosted')}</button>`:''}</div>`:'';
       return `<div class="portion-handling-wrap"><div class="po-row${isOpen ? "" : ` done ${p.status}`}${hl}">
         <span class="code">${esc(code)}</span>${status}${actions}
-      </div>${state ? `<p class="location-help">${esc(panel._locMeta(state.location).label)}${handlingSummary(panel,state)?" · "+esc(handlingSummary(panel,state)):""}</p>`:""}${handlingControls}</div>`;
+      </div>${state ? `<p class="location-help">${esc(panel._locMeta(state.location).label)}${handlingSummary(panel,state)?" · "+esc(handlingSummary(panel,state)):""}</p>`:""}</div>`;
     };
 
     h.modal.innerHTML = `

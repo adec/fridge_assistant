@@ -514,18 +514,19 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .pstep .ps-n{min-width:26px;text-align:center;font-size:16px;font-weight:800;}
 .ps-note{display:block;font-size:11.5px;color:var(--fa-muted);margin-top:6px;}
 .po-rows{display:flex;flex-direction:column;margin-top:8px;}
-.po-row{display:flex;align-items:center;gap:10px;padding:8px 2px;
+.po-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 2px;
   border-bottom:1px solid var(--fa-line);}
 .po-row:last-child{border-bottom:none;}
 .po-row .code{flex:none;}
 .po-row.done .code{opacity:.55;text-decoration:line-through;}
-.po-status{flex:1;min-width:0;font-size:12.5px;color:var(--fa-muted);display:flex;
+.po-status{flex:1;min-width:54px;font-size:12.5px;color:var(--fa-muted);display:flex;
   align-items:center;gap:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
 .po-status ha-icon{--mdc-icon-size:15px;vertical-align:-3px;flex:none;}
 .po-row.done.eaten .po-status{color:var(--fa-green);}
 .po-row.done.tossed .po-status{color:var(--fa-red);}
 .po-row.hl{background:var(--fa-accent-soft);border-radius:10px;padding-left:8px;padding-right:8px;}
-.po-act{display:flex;gap:2px;flex:none;}
+.po-act{display:flex;gap:2px;flex:none;margin-left:auto;}
+.portion-opened-badge{font-size:11px;font-weight:700;padding:3px 7px;border-radius:8px;background:var(--fa-accent-soft);color:var(--fa-accent);white-space:nowrap;}
 .po-act .icon-btn{width:36px;height:36px;font-size:15px;}
 .po-act .icon-btn ha-icon{--mdc-icon-size:18px;}
 .po-undo{border:none;background:transparent;color:var(--fa-accent);font-size:12px;
@@ -671,7 +672,6 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .status-colours .inventory-row.selected{outline:2px solid var(--fa-accent);outline-offset:-2px;}
 
 .inventory-handling{display:block;font-size:11px;color:var(--fa-muted);line-height:1.5;margin-top:5px;overflow-wrap:anywhere;}
-.handling-row-actions{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 10px;}.handling-row-actions .btn{font-size:11px;min-height:36px;padding:6px 9px;}
 .portion-handling-wrap{padding:8px 0;border-bottom:1px solid var(--fa-line);}.template-handling{margin:16px 0;}.template-handling summary{cursor:pointer;font-weight:700;font-size:13px;}
 .field textarea{width:100%;resize:vertical;font:inherit;font-size:14px;color:var(--fa-text);background:var(--fa-soft);border:1px solid var(--fa-line);border-radius:10px;padding:10px;margin-top:7px;}
 `;

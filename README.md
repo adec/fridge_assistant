@@ -263,7 +263,11 @@ or resetting its customisations removes its links; restoring the built-in does n
 
 ### Storage after opening
 
-With opened/defrosted tracking enabled, templates offer **Storage after opening**, defaulting to
+With opened/defrosted tracking enabled, each available portion has a **Mark opened** icon beside
+Eat, Toss and Print. Defrost actions appear as icons when applicable. Tooltips identify each
+action, and an **Opened** badge replaces the opening action afterwards.
+
+Templates offer **Storage after opening**, defaulting to
 **Keep current location**. For foods such as marmalade, choose a fridge location. Marking stock
 as opened proposes that destination; confirm it, choose another active location, or keep the
 current location. Only selected portions move. Opening time, the post-opening lifetime and the
