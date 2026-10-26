@@ -1,9 +1,9 @@
-import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b25";
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b25";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b25";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b25";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b25";
-import { openMealie } from "./views/mealie.js?v=0.10.0b25";
+import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b26";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b26";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b26";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b26";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b26";
+import { openMealie } from "./views/mealie.js?v=0.10.0b26";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -16,18 +16,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b25";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b25";
-import { STYLES } from "./styles.js?v=0.10.0b25";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b25";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b25";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b25";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b25";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b25";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b25";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b25";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b25";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b25";
-import { printSticker } from "./views/print.js?v=0.10.0b25";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b26";
+import { STYLES } from "./styles.js?v=0.10.0b26";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b26";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b26";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b26";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b26";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b26";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b26";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b26";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b26";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b26";
+import { printSticker } from "./views/print.js?v=0.10.0b26";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {

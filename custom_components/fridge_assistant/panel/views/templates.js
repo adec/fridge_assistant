@@ -1,11 +1,11 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b25";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b26";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b25";
-import { openSurface } from "../lib/surface.js?v=0.10.0b25";
+import { esc } from "../lib/format.js?v=0.10.0b26";
+import { openSurface } from "../lib/surface.js?v=0.10.0b26";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -222,6 +222,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     <div class="grid3">${locs.map(dayField).join("")}</div>
     ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] && t[key]%24===0 ? t[key]/24 : t[key]??''}" placeholder="${panel.t('handlingNoAutomatic')}"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0?'selected':''}>${panel.t('handlingDays')}</option></select></div></label>`).join('')}</details>`:''}
     <label class="field"><span>${panel.t("aliasesLabel")}</span><input id="te-aliases" value="${esc((t.aliases || []).join(", "))}" placeholder="${panel.t("aliasesPlaceholder")}"></label>
+    <label class="field"><span>${panel.t("labelNote")}</span><textarea id="te-label-note" maxlength="500" rows="2">${esc(t.label_note || "")}</textarea><small class="location-help">${panel.t("labelNoteTemplateHelp")}</small></label>
     <label class="field"><span>${panel.t("notesTipLabel")}</span><input id="te-notes" value="${esc(t.notes || "")}" placeholder="${panel.t("notesTipPlaceholder")}"></label>
     <div class="modal-actions ${!isNew ? "with-del" : ""}">
       ${isOverride ? `<button class="btn ghost" id="te-reset">${panel.t("restoreDefaultBtn")}</button>` : ""}
@@ -306,6 +307,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       date_type: q("#te-date-type").checked ? "best_before" : "use_by",
       shelf_life: shelf,
       aliases: (q("#te-aliases").value || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
+      label_note: q("#te-label-note").value.trim(),
       notes: (q("#te-notes").value || "").trim(),
       source: "user",
     };
@@ -325,7 +327,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       if (options.afterSave) {
         savedTemplate = result.template;
         // A failed mapping retries this same template, never creates a duplicate.
-        h.modal.querySelectorAll("input,select,#te-kind button,#te-emoji-ai").forEach(el => el.disabled = true);
+        h.modal.querySelectorAll("input,textarea,select,#te-kind button,#te-emoji-ai").forEach(el => el.disabled = true);
         if (!await options.afterSave(savedTemplate)) throw new Error(panel.t("mappingTemplateSavedLinkFailed"));
       }
       h.close();

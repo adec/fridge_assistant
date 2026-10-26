@@ -418,9 +418,6 @@ def render_label(item: dict[str, Any], ctx: dict[str, Any] | None = None) -> Ima
         deadline = datetime.fromisoformat(item['handling_due_at'])
         exp_str = (_fmt_date(deadline.date(), lang) or '') + ' ' + deadline.strftime('%H:%M')
         date_heading = 'GEBRUIKEN VOOR' if lang == 'nl' else 'USE WITHIN'
-        reason = ('Na openen' if item['handling_reason'] == 'opened' else 'Na ontdooien') if lang == 'nl' else ('After opening' if item['handling_reason'] == 'opened' else 'After defrosting')
-        original_type = ('THT' if lang == 'nl' else 'Best Before') if item.get('original_date_type') == 'best_before' else ('Te gebruiken tot' if lang == 'nl' else 'Use By')
-        item = {**item, 'contents': f"{reason} · {original_type}: {item.get('original_expiry_date') or '-'} · {item.get('contents') or item.get('name', '')}"}
     label_font, _ = _fit_font(d, date_heading, sans_bold, inner_w - S(6) * (len(date_heading) - 1), start=S(26), min_size=S(14))
     exp_font, _ = _fit_font(d, exp_str, sans_bold, inner_w - S(56), start=S(58),
                             min_size=S(34))
@@ -442,25 +439,31 @@ def render_label(item: dict[str, Any], ctx: dict[str, Any] | None = None) -> Ima
     d.text((MX, dy - et), exp_str, font=exp_font, fill=fg)
     y = box_top + box_h + S(24)
 
-    # 6) Contents (only as much as fits above the footer) --------------------
-    contents = str(item.get("contents") or "").strip()
+    # 6) Contextual details, prioritised; never print generic notes or repeated names.
+    try:
+        from .label_details import label_sections
+    except ImportError:  # Standalone label preview script.
+        from label_details import label_sections
     quantity = str(item.get("quantity") or "").strip()
-    # Reserve a taller footer band when there's a quantity to show.
     footer_top = H - (S(132) if quantity else S(70))
-    if contents:
-        cfont = sans(S(38))
-        line_h = S(46)
-        # Taller labels simply fit more lines; cap so contents never becomes
-        # the dominant section. Zero lines of room = skip the section whole
-        # (heading included) instead of colliding with the footer.
+    for heading, text in label_sections(item, lang):
+        cfont = sans(S(34))
+        line_h = S(42)
         max_lines = min(8, int((footer_top - y - S(40)) // line_h))
-        if max_lines >= 1:
-            _draw_tracked(d, (MX, y), s["contents"], sans_bold(S(26)),
-                          tracking=S(6))
-            y += S(40)
-            for line in _wrap(d, contents, cfont, inner_w, max_lines=max_lines):
-                d.text((MX, y), line, font=cfont, fill=BLACK)
-                y += line_h
+        if max_lines < 1:
+            break
+        _draw_tracked(d, (MX, y), heading, sans_bold(S(22)), tracking=S(4))
+        y += S(36)
+        lines = []
+        for paragraph in text.splitlines():
+            remaining = max_lines - len(lines)
+            if remaining <= 0:
+                break
+            lines.extend(_wrap(d, paragraph, cfont, inner_w, max_lines=remaining))
+        for line in lines:
+            d.text((MX, y), line, font=cfont, fill=BLACK)
+            y += line_h
+        y += S(14)
 
     # 7) Footer — the quantity ("how much / how many servings") lives here.
     # It replaces the old label-type stamp because it's what you actually want

@@ -225,7 +225,18 @@ ambiguous letters (I/O/Q) excluded so it always reads cleanly off a small sticke
 
 If the optional [Label Printer add-on](#optional-label-printer-add-on) is installed, a tap on 🏷️ prints
 a sticker sized for a **DYMO 99014** label (54 × 101 mm) with the item name, a scannable Code 39 barcode
-of the item code, the storage date, a bold "eat before" date, contents, and quantity/servings.
+of the item code, the storage date, a bold **Use By** or **Best Before** date, and quantity/servings.
+
+Below the date, labels prioritise handling details (opened/defrosted times and the original label
+date), followed by optional instructions and contents that differ from the item name. Duplicate
+contents are omitted. Sections appear only when relevant and space allows; handling details take
+priority over instructions and contents.
+
+Use **Label note / instructions** in a template to set default printable instructions, or in an
+item's **More options** to override them. New items copy the template's note; later template edits
+do not change existing stock. Clearing an item's label note suppresses it, and **Use template label
+note** restores the current template default. Ordinary notes remain separate and are not printed
+in this section.
 
 ### Portions
 

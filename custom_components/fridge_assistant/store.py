@@ -15,6 +15,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .codes import generate_code
+from .label_details import label_note
 from .const import (
     ACTION_EATEN,
     ACTION_PORTION_EATEN,
@@ -554,6 +555,7 @@ class FridgeStore:
         tpl_id = explicit_id or self._unique_template_id(data.get("name", "template"))
         existing = self.user_templates.get(tpl_id, {})
         tpl = {
+            "label_note": label_note(data.get("label_note",existing.get("label_note", ""))),
             "id": tpl_id,
             "name": data.get("name", existing.get("name", tpl_id)),
             "aliases": data.get("aliases", existing.get("aliases", [])),
@@ -665,6 +667,7 @@ class FridgeStore:
             (ev.get("item") or {}).get("code") for ev in self.history
         ]
         item = {
+            "label_note": label_note((template or {}).get("label_note", "") if data.get("label_note") is None else data["label_note"]),
             "id": uuid.uuid4().hex,
             "code": generate_code((c for c in taken_codes if c), code_format),
             "name": (
@@ -720,6 +723,8 @@ class FridgeStore:
             return None
         if "date_type" in changes:
             valid_date_type(changes["date_type"])
+        if "label_note" in changes:
+            changes = {**changes,"label_note":label_note(changes["label_note"])}
         if "location" in changes:
             self.validate_item_location(changes["location"], item.get("location"))
         allowed = {
@@ -738,6 +743,7 @@ class FridgeStore:
             "expiry_source",
             "date_type",
             "notes",
+            "label_note",
             "barcode",
         }
         for key, value in changes.items():

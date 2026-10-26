@@ -33,6 +33,12 @@ add_item:
       example: 2 bakjes
       selector:
         text:
+    label_note:
+      name: Label note / instructions
+      description: "Optional printable instructions; separate from private notes. Empty suppresses the template default."
+      selector:
+        text:
+          multiline: true
     portions:
       example: 3
       selector:
@@ -43,6 +49,11 @@ add_item:
 
 update_item:
   fields:
+    label_note:
+      name: Label note / instructions
+      selector:
+        text:
+          multiline: true
     date_type:
       name: Date type
       description: "Use By for expiry dates, or Best Before for quality dates. Defaults to the template's date type."

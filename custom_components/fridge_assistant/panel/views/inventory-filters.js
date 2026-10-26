@@ -1,7 +1,7 @@
-import { emptyFilters, filterInventory, activeFilterGroups } from '../lib/inventory-filters.js?v=0.10.0b25';
-import { esc } from '../lib/format.js?v=0.10.0b25';
-import { openSurface } from '../lib/surface.js?v=0.10.0b25';
-import { openLocationsManager } from './locations.js?v=0.10.0b25';
+import { emptyFilters, filterInventory, activeFilterGroups } from '../lib/inventory-filters.js?v=0.10.0b26';
+import { esc } from '../lib/format.js?v=0.10.0b26';
+import { openSurface } from '../lib/surface.js?v=0.10.0b26';
+import { openLocationsManager } from './locations.js?v=0.10.0b26';
 export const dueKeys = ['any','past','today','soon','week','none','custom'];
 export function filterLabel(panel, filters, key) {
   if (key==='locations') return filters.locations.map(id=>panel._locMeta(id).label || id).join(', ');

@@ -1,5 +1,5 @@
-import { handlingSummary, handlingDate, handlingStatus } from "./handling.js?v=0.10.0b25";
-import { esc, fmtCardDate, daysLabel } from '../lib/format.js?v=0.10.0b25';
+import { handlingSummary, handlingDate, handlingStatus } from "./handling.js?v=0.10.0b26";
+import { esc, fmtCardDate, daysLabel } from '../lib/format.js?v=0.10.0b26';
 
 export function inventoryList(panel, items, lang) {
   if (!panel._inventorySort || panel._inventorySort.startsWith("due")) items = items.slice().sort((a,b) => {

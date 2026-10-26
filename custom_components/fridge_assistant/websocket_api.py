@@ -79,6 +79,7 @@ _ITEM_FIELDS = {
     vol.Optional("date_type"): vol.In(DATE_TYPES),
     vol.Optional("expiry_date"): _OPT_STR,
     vol.Optional("expiry_source"): _OPT_STR,
+    vol.Optional("label_note"): vol.Any(None, vol.All(str, vol.Length(max=500))),
     vol.Optional("notes"): _OPT_STR,
     vol.Optional("barcode"): _OPT_STR,
 }

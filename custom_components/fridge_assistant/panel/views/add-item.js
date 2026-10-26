@@ -1,7 +1,7 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b25";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b26";
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b25";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b26";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
@@ -70,6 +70,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
         <label class="field"><span>${panel.t("emojiLabel")}</span><input id="f-emojiin" maxlength="4" value="${esc(m.emoji)}"></label>
       </div>
       <label class="field"><span>${panel.t("notesLabel")}</span><input id="f-notes" placeholder="${panel.t("notesLabel")}" value="${esc(editItem?.notes ?? prefill.notes ?? "")}"></label>
+      <label class="field"><span>${panel.t("labelNote")}</span><textarea id="f-label-note" maxlength="500" rows="2">${esc(editItem?.label_note ?? prefill.label_note ?? "")}</textarea><small class="location-help">${panel.t("labelNoteItemHelp")}</small><button type="button" class="link" id="f-label-note-reset">${panel.t("labelNoteUseTemplate")}</button></label>
       <label class="field"><span>${panel.t("photoUrlLabel")}</span><input id="f-photo" placeholder="${panel.t("photoUrlPlaceholder")}" value="${esc(editItem?.photo ?? prefill.photo ?? "")}"></label>
     </div>
     <div class="modal-actions">
@@ -83,6 +84,12 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   const nameEl = q("#f-name"), addedEl = q("#f-added"), expEl = q("#f-expiry");
   const emojiEl = q("#m-emoji"), suggestEl = q("#f-suggest"), hintEl = q("#f-hint");
   const lang = panel._lang();
+  let labelNoteManual = (isEdit && editItem.label_note != null) || prefill.label_note != null;
+  const applyLabelNote = template => { q('#f-label-note-reset').disabled=!template; if (!labelNoteManual) q('#f-label-note').value = template?.label_note || ''; };
+  q('#f-label-note').addEventListener('input',()=>{labelNoteManual=true;});
+  q('#f-label-note-reset').onclick=()=>{labelNoteManual=false;applyLabelNote(panel._state.templates.find(t=>t.id===m.template_id));};
+  applyLabelNote(panel._state.templates.find(t=>t.id===m.template_id));
+
 
   const setEmoji = (e) => { m.emoji = e; emojiEl.textContent = e; if (q("#f-emojiin")) q("#f-emojiin").value = e; };
   const setCategory = (category, force = false) => {
@@ -144,7 +151,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
 
   // Shown when nothing matched, or after the user rejected a wrong guess.
   const showManual = (query, heading) => {
-    m.template_id = null; setCategory(null);
+    m.template_id = null; applyLabelNote(null); setCategory(null);
     suggestEl.className = "suggest";
     const aiBtn = panel._state.options.ai_enabled
       ? `<button class="s-mini ai" id="s-ai">${panel.t("aiEstimateMini")}</button>` : "";
@@ -174,7 +181,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     if (res.template) {
       const t = res.template;
       if (!m.dateTypeManual) setDateType(t.date_type);
-      m.template_id = t.id;
+      m.template_id = t.id; applyLabelNote(t);
       if (!m.kindManual) setKind(panel._kindOf(t));
       setCategory(t.category); setEmoji(t.emoji || "🍽️");
       const sl = t.shelf_life || {};
@@ -266,11 +273,11 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     // Prevent pending recognition from overwriting an explicitly created link.
     ++matchVersion;
     const seed = { name, emoji: m.emoji, kind: m.kind, category: m.category || "other",
-      date_type: m.dateType, shelf_life: { ...(m.aiResult?.shelf_life || {}) }, aliases: [], notes: "" };
+      date_type: m.dateType, shelf_life: { ...(m.aiResult?.shelf_life || {}) }, aliases: [], notes: "", label_note:q("#f-label-note").value.trim() };
     panel._openTemplateEditor(seed, true, template => {
       if (!template || !h.modal.isConnected) return;
       ++matchVersion; m.noAutoMatch = true; m.aiResult = null;
-      m.template_id = template.id; nameEl.value = template.name;
+      m.template_id = template.id; nameEl.value = template.name; applyLabelNote(template);
       m.kindManual = true; setKind(template.kind);
       m.categoryManual = true; setCategory(template.category, true); setEmoji(template.emoji || m.emoji);
       if (!m.dateTypeManual) setDateType(template.date_type);
@@ -309,6 +316,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     q("#f-submit").disabled = true;
     try {
       if (!m.aiResult && !m.noAutoMatch) await matchNow();
+      payload.label_note = isEdit || labelNoteManual ? q("#f-label-note").value.trim() : null;
       payload.date_type = m.dateType;
       payload.expiry_date = expEl.value || null;
       payload.expiry_source = m.expiryManual ? "manual" : m.expirySource;
@@ -333,6 +341,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
               icon: m.aiResult.icon,
               date_type: m.dateType,
               shelf_life: m.aiResult.shelf_life,
+              label_note: labelNoteManual ? q("#f-label-note").value.trim() : "",
               notes: m.aiResult.notes,
               source: "ai",
             },

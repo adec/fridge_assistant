@@ -671,4 +671,5 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .inventory-handling{display:block;font-size:11px;color:var(--fa-muted);line-height:1.5;margin-top:5px;overflow-wrap:anywhere;}
 .handling-row-actions{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 10px;}.handling-row-actions .btn{font-size:11px;min-height:36px;padding:6px 9px;}
 .portion-handling-wrap{padding:8px 0;border-bottom:1px solid var(--fa-line);}.template-handling{margin:16px 0;}.template-handling summary{cursor:pointer;font-weight:700;font-size:13px;}
+.field textarea{width:100%;resize:vertical;font:inherit;font-size:14px;color:var(--fa-text);background:var(--fa-soft);border:1px solid var(--fa-line);border-radius:10px;padding:10px;margin-top:7px;}
 `;

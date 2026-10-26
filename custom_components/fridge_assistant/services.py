@@ -141,6 +141,7 @@ ADD_ITEM_SCHEMA = vol.Schema(
         vol.Optional("emoji"): cv.string,
         vol.Optional("icon"): cv.string,
         vol.Optional("photo"): cv.string,
+        vol.Optional("label_note"): vol.All(cv.string, vol.Length(max=500)),
         vol.Optional("notes"): cv.string,
     }
 )
