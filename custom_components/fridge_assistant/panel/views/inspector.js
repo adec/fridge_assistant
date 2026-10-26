@@ -1,12 +1,13 @@
-import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b27";
+import { fmtCardDate } from "../lib/format.js?v=0.10.0b28";
+import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b28";
 /* Item inspector: drawer on desktop (list stays visible; selecting another
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b27";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b27";
-import { openSurface } from "../lib/surface.js?v=0.10.0b27";
-import { relTime } from "./history.js?v=0.10.0b27";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b28";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b28";
+import { openSurface } from "../lib/surface.js?v=0.10.0b28";
+import { relTime } from "./history.js?v=0.10.0b28";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length
@@ -77,8 +78,8 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         <div class="d-title"><h2>${esc(i.name)}</h2><div class="d-code">${esc(i.code)}${total > 1 ? ` · <span class="pbadge" title="${esc(panel.t("pbadgeTitle", open, total))}">${open}/${total}</span>` : ""}</div></div>
         <button class="icon-btn" id="d-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button>
       </div>
-      <div class="d-status" style="--c:${col}">${i.effective_due_at ? esc(handlingDate(panel,i)) : daysLabel(i.days_left, lang, i.date_type)}${!i.effective_due_at && i.expiry_date ? " · " + panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel") + " " + fmtDate(i.expiry_date, lang) : ""}</div>
-      ${i.effective_due_at ? `<p class="location-help">${panel.t("handlingOriginal")}: ${panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} ${i.expiry_date || "—"}</p>`:""}
+      <div class="d-status" style="--c:${col}">${i.effective_due_at ? esc(handlingDate(panel,i)) : daysLabel(i.days_left, lang, i.date_type)}${!i.effective_due_at && i.expiry_date ? " · " + panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel") + " " + fmtCardDate(i.expiry_date, lang, panel._state.today, i.expiry_precision) : ""}</div>
+      ${i.effective_due_at ? `<p class="location-help">${panel.t("handlingOriginal")}: ${panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} ${i.expiry_date ? fmtCardDate(i.expiry_date, lang, panel._state.today, i.expiry_precision) : "—"}</p>`:""}
       <div class="po-sec">
         <div class="po-head">
           <span>${panel.t("portionsLabel")}</span>

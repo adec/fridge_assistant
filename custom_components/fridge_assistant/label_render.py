@@ -412,6 +412,8 @@ def render_label(item: dict[str, Any], ctx: dict[str, Any] | None = None) -> Ima
     # Print the saved date meaning; countdowns would become stale on paper.
     expiry = _parse(item.get("expiry_date"))
     exp_str = _fmt_date(expiry, lang) or s["no_date"]
+    if expiry and item.get('expiry_precision') == 'month':
+        exp_str = exp_str.split(' ', 1)[1]
     date_heading = s["best_before" if item.get("date_type") == "best_before" else "use_by"]
     if item.get('handling_due_at'):
         from datetime import datetime

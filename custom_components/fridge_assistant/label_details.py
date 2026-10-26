@@ -43,7 +43,10 @@ def label_sections(item, lang='en'):
         original=item.get('original_expiry_date')
         if original:
             kind=('THT' if nl else 'Best Before') if item.get('original_date_type')=='best_before' else ('Te gebruiken tot' if nl else 'Use By')
-            handling.append(f'{kind}: {_date(original,lang)}')
+            original_text = _date(original, lang)
+            if item.get('original_expiry_precision') == 'month':
+                original_text = original_text.split(' ', 1)[1]
+            handling.append(f'{kind}: {original_text}')
     result=[]
     if handling:
         result.append(('BEHANDELING' if nl else 'HANDLING DETAILS', '\n'.join(handling)))

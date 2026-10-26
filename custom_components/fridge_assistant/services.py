@@ -134,6 +134,7 @@ ADD_ITEM_SCHEMA = vol.Schema(
         vol.Optional("added_date"): cv.string,
         vol.Optional("date_type"): vol.In(DATE_TYPES),
         vol.Optional("expiry_date"): cv.string,
+        vol.Optional("expiry_precision"): vol.In(["day", "month"]),
         vol.Optional("quantity"): cv.string,
         vol.Optional("portions"): vol.All(
             vol.Coerce(int), vol.Range(min=1, max=MAX_PORTIONS)

@@ -1,7 +1,8 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b27";
+import { monthEnd } from "../lib/date-precision.js?v=0.10.0b28";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b28";
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b27";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b28";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
@@ -10,6 +11,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     added: prefill.added_date || editItem?.added_date || todayISO(),
     dateType: editItem?.date_type || prefill.date_type || "use_by",
     dateTypeManual: isEdit || !!prefill.date_type,
+    expiryPrecision: prefill.expiry_precision || editItem?.expiry_precision || "day",
     expiry: prefill.expiry_date || editItem?.expiry_date || "",
     expiryManual: isEdit ? editItem?.expiry_source === "manual" : !!prefill.expiry_date,
     expiryLocked: isEdit || !!prefill.expiry_date,
@@ -60,6 +62,8 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       <label class="field"><span id="f-date-label">${panel.t(m.dateType === "best_before" ? "bestBeforeLabel" : "useByLabel")}</span><div class="datefield"><input type="date" id="f-expiry" value="${m.expiry}"><span class="df-display"></span><button type="button" class="df-clear" title="${panel.t("clearDateTitle")}" aria-label="${panel.t("clearDateTitle")}"><ha-icon icon="mdi:close"></ha-icon></button></div></label>
     </div>
     <div class="expiry-hint" id="f-hint"></div>
+    <div class="grid2"><label class="field"><span>${panel.t('datePrecision')}</span><div class="select-wrap"><select id="f-date-precision"><option value="day">${panel.t('exactDate')}</option><option value="month">${panel.t('monthYear')}</option></select></div></label><label class="field hidden" id="f-month-wrap"><span id="f-month-label">${panel.t(m.dateType === 'best_before' ? 'bestBeforeLabel' : 'useByLabel')}</span><input type="month" id="f-expiry-month"></label></div>
+    <p class="location-help hidden" id="f-month-hint"></p>
     <div id="f-expiry-suggestion" class="expiry-suggestion hidden"></div>
     <button class="link" id="f-adv">${panel.t("moreOptions")}</button>
     <div class="adv hidden" id="f-advbox">
@@ -114,12 +118,31 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     m.dateType = type || "use_by";
     q("#f-date-type").checked = m.dateType === "best_before";
     q("#f-date-label").textContent = panel.t(m.dateType === "best_before" ? "bestBeforeLabel" : "useByLabel");
+    q('#f-month-label').textContent = panel.t(m.dateType === 'best_before' ? 'bestBeforeLabel' : 'useByLabel');
     updateHint();
   };
   q("#f-date-type").addEventListener("change", e => { m.dateTypeManual = true; setDateType(e.target.checked ? "best_before" : "use_by"); });
   updateHint();
   panel._wireDateField(addedEl, panel.t("datePickPlaceholder"), lang);
   panel._wireDateField(expEl, panel.t("dateOptionalPlaceholder"), lang);
+
+  const precisionEl = q('#f-date-precision'), monthEl = q('#f-expiry-month');
+  const syncPrecision = () => {
+    const monthly = m.expiryPrecision === 'month';
+    precisionEl.value = m.expiryPrecision;
+    expEl.closest('label').classList.toggle('hidden', monthly);
+    q('#f-month-wrap').classList.toggle('hidden', !monthly);
+    monthEl.value = expEl.value.slice(0, 7);
+    q('#f-month-hint').classList.toggle('hidden', !monthly || !expEl.value);
+    q('#f-month-hint').textContent = monthly && expEl.value ? panel.t('monthDeadline') + ' ' + new Intl.DateTimeFormat(lang === 'nl' ? 'nl-NL' : 'en-GB', {day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(expEl.value+'T00:00:00Z')) : '';
+  };
+  precisionEl.onchange = () => {
+    m.expiryPrecision = precisionEl.value;
+    if (m.expiryPrecision === 'month' && expEl.value) expEl.value = monthEnd(expEl.value.slice(0,7));
+    expEl.dispatchEvent(new Event('input')); syncPrecision();
+  };
+  monthEl.oninput = () => { expEl.value = monthEnd(monthEl.value); expEl.dispatchEvent(new Event('input')); syncPrecision(); };
+  syncPrecision();
 
   const applySuggestion = (expiryDate, source) => {
     const proposal = q("#f-expiry-suggestion");
@@ -128,7 +151,8 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       proposal.innerHTML = expiryDate && expiryDate !== expEl.value
         ? `<p>${panel.t("suggestedExpiry")}: <b>${esc(expiryDate)}</b><br>${panel.t("keepExpiry")}</p><button type="button" class="btn ghost" id="accept-expiry">${panel.t("useSuggestedExpiry")}</button>` : "";
       proposal.querySelector("#accept-expiry")?.addEventListener("click", () => {
-        expEl.value = expiryDate; m.expiry = expiryDate; m.expiryManual = false;
+        m.expiryPrecision = "day";
+        expEl.value = expiryDate; syncPrecision(); m.expiry = expiryDate; m.expiryManual = false;
         m.expiryLocked = true; m.expirySource = source;
         proposal.classList.add("hidden"); updateHint();
       });
@@ -300,6 +324,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       location: m.location,
       added_date: addedEl.value || todayISO(),
       date_type: m.dateType,
+      expiry_precision: m.expiryPrecision,
       expiry_date: expEl.value || null,
       expiry_source: m.expiryManual ? "manual" : (m.expirySource || (expEl.value ? "manual" : "none")),
       emoji: m.emoji,
@@ -318,6 +343,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       if (!m.aiResult && !m.noAutoMatch) await matchNow();
       payload.label_note = isEdit || labelNoteManual ? q("#f-label-note").value.trim() : null;
       payload.date_type = m.dateType;
+      payload.expiry_precision = m.expiryPrecision;
       payload.expiry_date = expEl.value || null;
       payload.expiry_source = m.expiryManual ? "manual" : m.expirySource;
       payload.template_id = m.template_id;

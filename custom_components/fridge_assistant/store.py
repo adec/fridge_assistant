@@ -14,6 +14,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
+from .date_precision import normalise_expiry
 from .codes import generate_code
 from .label_details import label_note
 from .const import (
@@ -689,7 +690,8 @@ class FridgeStore:
             "portions": default_portions(data.get("portions")),
             "added_date": added_date,
             "date_type": valid_date_type(data.get("date_type", (template or {}).get("date_type", DEFAULT_DATE_TYPE))),
-            "expiry_date": expiry_date,
+            "expiry_date": normalise_expiry(expiry_date, data.get("expiry_precision", "day")),
+            "expiry_precision": data.get("expiry_precision", "day"),
             "expiry_source": expiry_source,
             "notes": data.get("notes"),
             # Retail barcode (EAN/UPC) if the item was added by scanning one;
@@ -721,6 +723,10 @@ class FridgeStore:
         item = self.items.get(item_id)
         if not item:
             return None
+        if "expiry_date" in changes or "expiry_precision" in changes:
+            precision = changes.get("expiry_precision", "day" if "expiry_date" in changes else item.get("expiry_precision", "day"))
+            changes = {**changes, "expiry_precision": precision,
+                       "expiry_date": normalise_expiry(changes.get("expiry_date", item.get("expiry_date")), precision)}
         if "date_type" in changes:
             valid_date_type(changes["date_type"])
         if "label_note" in changes:
@@ -740,6 +746,7 @@ class FridgeStore:
             "quantity",
             "added_date",
             "expiry_date",
+            "expiry_precision",
             "expiry_source",
             "date_type",
             "notes",

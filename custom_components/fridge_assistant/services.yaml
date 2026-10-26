@@ -16,6 +16,13 @@ add_item:
     added_date:
       selector:
         text:
+    expiry_precision:
+      description: "day (default) or month. Month precision uses the month's final day."
+      selector:
+        select:
+          options:
+            - day
+            - month
     date_type:
       name: Date type
       description: "Use By for expiry dates, or Best Before for quality dates. Defaults to the template's date type."
@@ -54,6 +61,13 @@ update_item:
       selector:
         text:
           multiline: true
+    expiry_precision:
+      description: "day (default) or month. Month precision uses the month's final day."
+      selector:
+        select:
+          options:
+            - day
+            - month
     date_type:
       name: Date type
       description: "Use By for expiry dates, or Best Before for quality dates. Defaults to the template's date type."

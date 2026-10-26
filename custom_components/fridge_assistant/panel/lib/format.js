@@ -1,6 +1,6 @@
 /* Small date/text helpers (timezone-safe, YYYY-MM-DD). */
 
-import { MONTHS } from "../strings.js?v=0.10.0b27";
+import { MONTHS } from "../strings.js?v=0.10.0b28";
 
 export function todayISO() {
   const n = new Date();
@@ -31,7 +31,8 @@ export function fmtDate(iso, lang) {
   return `${dt.getUTCDate()} ${MONTHS[lang][dt.getUTCMonth()]}`;
 }
 // Use Home Assistant's current date so the threshold follows its timezone.
-export function fmtCardDate(iso, lang, today = todayISO()) {
+export function fmtCardDate(iso, lang, today = todayISO(), precision = "day") {
+  if (precision === "month" && parseISO(iso)) return new Intl.DateTimeFormat(lang === "nl" ? "nl-NL" : "en-GB", {month:"short", year:"numeric", timeZone:"UTC"}).format(parseISO(iso));
   const date = parseISO(iso), now = parseISO(today);
   if (!date || !now) return fmtDate(iso, lang);
   const year = now.getUTCFullYear() + 1, month = now.getUTCMonth();

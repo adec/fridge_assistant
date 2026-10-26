@@ -47,6 +47,8 @@ def portion_projection(item, portion, now):
     phase = 'defrosted' if portion.get('defrosted_at') else 'defrosting' if portion.get('defrost_started_at') else None
     return {**item, 'location':portion.get('location', item.get('location')),
             'original_expiry_date':item.get('original_expiry_date', item.get('expiry_date')),
+            'original_expiry_precision':item.get('original_expiry_precision', item.get('expiry_precision', 'day')),
+            'expiry_precision':item.get('expiry_precision', 'day') if reason in ('original', None) else 'day',
             'original_date_type':item.get('original_date_type', item.get('date_type', 'use_by')),
             'handling_reason':reason if reason != 'original' else None,
             'handling_due_at':deadline.astimezone(now.tzinfo).isoformat() if deadline and reason != 'original' else None,

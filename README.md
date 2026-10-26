@@ -238,6 +238,12 @@ do not change existing stock. Clearing an item's label note suppresses it, and *
 note** restores the current template default. Ordinary notes remain separate and are not printed
 in this section.
 
+When adding or editing stock, **Date precision** offers **Exact date** (the default) or
+**Month & year**. A month-only date uses the month's final calendar day for status and sorting,
+including leap years. The form confirms that deadline; inventory dates and labels retain the
+month/year display. Best Before / Use By is chosen separately. Existing stock keeps exact dates.
+An earlier opened/defrosted deadline still displays its precise date and time.
+
 ### Portions
 
 Cooked a big batch? Set a portion count when adding the item (or later, in the inspector) and the

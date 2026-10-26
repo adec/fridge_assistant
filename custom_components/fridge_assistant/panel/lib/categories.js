@@ -1,4 +1,4 @@
-import { esc } from './format.js?v=0.10.0b27';
+import { esc } from './format.js?v=0.10.0b28';
 
 export function categoryIds(categories, kind, current = null, retainCurrent = false) {
   return Object.keys(categories).filter(id => !categories[id].deleted &&
