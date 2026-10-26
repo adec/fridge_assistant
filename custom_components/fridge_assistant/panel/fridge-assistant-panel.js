@@ -1,5 +1,6 @@
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b21";
-import { openMealie } from "./views/mealie.js?v=0.10.0b21";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b22";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b22";
+import { openMealie } from "./views/mealie.js?v=0.10.0b22";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -12,18 +13,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b21";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b21";
-import { STYLES } from "./styles.js?v=0.10.0b21";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b21";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b21";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b21";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b21";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b21";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b21";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b21";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b21";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b21";
-import { printSticker } from "./views/print.js?v=0.10.0b21";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b22";
+import { STYLES } from "./styles.js?v=0.10.0b22";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b22";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b22";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b22";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b22";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b22";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b22";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b22";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b22";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b22";
+import { printSticker } from "./views/print.js?v=0.10.0b22";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -37,6 +38,8 @@ class FridgeAssistantPanel extends HTMLElement {
     this._unsub = null;
     this._shellBuilt = false;
     this._activeTab = "inventory";
+    this._inventoryView = "cards";
+    try { if (localStorage.getItem("fridge_assistant.inventory_view") === "list") this._inventoryView = "list"; } catch {}
   }
 
   set hass(hass) {
@@ -221,6 +224,7 @@ class FridgeAssistantPanel extends HTMLElement {
           <div class="counts" id="counts"></div>
           <div class="searchrow">
             <div class="search"><ha-icon icon="mdi:magnify" style="--mdc-icon-size:18px;color:var(--fa-muted)"></ha-icon><input id="search" placeholder="${this.t("searchPlaceholder")}" autocomplete="off" enterkeyhint="search"></div>
+        <div class="inventory-view-switch" id="inventory-view-switch" role="group" aria-label="${this.t("inventoryViewLabel")}"><button class="btn ghost" data-view="cards" aria-pressed="${this._inventoryView === "cards"}"><ha-icon icon="mdi:view-grid-outline"></ha-icon> ${this.t("cardView")}</button><button class="btn ghost" data-view="list" aria-pressed="${this._inventoryView === "list"}"><ha-icon icon="mdi:format-list-bulleted"></ha-icon> ${this.t("listView")}</button></div>
             <button class="btn ghost icon-only" id="btn-clean" title="${this.t("cleanUp")}"><ha-icon icon="mdi:broom"></ha-icon></button>
           </div>
         </header>
@@ -234,6 +238,12 @@ class FridgeAssistantPanel extends HTMLElement {
       <div id="toast-root"></div>
     `;
     const $ = (s) => this.shadowRoot.getElementById(s);
+    this.shadowRoot.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => {
+      this._inventoryView = button.dataset.view;
+      try { localStorage.setItem("fridge_assistant.inventory_view", this._inventoryView); } catch {}
+      this.shadowRoot.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === this._inventoryView)));
+      this._renderList();
+    }));
     $("fab-add").addEventListener("click", () => this._openAddModal());
     $("fab-scan").addEventListener("click", () => this._openScanner());
     $("tab-inventory").addEventListener("click", () => this._selectTab("inventory"));
@@ -255,7 +265,7 @@ class FridgeAssistantPanel extends HTMLElement {
   _selectTab(tab) {
     this._activeTab = tab;
     const recipes = tab === "recipes";
-    for (const id of ["counts", "filters", "list", "fab-add", "fab-scan"]) this.shadowRoot.getElementById(id).hidden = recipes;
+    for (const id of ["counts", "filters", "list", "fab-add", "fab-scan", "inventory-view-switch"]) this.shadowRoot.getElementById(id).hidden = recipes;
     this.shadowRoot.querySelector(".searchrow").hidden = recipes;
     this.shadowRoot.getElementById("recipes-view").hidden = !recipes;
     for (const name of ["inventory", "recipes"]) this.shadowRoot.getElementById(`tab-${name}`).setAttribute("aria-selected", String(tab === name));
@@ -401,6 +411,8 @@ class FridgeAssistantPanel extends HTMLElement {
       // needs its own way out.
       html += `<div class="empty small"><p>${this.t("nothingFound")}</p>
         <button class="btn ghost" id="clear-filters">${this.t("showAll")}</button></div>`;
+    } else if (this._inventoryView === "list") {
+      html += inventoryList(this, items, lang);
     } else {
       // Urgency sections: full-width headers inside the cards grid, so the
       // expiry sort stays readable in the two-column layout. They apply in
@@ -426,6 +438,7 @@ class FridgeAssistantPanel extends HTMLElement {
     }
     list.innerHTML = html;
 
+    list.querySelector("#list-sort")?.addEventListener("click", () => { this._listDescending = !this._listDescending; this._renderList(); });
     const clearBtn = list.querySelector("#clear-filters");
     if (clearBtn) clearBtn.addEventListener("click", () => {
       this._filterLoc = this._filterKind = this._filterCat = "all";
@@ -437,16 +450,21 @@ class FridgeAssistantPanel extends HTMLElement {
     });
     list.querySelectorAll("[data-item]").forEach((el) => {
       const open = (e) => {
-        if (e.target.closest(".card-print")) return;
+        if (e.target.closest("button")) return;
         const item = this._state.items.find((x) => x.id === el.dataset.item);
         if (item) this._openItemModal(item);
       };
       el.addEventListener("click", open);
       // Cards are divs, so Enter/Space must be wired for keyboard users.
       el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(e); }
+        if (e.target === el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(e); }
       });
     });
+    list.querySelectorAll("[data-list-actions]").forEach(button => button.addEventListener("click", e => {
+      e.stopPropagation();
+      const item = this._state.items.find(i => i.id === button.dataset.listActions);
+      if (item) this._openItemModal(item);
+    }));
     list.querySelectorAll(".card-print").forEach((b) =>
       b.addEventListener("click", (e) => { e.stopPropagation(); this._printSticker(b.dataset.print); })
     );

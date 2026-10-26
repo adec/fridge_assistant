@@ -514,3 +514,17 @@ To work recipe by recipe, open a recipe with unresolved mappings and choose
 with Needs review selected initially. Link existing, Create template and Save and next
 stay within that recipe. Links are shared across recipes using the same Mealie food.
 Mapped ingredients absent from inventory remain missing stock rather than unmatched mappings.
+
+### Compact inventory list
+
+Use **Cards / List** beside search to switch inventory layouts. The choice is saved in
+this browser/device; Cards remains the default. List view supports the same search,
+location, kind and category filters. Click the Due date heading to reverse date order;
+undated items remain last.
+
+Desktop rows show food, stock code, location, date type/date and time remaining. The
+portions column appears only when a displayed item has multiple portions. On phones,
+rows use two columns with location and portion counts beneath the name. A selected
+location filter hides repeated location labels. Select a row (or press Enter/Space)
+to open the existing item details and actions; the desktop ellipsis opens the same
+actions. Storage-disabled browsers can still switch views for the current session.
