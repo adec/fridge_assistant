@@ -58,3 +58,30 @@ category. Keep emojis as the default. Category MDI fields originated upstream an
 remain stored for compatibility, but are not currently displayed in the panel. The
 category editor hides the unused icon field and preserves existing icon values.
 Check upstream usage before implementing this option. No implementation commitment.
+
+## Backlog: ingredient and dish template maintenance
+
+Requested 26 October 2026. A dedicated maintenance view for tidying the template
+catalogue without adding friction to everyday inventory entry. Proposal only:
+
+- Search/filter and select multiple ingredient or dish templates, then preview bulk
+  name formatting (e.g. lower-case). Keep IDs stable; preserve stock assignments,
+  aliases, Mealie mappings and intentional item display names. Show name collisions
+  and possible duplicate matches before applying changes; offer undo where practical.
+- Review templates unused for a configurable period. Track actual use/last-used dates
+  from introduction of the feature; do not infer that old templates were never used
+  when historical usage is unavailable. Distinguish creation/modification from usage.
+- Review templates with no Mealie mappings or no usage in synced Mealie recipes.
+  Include automatic matches as well as manual mappings, and show which recipe/stock
+  references exist. “Unlinked” does not mean unwanted: pantry staples and dishes may
+  intentionally have no recipe links. Mark linkage unknown when Mealie is unconfigured,
+  its cache is incomplete or sync failed; never classify unknown as safe to remove.
+- Prefer archive/hide with restore over deletion. Show affected current inventory,
+  templates, aliases and recipe mappings before any bulk destructive action. Keep
+  built-in hide/reset behaviour distinct from deleting user-created templates.
+- Protect referenced templates or offer explicit reassignment. Keep inventory,
+  sticker codes, history and quantity/portion tracking intact. Dry-run previews and
+  explicit selection; no automatic deletion merely because a template is old or
+  absent from the current Mealie catalogue.
+
+Recording the idea does not implement cleanup or authorise deleting any templates.
