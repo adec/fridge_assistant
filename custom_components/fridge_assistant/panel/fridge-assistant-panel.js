@@ -1,8 +1,8 @@
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b23";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b23";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b23";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b23";
-import { openMealie } from "./views/mealie.js?v=0.10.0b23";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b24";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b24";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b24";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b24";
+import { openMealie } from "./views/mealie.js?v=0.10.0b24";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -15,18 +15,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b23";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b23";
-import { STYLES } from "./styles.js?v=0.10.0b23";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b23";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b23";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b23";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b23";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b23";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b23";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b23";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b23";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b23";
-import { printSticker } from "./views/print.js?v=0.10.0b23";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b24";
+import { STYLES } from "./styles.js?v=0.10.0b24";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b24";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b24";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b24";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b24";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b24";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b24";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b24";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b24";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b24";
+import { printSticker } from "./views/print.js?v=0.10.0b24";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -41,6 +41,8 @@ class FridgeAssistantPanel extends HTMLElement {
     this._shellBuilt = false;
     this._activeTab = "inventory";
     this._inventoryView = "cards";
+    this._statusColours = true;
+    try { this._statusColours = localStorage.getItem("fridge_assistant.status_colours") !== "off"; } catch {}
     try { if (localStorage.getItem("fridge_assistant.inventory_view") === "list") this._inventoryView = "list"; } catch {}
   }
 
@@ -311,7 +313,8 @@ class FridgeAssistantPanel extends HTMLElement {
   _renderCounts() {
     const items = this._filteredItems();
     const el = this.shadowRoot.getElementById("counts");
-    el.innerHTML = `<span>${this.t("filterResults",items.length,this._state.counts.total)}</span><label class="inventory-sort"><span class="reorder-status">${this.t("filterSort")}</span><select id="inventory-sort"><option value="due">${this.t("filterSortDue")}</option><option value="due-desc">${this.t("filterSortDueDesc")}</option><option value="name">${this.t("filterSortName")}</option><option value="location">${this.t("locationLabel")}</option></select></label>`;
+    el.innerHTML = `<span>${this.t("filterResults",items.length,this._state.counts.total)}</span><label class="status-colour-toggle"><input type="checkbox" id="status-colours" ${this._statusColours ? "checked" : ""}>${this.t("statusColours")}</label><label class="inventory-sort"><span class="reorder-status">${this.t("filterSort")}</span><select id="inventory-sort"><option value="due">${this.t("filterSortDue")}</option><option value="due-desc">${this.t("filterSortDueDesc")}</option><option value="name">${this.t("filterSortName")}</option><option value="location">${this.t("locationLabel")}</option></select></label>`;
+    el.querySelector("#status-colours").onchange=e=>{this._statusColours=e.target.checked;try{localStorage.setItem("fridge_assistant.status_colours",this._statusColours?"on":"off");}catch{}this._renderList();this.shadowRoot.getElementById("status-colours").focus();};
     const select=el.querySelector("select");select.value=this._inventorySort;
     select.onchange=()=>{this._inventorySort=select.value;this._listDescending=select.value==='due-desc';this._renderList();};
   }
@@ -331,6 +334,7 @@ class FridgeAssistantPanel extends HTMLElement {
   _renderList() {
     if (!this._state) return;
     const list = this.shadowRoot.getElementById("list");
+    list.classList.toggle("status-colours", this._statusColours);
     this._renderCounts();
     const items = this._filteredItems();
     const lang = this._lang();
@@ -423,7 +427,7 @@ class FridgeAssistantPanel extends HTMLElement {
       ? `<span class="cs-sep">·</span><span class="pbadge" title="${esc(this.t("pbadgeTitle", open, total))}">${open}/${total}</span>`
       : "";
     const selected = this._inspectorItemId === i.id ? " selected" : "";
-    return `<div class="card${selected}" data-item="${i.id}" role="button" tabindex="0" aria-label="${esc(i.name)}">
+    return `<div class="card${selected}${i.status === "expired" ? " status-expired" : i.status === "soon" ? " status-soon" : ""}" data-item="${i.id}" role="button" tabindex="0" aria-label="${esc(i.name)}">
       <div class="card-emoji">${i.emoji || "🍽️"}</div>
       <div class="card-main">
         <div class="card-title">${esc(i.name)}</div>

@@ -1,4 +1,4 @@
-import { esc, fmtCardDate, daysLabel } from '../lib/format.js?v=0.10.0b23';
+import { esc, fmtCardDate, daysLabel } from '../lib/format.js?v=0.10.0b24';
 
 export function inventoryList(panel, items, lang) {
   if (!panel._inventorySort || panel._inventorySort.startsWith("due")) items = items.slice().sort((a,b) => {
@@ -14,7 +14,7 @@ export function inventoryList(panel, items, lang) {
       const portionText = portions.length > 1 ? `${portions.filter(p => p.status === 'open').length}/${portions.length}` : '';
       const status = daysLabel(i.days_left, lang, i.date_type);
       const type = panel.t(i.date_type === 'best_before' ? 'bestBeforeLabel' : 'useByLabel');
-      return `<tr data-item="${esc(i.id)}" tabindex="0" class="inventory-row ${panel._inspectorItemId === i.id ? 'selected' : ''}" aria-label="${esc(i.name)}">
+      return `<tr data-item="${esc(i.id)}" tabindex="0" class="inventory-row ${i.status === 'expired' ? 'status-expired' : i.status === 'soon' ? 'status-soon' : ''} ${panel._inspectorItemId === i.id ? 'selected' : ''}" aria-label="${esc(i.name)}">
         <td><div class="il-food"><span class="il-emoji">${esc(i.emoji || '🍽️')}</span><div class="il-name"><b>${esc(i.name)}</b><code class="il-code">${esc(i.code)}</code><span class="il-mobile-meta">${[showLocation ? esc(loc.label || i.location) : '', portionText ? esc(panel.t('listPortionsRemaining', portionText)) : ''].filter(Boolean).join(' · ')}</span></div></div></td>
         ${showLocation ? `<td class="il-location">${esc(loc.label || i.location)}</td>` : ''}
         <td class="il-date">${i.expiry_date ? `<small>${esc(type)}</small><span>${fmtCardDate(i.expiry_date, lang, panel._state.today)}</span>` : `<span>—</span>`}<span class="il-mobile-time il-status ${esc(i.status)}">${esc(status)}</span></td>

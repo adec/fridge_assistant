@@ -647,4 +647,24 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .filter-panel-footer{display:flex;justify-content:flex-end;gap:6px;padding:14px 12px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--fa-line);flex:none;background:var(--fa-card);}
 .filter-panel-footer .btn{font-size:12px;padding:8px 12px;min-height:44px;}#filter-clear{margin-right:auto;}
 @media(max-width:639px){.searchrow{flex-wrap:wrap;}.searchrow .search{flex-basis:100%;}.searchrow .inventory-view-switch{margin-right:auto;}.inventory-sort select{max-width:140px;font-size:11px;}}
+
+.status-colour-toggle{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:11px;cursor:pointer;margin-left:auto;}
+.status-colour-toggle input{accent-color:var(--fa-accent);width:16px;height:16px;cursor:pointer;}
+#counts{flex-wrap:wrap;}
+.status-colours .status-soon{--inventory-status-colour:var(--fa-orange);}
+.status-colours .status-expired{--inventory-status-colour:var(--fa-red);}
+.status-colours .card.status-soon,.status-colours .card.status-expired{
+  background:color-mix(in srgb,var(--inventory-status-colour) 9%,var(--fa-card));
+  border-color:color-mix(in srgb,var(--inventory-status-colour) 40%,var(--fa-line));
+  box-shadow:inset 3px 0 var(--inventory-status-colour),var(--fa-shadow-s);
+}
+.status-colours .card.selected{border-color:var(--fa-accent);}
+.status-colours .inventory-row.status-soon,.status-colours .inventory-row.status-expired{
+  background:color-mix(in srgb,var(--inventory-status-colour) 9%,var(--fa-card));
+}
+.status-colours .inventory-row.status-soon:hover,.status-colours .inventory-row.status-expired:hover{
+  background:color-mix(in srgb,var(--inventory-status-colour) 14%,var(--fa-card));
+}
+.status-colours .inventory-row.status-soon td:first-child,.status-colours .inventory-row.status-expired td:first-child{box-shadow:inset 3px 0 var(--inventory-status-colour);}
+.status-colours .inventory-row.selected{outline:2px solid var(--fa-accent);outline-offset:-2px;}
 `;

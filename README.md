@@ -543,3 +543,12 @@ you apply it. Outside the panel, selected groups appear as removable chips; **Re
 clears applied filters without clearing search. Sorting (due date, name or location) is
 shared by Cards and List. Undated items are last when sorting by due date. Location
 management remains available from inside Filters.
+
+### Inventory status colours
+
+Cards and list rows use a subtle amber tint and coloured edge for items due soon,
+and muted red for past-date items. The colours follow the existing configured warning
+threshold and work with light/dark Home Assistant themes. Normal and undated stock
+retain their usual background. Status text and Use By/Best Before labels stay visible.
+Use **Status colours** beside the inventory count to switch the styling off; this
+preference is saved per browser/device without changing inventory or date calculations.
