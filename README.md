@@ -528,3 +528,18 @@ rows use two columns with location and portion counts beneath the name. A select
 location filter hides repeated location labels. Select a row (or press Enter/Space)
 to open the existing item details and actions; the desktop ellipsis opens the same
 actions. Storage-disabled browsers can still switch views for the current session.
+
+### Inventory filters
+
+Use **Filters** beside Cards/List to open the desktop drawer or phone bottom sheet.
+Choose any combination of locations, kind and categories, plus a due-date window,
+Use By/Best Before type, or inclusive custom date range. Multiple locations/categories
+match any selected value within their group; different groups combine. Category choices
+include existing stock assignments regardless of kind, including archived categories.
+
+The panel shows a live matching count including your search. **Show N items** applies
+changes; **Cancel** leaves the inventory unchanged. **Clear all** resets the draft until
+you apply it. Outside the panel, selected groups appear as removable chips; **Reset**
+clears applied filters without clearing search. Sorting (due date, name or location) is
+shared by Cards and List. Undated items are last when sorting by due date. Location
+management remains available from inside Filters.

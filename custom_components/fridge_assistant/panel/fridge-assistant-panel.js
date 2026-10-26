@@ -1,6 +1,8 @@
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b22";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b22";
-import { openMealie } from "./views/mealie.js?v=0.10.0b22";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b23";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b23";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b23";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b23";
+import { openMealie } from "./views/mealie.js?v=0.10.0b23";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -13,18 +15,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b22";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b22";
-import { STYLES } from "./styles.js?v=0.10.0b22";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b22";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b22";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b22";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b22";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b22";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b22";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b22";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b22";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b22";
-import { printSticker } from "./views/print.js?v=0.10.0b22";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b23";
+import { STYLES } from "./styles.js?v=0.10.0b23";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b23";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b23";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b23";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b23";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b23";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b23";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b23";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b23";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b23";
+import { printSticker } from "./views/print.js?v=0.10.0b23";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -32,8 +34,8 @@ class FridgeAssistantPanel extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._state = null;
     this._filterLoc = "all";
-    this._filterKind = "all";
-    this._filterCat = "all";
+    this._inventoryFilters = emptyFilters();
+    this._inventorySort = "due";
     this._search = "";
     this._unsub = null;
     this._shellBuilt = false;
@@ -225,6 +227,7 @@ class FridgeAssistantPanel extends HTMLElement {
           <div class="searchrow">
             <div class="search"><ha-icon icon="mdi:magnify" style="--mdc-icon-size:18px;color:var(--fa-muted)"></ha-icon><input id="search" placeholder="${this.t("searchPlaceholder")}" autocomplete="off" enterkeyhint="search"></div>
         <div class="inventory-view-switch" id="inventory-view-switch" role="group" aria-label="${this.t("inventoryViewLabel")}"><button class="btn ghost" data-view="cards" aria-pressed="${this._inventoryView === "cards"}"><ha-icon icon="mdi:view-grid-outline"></ha-icon> ${this.t("cardView")}</button><button class="btn ghost" data-view="list" aria-pressed="${this._inventoryView === "list"}"><ha-icon icon="mdi:format-list-bulleted"></ha-icon> ${this.t("listView")}</button></div>
+            <button class="btn ghost filter-trigger" id="btn-filters" aria-haspopup="dialog"><ha-icon icon="mdi:filter-variant"></ha-icon> ${this.t("filterButton")}<span id="filter-badge" hidden></span></button>
             <button class="btn ghost icon-only" id="btn-clean" title="${this.t("cleanUp")}"><ha-icon icon="mdi:broom"></ha-icon></button>
           </div>
         </header>
@@ -248,6 +251,7 @@ class FridgeAssistantPanel extends HTMLElement {
     $("fab-scan").addEventListener("click", () => this._openScanner());
     $("tab-inventory").addEventListener("click", () => this._selectTab("inventory"));
     $("tab-recipes").addEventListener("click", () => this._selectTab("recipes"));
+    $("btn-filters").addEventListener("click", () => openInventoryFilters(this));
     $("btn-clean").addEventListener("click", () => this._openCleanModal());
     $("btn-history").addEventListener("click", () => this._openHistory());
     $("btn-templates").addEventListener("click", () => this._openTemplatesManager());
@@ -257,7 +261,7 @@ class FridgeAssistantPanel extends HTMLElement {
       history.pushState(null, "", "/config/integrations/integration/fridge_assistant");
       window.dispatchEvent(new CustomEvent("location-changed"));
     });
-    $("search").addEventListener("input", (e) => { this._search = e.target.value; this._renderList(); });
+    $("search").addEventListener("input", (e) => { this._search = e.target.value; this._renderList(); if(this._refreshInventoryFilters)this._refreshInventoryFilters(); });
     this._applyChrome();
     if (this._state) this._onState();
   }
@@ -269,6 +273,7 @@ class FridgeAssistantPanel extends HTMLElement {
     this.shadowRoot.querySelector(".searchrow").hidden = recipes;
     this.shadowRoot.getElementById("recipes-view").hidden = !recipes;
     for (const name of ["inventory", "recipes"]) this.shadowRoot.getElementById(`tab-${name}`).setAttribute("aria-selected", String(tab === name));
+    if (!recipes && this._state) this._renderFilters();
     if (recipes && !this._recipesMounted) {
       this._recipesMounted = true;
       openMealie(this, this.shadowRoot.getElementById("recipes-view"));
@@ -291,7 +296,8 @@ class FridgeAssistantPanel extends HTMLElement {
   _onState() {
     const hb = this.shadowRoot.getElementById("btn-history");
     if (hb) hb.title = this.t("historyTooltip", this._state.history_count || 0);
-    if (this._filterLoc !== "all" && !this._state.locations.includes(this._filterLoc)) this._filterLoc = "all";
+    this._filterLoc = this._inventoryFilters.locations.length === 1 ? this._inventoryFilters.locations[0] : "all";
+    if (this._refreshInventoryFilters) this._refreshInventoryFilters();
     this._renderCounts();
     this._renderFilters();
     this._renderList();
@@ -303,94 +309,29 @@ class FridgeAssistantPanel extends HTMLElement {
   }
 
   _renderCounts() {
-    const c = this._state.counts;
+    const items = this._filteredItems();
     const el = this.shadowRoot.getElementById("counts");
-    el.innerHTML = `
-      <span class="pill"><b>${c.total}</b> ${this.t("itemsUnit")}</span>
-      ${c.soon ? `<span class="pill warn"><b>${c.soon}</b> ${this.t("soonUnit")}</span>` : ""}
-      ${c.expired ? `<span class="pill bad"><b>${c.expired}</b> ${this.t("expiredUnit")}</span>` : ""}
-    `;
+    el.innerHTML = `<span>${this.t("filterResults",items.length,this._state.counts.total)}</span><label class="inventory-sort"><span class="reorder-status">${this.t("filterSort")}</span><select id="inventory-sort"><option value="due">${this.t("filterSortDue")}</option><option value="due-desc">${this.t("filterSortDueDesc")}</option><option value="name">${this.t("filterSortName")}</option><option value="location">${this.t("locationLabel")}</option></select></label>`;
+    const select=el.querySelector("select");select.value=this._inventorySort;
+    select.onchange=()=>{this._inventorySort=select.value;this._listDescending=select.value==='due-desc';this._renderList();};
   }
 
-  _renderFilters() {
-    const { locations, counts, kinds } = this._state;
-    const el = this.shadowRoot.getElementById("filters");
-    const locChip = (key, label, count) =>
-      `<button class="chip ${this._filterLoc === key ? "active" : ""}" data-loc="${key}">${label} <span class="chip-n">${count}</span></button>`;
-    let html = locChip("all", this.t("all"), counts.total);
-    for (const loc of locations) {
-      const m = this._locMeta(loc);
-      html += locChip(loc, `${esc(m.emoji || "")} ${esc(m.label || loc)}${m.archived ? " · " + this.t("locationArchived") : ""}`, counts.by_location[loc] || 0);
-    }
-
-    html += `<button class="chip" id="manage-locations"><ha-icon icon="mdi:map-marker-multiple-outline"></ha-icon> ${this.t("manageLocations")}</button>`;
-    const kindKeys = Object.keys(kinds || {});
-    if (kindKeys.length) {
-      const kindCounts = {};
-      for (const i of this._state.items) {
-        const k = this._kindOf(i);
-        kindCounts[k] = (kindCounts[k] || 0) + 1;
-      }
-      const kindChip = (key, label, count) =>
-        `<button class="chip ${this._filterKind === key ? "active" : ""}" data-kind="${key}">${label} <span class="chip-n">${count}</span></button>`;
-      html += `<span class="chip-sep"></span>`;
-      html += kindChip("all", this.t("all"), counts.total);
-      for (const k of kindKeys) {
-        const km = this._kindMeta(k);
-        html += kindChip(k, `${km.emoji || ""} ${km.short || km.label}`, kindCounts[k] || 0);
-      }
-    }
-
-    // Category chips: only categories that actually hold items (the full
-    // catalogue would flood the bar), plus the active one so an emptied
-    // filter can still be tapped back to "all".
-    const catCounts = {};
-    for (const i of this._state.items) {
-      catCounts[i.category] = (catCounts[i.category] || 0) + 1;
-    }
-    const catKeys = Object.keys(this._state.categories || {})
-      .filter((k) => catCounts[k] || k === this._filterCat);
-    if (catKeys.length) {
-      const catChip = (key, label, count) =>
-        `<button class="chip ${this._filterCat === key ? "active" : ""}" data-cat="${key}">${label} <span class="chip-n">${count}</span></button>`;
-      html += `<span class="chip-sep"></span>`;
-      html += catChip("all", this.t("all"), counts.total);
-      for (const k of catKeys) {
-        const cm = this._catMeta(k);
-        html += catChip(k, `${cm.emoji || ""} ${cm.label || k}`, catCounts[k] || 0);
-      }
-    }
-
-    el.innerHTML = html;
-    el.querySelector("#manage-locations").addEventListener("click", () => openLocationsManager(this));
-    el.querySelectorAll("[data-loc]").forEach((b) =>
-      b.addEventListener("click", () => { this._filterLoc = b.dataset.loc; this._renderFilters(); this._renderList(); })
-    );
-    el.querySelectorAll("[data-kind]").forEach((b) =>
-      b.addEventListener("click", () => { this._filterKind = b.dataset.kind; this._renderFilters(); this._renderList(); })
-    );
-    el.querySelectorAll("[data-cat]").forEach((b) =>
-      b.addEventListener("click", () => { this._filterCat = b.dataset.cat; this._renderFilters(); this._renderList(); })
-    );
-  }
+  _renderFilters() { renderFilterChips(this); }
 
   _filteredItems() {
-    let items = this._state.items.slice();
-    if (this._filterLoc !== "all") items = items.filter((i) => i.location === this._filterLoc);
-    if (this._filterKind !== "all") items = items.filter((i) => this._kindOf(i) === this._filterKind);
-    if (this._filterCat !== "all") items = items.filter((i) => i.category === this._filterCat);
-    const q = this._search.trim().toLowerCase();
-    if (q) items = items.filter((i) =>
-      (i.name || "").toLowerCase().includes(q) ||
-      (i.contents || "").toLowerCase().includes(q) ||
-      (i.code || "").toLowerCase().includes(q)
-    );
-    return items;
+    const items=filterInventory(this._state.items,this._inventoryFilters,{search:this._search,kindOf:i=>this._kindOf(i)});
+    return items.slice().sort((a,b)=>{
+      if(this._inventorySort==='name')return (a.name||'').localeCompare(b.name||'');
+      if(this._inventorySort==='location')return (this._locMeta(a.location).label||'').localeCompare(this._locMeta(b.location).label||'');
+      if(!a.expiry_date||!b.expiry_date)return Number(!a.expiry_date)-Number(!b.expiry_date);
+      return a.expiry_date.localeCompare(b.expiry_date)*(this._inventorySort==='due-desc'?-1:1);
+    });
   }
 
   _renderList() {
     if (!this._state) return;
     const list = this.shadowRoot.getElementById("list");
+    this._renderCounts();
     const items = this._filteredItems();
     const lang = this._lang();
 
@@ -431,17 +372,18 @@ class FridgeAssistantPanel extends HTMLElement {
         .map((k) => [k, items.filter((i) => secOf(i) === k)])
         .filter(([, arr]) => arr.length);
       const showHeads = groups.length > 1;
+      if (this._inventorySort !== "due") { groups.splice(0,groups.length,["all",items]); }
       html += `<div class="cards">${groups.map(([k, arr]) =>
-        (showHeads ? `<div class="sec-head${k === "first" ? " urgent" : ""}">${titles[k]} <span class="sec-n">${arr.length}</span></div>` : "")
+        (showHeads && k !== "all" ? `<div class="sec-head${k === "first" ? " urgent" : ""}">${titles[k]} <span class="sec-n">${arr.length}</span></div>` : "")
         + arr.map((i) => this._itemCard(i, lang)).join("")
       ).join("")}</div>`;
     }
     list.innerHTML = html;
 
-    list.querySelector("#list-sort")?.addEventListener("click", () => { this._listDescending = !this._listDescending; this._renderList(); });
+    list.querySelector("#list-sort")?.addEventListener("click", () => { this._listDescending = this._inventorySort.startsWith("due") ? !this._listDescending : false; this._inventorySort=this._listDescending?"due-desc":"due"; this._renderList(); });
     const clearBtn = list.querySelector("#clear-filters");
     if (clearBtn) clearBtn.addEventListener("click", () => {
-      this._filterLoc = this._filterKind = this._filterCat = "all";
+      this._filterLoc = "all"; this._inventoryFilters = emptyFilters();
       this._search = "";
       const s = this.shadowRoot.getElementById("search");
       if (s) s.value = "";

@@ -1,11 +1,11 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b22";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b23";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b22";
-import { openSurface } from "../lib/surface.js?v=0.10.0b22";
+import { esc } from "../lib/format.js?v=0.10.0b23";
+import { openSurface } from "../lib/surface.js?v=0.10.0b23";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;

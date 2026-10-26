@@ -1,14 +1,14 @@
-import { esc, fmtCardDate, daysLabel } from '../lib/format.js?v=0.10.0b22';
+import { esc, fmtCardDate, daysLabel } from '../lib/format.js?v=0.10.0b23';
 
 export function inventoryList(panel, items, lang) {
-  items = items.slice().sort((a,b) => {
+  if (!panel._inventorySort || panel._inventorySort.startsWith("due")) items = items.slice().sort((a,b) => {
     if (!a.expiry_date || !b.expiry_date) return Number(!a.expiry_date) - Number(!b.expiry_date);
     return a.expiry_date.localeCompare(b.expiry_date) * (panel._listDescending ? -1 : 1);
   });
   const showLocation = panel._filterLoc === 'all';
   const multi = items.some(i => (i.portions || []).length > 1);
   return `<div class="inventory-table-wrap"><table class="inventory-table ${showLocation ? '' : 'location-filtered'}"><caption class="reorder-status">${panel.t('inventoryTab')}</caption>
-    <thead><tr><th scope="col">${panel.t('listFood')}</th>${showLocation ? `<th scope="col" class="il-location">${panel.t('locationLabel')}</th>` : ''}<th scope="col" class="il-date" aria-sort="${panel._listDescending ? 'descending' : 'ascending'}"><button type="button" id="list-sort">${panel.t('listDueDate')} ${panel._listDescending ? '↓' : '↑'}</button></th><th scope="col" class="il-time">${panel.t('listTimeLeft')}</th>${multi ? `<th scope="col" class="il-portions">${panel.t('portionsLabel')}</th>` : ''}<th scope="col" class="il-actions"><span class="reorder-status">${panel.t('listActions')}</span></th></tr></thead>
+    <thead><tr><th scope="col">${panel.t('listFood')}</th>${showLocation ? `<th scope="col" class="il-location">${panel.t('locationLabel')}</th>` : ''}<th scope="col" class="il-date" aria-sort="${panel._inventorySort && !panel._inventorySort.startsWith('due') ? 'none' : panel._listDescending ? 'descending' : 'ascending'}"><button type="button" id="list-sort">${panel.t('listDueDate')} ${panel._inventorySort && !panel._inventorySort.startsWith('due') ? '' : panel._listDescending ? '↓' : '↑'}</button></th><th scope="col" class="il-time">${panel.t('listTimeLeft')}</th>${multi ? `<th scope="col" class="il-portions">${panel.t('portionsLabel')}</th>` : ''}<th scope="col" class="il-actions"><span class="reorder-status">${panel.t('listActions')}</span></th></tr></thead>
     <tbody>${items.map(i => {
       const loc = panel._locMeta(i.location), portions = i.portions || [];
       const portionText = portions.length > 1 ? `${portions.filter(p => p.status === 'open').length}/${portions.length}` : '';
