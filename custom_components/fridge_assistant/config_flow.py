@@ -19,6 +19,7 @@ from .const import (
     CODE_FORMAT_DIGITS,
     CODE_FORMAT_LETTERS,
     CONF_AI_AGENT,
+    CONF_HANDLING_ENABLED,
     CONF_AI_ENABLED,
     CONF_CODE_FORMAT,
     CONF_LABEL_COPIES,
@@ -97,6 +98,7 @@ class FridgeAssistantOptionsFlow(OptionsFlow):
 
         return vol.Schema(
             {
+                vol.Optional(CONF_HANDLING_ENABLED, description=sv(CONF_HANDLING_ENABLED)): selector.BooleanSelector(),
                 vol.Optional(CONF_MEALIE_URL, description=sv(CONF_MEALIE_URL)): selector.TextSelector(),
                 vol.Optional(CONF_MEALIE_TOKEN, description=sv(CONF_MEALIE_TOKEN)): selector.TextSelector(
                     selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)

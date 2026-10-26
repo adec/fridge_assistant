@@ -667,4 +667,8 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 }
 .status-colours .inventory-row.status-soon td:first-child,.status-colours .inventory-row.status-expired td:first-child{box-shadow:inset 3px 0 var(--inventory-status-colour);}
 .status-colours .inventory-row.selected{outline:2px solid var(--fa-accent);outline-offset:-2px;}
+
+.inventory-handling{display:block;font-size:11px;color:var(--fa-muted);line-height:1.5;margin-top:5px;overflow-wrap:anywhere;}
+.handling-row-actions{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 10px;}.handling-row-actions .btn{font-size:11px;min-height:36px;padding:6px 9px;}
+.portion-handling-wrap{padding:8px 0;border-bottom:1px solid var(--fa-line);}.template-handling{margin:16px 0;}.template-handling summary{cursor:pointer;font-weight:700;font-size:13px;}
 `;

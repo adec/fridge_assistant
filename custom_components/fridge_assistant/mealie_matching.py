@@ -25,11 +25,14 @@ def food_links(foods, templates, saved):
     return links
 
 
-def rank_recipes(recipes, foods, templates, items, locations, saved, today=None):
+def rank_recipes(recipes, foods, templates, items, locations, saved, today=None, now=None):
     today = today or date.today()
     links = {f['id']: f for f in food_links(foods, templates, saved)}
     stock = {}
-    for item in items:
+    from .handling import projected_items
+    from datetime import datetime, timezone
+    now = now or datetime.now(timezone.utc)
+    for item in [p for batch in items for p in projected_items(batch, now)]:
         # Meals are not treated as raw ingredients.
         if item.get('kind') in ('dish', 'meal') or (item.get('portions') and not any(p.get('status') == 'open' for p in item['portions'])):
             continue
@@ -38,12 +41,15 @@ def rank_recipes(recipes, foods, templates, items, locations, saved, today=None)
         except (ValueError, TypeError):
             due = None
         days = (due - today).days if due else None
+        if item.get('handling_overdue'): continue
         if days is not None and days < 0 and item.get('date_type', 'use_by') != 'best_before':
             continue
         stock.setdefault(item.get('template_id'), []).append({
+            'deadline': item.get('sort_due_at'),
             'id': item['id'], 'name': item.get('name', ''), 'days': days,
             'past_best_before': days is not None and days < 0,
-            'thaw': locations.get(item.get('location'), {}).get('storage_type') == 'freezer'})
+            'portion': item.get('portion_number'),
+            'thaw': item.get('handling_phase') == 'defrosting' or locations.get(item.get('location'), {}).get('storage_type') == 'freezer'})
     results = []
     for recipe in recipes:
         matched, missing, unresolved = [], [], []
@@ -63,7 +69,7 @@ def rank_recipes(recipes, foods, templates, items, locations, saved, today=None)
                 missing.append(name)
                 continue
             # Select one pack to explain priority; prefer earliest dated stock.
-            chosen = min(available, key=lambda i: (i['days'] is None, i['days'] if i['days'] is not None else 0, i['thaw'], i['id']))
+            chosen = min(available, key=lambda i: (i['thaw'], i['days'] is None, i['days'] if i['days'] is not None else 0, i.get('deadline') or '', i['id']))
             matched.append({'ingredient': name, **chosen})
         due_soon = [i for i in matched if i['days'] is not None and i['days'] <= 3]
         results.append({**recipe, 'matched': matched, 'missing': missing, 'unresolved': unresolved,

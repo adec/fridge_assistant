@@ -1,8 +1,9 @@
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b24";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b24";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b24";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b24";
-import { openMealie } from "./views/mealie.js?v=0.10.0b24";
+import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b25";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b25";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b25";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b25";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b25";
+import { openMealie } from "./views/mealie.js?v=0.10.0b25";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -15,18 +16,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b24";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b24";
-import { STYLES } from "./styles.js?v=0.10.0b24";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b24";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b24";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b24";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b24";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b24";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b24";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b24";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b24";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b24";
-import { printSticker } from "./views/print.js?v=0.10.0b24";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b25";
+import { STYLES } from "./styles.js?v=0.10.0b25";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b25";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b25";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b25";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b25";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b25";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b25";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b25";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b25";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b25";
+import { printSticker } from "./views/print.js?v=0.10.0b25";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -313,7 +314,7 @@ class FridgeAssistantPanel extends HTMLElement {
   _renderCounts() {
     const items = this._filteredItems();
     const el = this.shadowRoot.getElementById("counts");
-    el.innerHTML = `<span>${this.t("filterResults",items.length,this._state.counts.total)}</span><label class="status-colour-toggle"><input type="checkbox" id="status-colours" ${this._statusColours ? "checked" : ""}>${this.t("statusColours")}</label><label class="inventory-sort"><span class="reorder-status">${this.t("filterSort")}</span><select id="inventory-sort"><option value="due">${this.t("filterSortDue")}</option><option value="due-desc">${this.t("filterSortDueDesc")}</option><option value="name">${this.t("filterSortName")}</option><option value="location">${this.t("locationLabel")}</option></select></label>`;
+    el.innerHTML = `<span>${(this._state.inventory_rows && this._state.inventory_rows.length !== this._state.items.length ? this.t("handlingStockCount",items.length,this._state.inventory_rows.length,this._state.items.length) : this.t("filterResults",items.length,(this._state.inventory_rows || this._state.items).length))}</span><label class="status-colour-toggle"><input type="checkbox" id="status-colours" ${this._statusColours ? "checked" : ""}>${this.t("statusColours")}</label><label class="inventory-sort"><span class="reorder-status">${this.t("filterSort")}</span><select id="inventory-sort"><option value="due">${this.t("filterSortDue")}</option><option value="due-desc">${this.t("filterSortDueDesc")}</option><option value="name">${this.t("filterSortName")}</option><option value="location">${this.t("locationLabel")}</option></select></label>`;
     el.querySelector("#status-colours").onchange=e=>{this._statusColours=e.target.checked;try{localStorage.setItem("fridge_assistant.status_colours",this._statusColours?"on":"off");}catch{}this._renderList();this.shadowRoot.getElementById("status-colours").focus();};
     const select=el.querySelector("select");select.value=this._inventorySort;
     select.onchange=()=>{this._inventorySort=select.value;this._listDescending=select.value==='due-desc';this._renderList();};
@@ -322,12 +323,12 @@ class FridgeAssistantPanel extends HTMLElement {
   _renderFilters() { renderFilterChips(this); }
 
   _filteredItems() {
-    const items=filterInventory(this._state.items,this._inventoryFilters,{search:this._search,kindOf:i=>this._kindOf(i)});
+    const items=filterInventory(this._state.inventory_rows || this._state.items,this._inventoryFilters,{search:this._search,kindOf:i=>this._kindOf(i)});
     return items.slice().sort((a,b)=>{
       if(this._inventorySort==='name')return (a.name||'').localeCompare(b.name||'');
       if(this._inventorySort==='location')return (this._locMeta(a.location).label||'').localeCompare(this._locMeta(b.location).label||'');
       if(!a.expiry_date||!b.expiry_date)return Number(!a.expiry_date)-Number(!b.expiry_date);
-      return a.expiry_date.localeCompare(b.expiry_date)*(this._inventorySort==='due-desc'?-1:1);
+      return (Date.parse(a.handling_due_at || a.expiry_date+'T23:59:59')-Date.parse(b.handling_due_at || b.expiry_date+'T23:59:59'))*(this._inventorySort==='due-desc'?-1:1);
     });
   }
 
@@ -397,8 +398,8 @@ class FridgeAssistantPanel extends HTMLElement {
     list.querySelectorAll("[data-item]").forEach((el) => {
       const open = (e) => {
         if (e.target.closest("button")) return;
-        const item = this._state.items.find((x) => x.id === el.dataset.item);
-        if (item) this._openItemModal(item);
+        const item = (this._state.inventory_rows || this._state.items).find(x => (x.inventory_key || x.id) === el.dataset.item);
+        if (item) this._openItemModal(item, {highlight:item.portions?.[0]?.n});
       };
       el.addEventListener("click", open);
       // Cards are divs, so Enter/Space must be wired for keyboard users.
@@ -408,11 +409,11 @@ class FridgeAssistantPanel extends HTMLElement {
     });
     list.querySelectorAll("[data-list-actions]").forEach(button => button.addEventListener("click", e => {
       e.stopPropagation();
-      const item = this._state.items.find(i => i.id === button.dataset.listActions);
-      if (item) this._openItemModal(item);
+      const item = (this._state.inventory_rows || this._state.items).find(i => (i.inventory_key || i.id) === button.dataset.listActions);
+      if (item) this._openItemModal(item, {highlight:item.portions?.[0]?.n});
     }));
     list.querySelectorAll(".card-print").forEach((b) =>
-      b.addEventListener("click", (e) => { e.stopPropagation(); this._printSticker(b.dataset.print); })
+      b.addEventListener("click", (e) => { e.stopPropagation(); const row=(this._state.inventory_rows || this._state.items).find(i=>(i.inventory_key || i.id)===b.dataset.print); if(row)this._printSticker(row.id,row,{allowedPortions:row.portions?.map(p=>p.n)}); })
     );
   }
 
@@ -421,27 +422,28 @@ class FridgeAssistantPanel extends HTMLElement {
     const locLabel = lm.label || i.location || "";
     const contents = i.contents && i.contents !== i.name ? i.contents : "";
     const portions = i.portions || [];
-    const total = portions.length;
+    const total = i.batch_portions_total || portions.length;
     const open = portions.filter((p) => p.status === "open").length;
     const pbadge = total > 1
       ? `<span class="cs-sep">·</span><span class="pbadge" title="${esc(this.t("pbadgeTitle", open, total))}">${open}/${total}</span>`
       : "";
     const selected = this._inspectorItemId === i.id ? " selected" : "";
-    return `<div class="card${selected}${i.status === "expired" ? " status-expired" : i.status === "soon" ? " status-soon" : ""}" data-item="${i.id}" role="button" tabindex="0" aria-label="${esc(i.name)}">
+    return `<div class="card${selected}${i.status === "expired" ? " status-expired" : i.status === "soon" ? " status-soon" : ""}" data-item="${i.inventory_key || i.id}" role="button" tabindex="0" aria-label="${esc(i.name)}">
       <div class="card-emoji">${i.emoji || "🍽️"}</div>
       <div class="card-main">
         <div class="card-title">${esc(i.name)}</div>
         <div class="card-sub">
           ${this._filterLoc === "all" ? `<span class="cs-fix">${lm.emoji || ""} ${esc(locLabel)}</span><span class="cs-sep">·</span>` : ""}
-          <span class="code">${esc(i.code)}</span>${pbadge}
+          <span class="code">${esc(i.code)}${i.inventory_key && i.portions?.length === 1 && i.batch_portions_total > 1 ? "-"+i.portions[0].n : ""}</span>${pbadge}
           ${contents ? `<span class="cs-sep">·</span><span class="cs-more">${esc(contents)}</span>` : ""}
         </div>
+        ${handlingSummary(this,i,false) ? `<div class="inventory-handling">${esc(handlingSummary(this,i,false))}</div>` : ""}
       </div>
       <div class="card-right">
-        <div class="status" style="--c:${STATUS_COLOR[i.status]}">${daysLabel(i.days_left, lang, i.date_type)}</div>
-        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${this.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} · ${fmtCardDate(i.expiry_date, lang, this._state.today)}</span>` : ""}</div>
+        <div class="status" style="--c:${STATUS_COLOR[i.status]}">${handlingStatus(this,i,daysLabel(i.days_left, lang, i.date_type))}</div>
+        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${handlingDate(this,i) || this.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")+" · "+fmtCardDate(i.expiry_date, lang, this._state.today)}</span>` : ""}</div>
       </div>
-      <button class="card-print icon-btn" data-print="${i.id}" title="${this.t("printSticker")}" aria-label="${this.t("printSticker")}"><ha-icon icon="mdi:tag-outline"></ha-icon></button>
+      <button class="card-print icon-btn" data-print="${i.inventory_key || i.id}" title="${this.t("printSticker")}" aria-label="${this.t("printSticker")}"><ha-icon icon="mdi:tag-outline"></ha-icon></button>
     </div>`;
   }
 }

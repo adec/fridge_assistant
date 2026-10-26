@@ -27,7 +27,8 @@
           "printer_url": "Label Printer add-on URL",
           "label_copies": "Copies per print",
           "mealie_url": "Mealie URL",
-          "mealie_token": "Mealie API token"
+          "mealie_token": "Mealie API token",
+          "handling_enabled": "Track opened and defrosted portions (optional)"
         },
         "data_description": {
           "ai_agent": "Which conversation agent to use for estimates. Leave empty for the default Assist agent.",

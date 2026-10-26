@@ -552,3 +552,52 @@ threshold and work with light/dark Home Assistant themes. Normal and undated sto
 retain their usual background. Status text and Use By/Best Before labels stay visible.
 Use **Status colours** beside the inventory count to switch the styling off; this
 preference is saved per browser/device without changing inventory or date calculations.
+
+### Opened and defrosted portions (optional)
+
+Enable **Track opened and defrosted portions** in the integration options. It is off
+by default. Template editors then expose two optional defaults under **After opening
+& defrosting**: lifetime after opening, and lifetime after **fully** defrosted. Choose
+hours or days; blank means no automatic estimate. No universal food lifetimes are
+seeded. Use the food/package instructions for your defaults.
+
+Open an inventory item to act on its portions:
+
+1. **Start defrosting** selects available frozen portions and a managed fridge
+   destination. Only selected portions move; no completed-defrost time is assumed.
+2. **Fully defrosted** records the actual time and starts its configured lifetime.
+3. **Mark opened** records opening and its lifetime. Select every affected portion
+   if they share a container. A partially used pack remains one available pack.
+
+Each action allows a corrected/backdated event time and a lifetime override in hours.
+Future times and defrost completion before starting are rejected. Existing events can
+be corrected by undoing them in History and recording them again. Undo dependent
+confirmation events before undoing their start event; consumed portions cannot be
+resurrected by undoing a handling event.
+
+Template lifetimes are copied into the selected portions when the event is recorded.
+Changing a template or moving stock later does not reset those clocks. Original label
+dates and their Use By/Best Before meaning remain stored. The earliest applicable date
+wins; an earlier original Use By is never automatically extended. Handling deadlines
+are displayed as **Use within**, with opening/defrosting reason and a time. Date-type
+filters refer to the original label type; due-date filters and sorting use the effective
+deadline. A portion awaiting full-defrost confirmation is marked explicitly. No deadline
+is invented when a handling lifetime is blank.
+
+Inventory groups separate only when portions have different locations, states or dates.
+They retain one underlying batch and stable sticker sub-codes. Location filtering shows
+only the portions in that location; grouped row counts are distinguished from batch
+counts. Batch-wide eat/toss controls are explicitly labelled **all remaining portions**.
+Tracked available portions are protected from removal by the portion-count stepper.
+Expiry cleanup tosses only overdue portions when siblings are still in date.
+
+Mealie matching prefers ready portions, flags frozen/defrosting stock as requiring
+thawing, and excludes elapsed handling deadlines. Sensors and expiry notifications use
+the earliest available portion deadline; hour-based status is refreshed each minute.
+Labels printed for affected portions show **Use within**, time and reason, retaining
+the original label date in the details. Group printing is limited to the selected
+inventory group's portions; mixed batches require portion-specific labels.
+
+Disabling the setting hides new controls but retains existing events, deadlines and
+visible status. Existing installations need no data reset. Printer output has been
+rendered locally; physical printer and real-HA validation remain beta testing tasks.

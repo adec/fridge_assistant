@@ -27,7 +27,8 @@
           "printer_url": "URL van de Label Printer add-on",
           "label_copies": "Aantal kopieën per print",
           "mealie_url": "Mealie URL",
-          "mealie_token": "Mealie API token"
+          "mealie_token": "Mealie API token",
+          "handling_enabled": "Geopende en ontdooide porties bijhouden"
         },
         "data_description": {
           "ai_agent": "Welke conversation-agent voor schattingen. Leeg = de standaard Assist-agent.",

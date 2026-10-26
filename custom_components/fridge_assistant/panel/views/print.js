@@ -12,13 +12,13 @@
  * a big label, the DYMO for the classic sticker.
  */
 
-import { esc } from "../lib/format.js?v=0.10.0b24";
-import { openPortions } from "./inspector.js?v=0.10.0b24";
+import { esc } from "../lib/format.js?v=0.10.0b25";
+import { openPortions } from "./inspector.js?v=0.10.0b25";
 
 // Where to point people who don't have the (optional) print add-on yet.
 const ADDON_URL = "https://github.com/MaxGramser/label-printer-addon";
 
-export function printSticker(panel, id, itemHint = null, { portion = null } = {}) {
+export function printSticker(panel, id, itemHint = null, { portion = null, allowedPortions = null } = {}) {
   // itemHint covers the just-added case: the state push may not have
   // landed yet, but the add response already has name/code/portions.
   const item = (panel._state.items || []).find((x) => x.id === id) || itemHint;
@@ -26,7 +26,7 @@ export function printSticker(panel, id, itemHint = null, { portion = null } = {}
   const copies = opts.label_copies || 1;
 
   const total = (item?.portions || []).length || 1;
-  const open = item ? openPortions(item) : [];
+  const open = item ? openPortions(item).filter(n=>!allowedPortions || allowedPortions.includes(n)) : [];
   const batch = portion == null && total > 1;
   const batchTargets = batch ? (open.length ? open : (item.portions || []).map((x) => x.n)) : [];
   const previewPortion = portion ?? (batch ? batchTargets[0] : null);

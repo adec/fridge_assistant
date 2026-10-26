@@ -15,6 +15,7 @@ from homeassistant.util import dt as dt_util
 from .const import (
     ACTION_EATEN,
     ACTION_TOSSED,
+    CONF_HANDLING_ENABLED,
     CONF_AI_AGENT,
     CONF_AI_ENABLED,
     CONF_CODE_FORMAT,
@@ -53,6 +54,7 @@ from .store import FridgeStore, item_days_left
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_OPTIONS: dict[str, Any] = {
+    CONF_HANDLING_ENABLED: False,
     CONF_MEALIE_URL: "",
     CONF_MEALIE_TOKEN: "",
     CONF_WARN_DAYS: DEFAULT_WARN_DAYS,
@@ -84,9 +86,16 @@ def get_runtime(hass: HomeAssistant) -> "FridgeRuntime | None":
 
 def item_summary(item: dict[str, Any], today: date) -> dict[str, Any]:
     """Compact representation used in events and notifications."""
+    from .handling import earliest
+    item = earliest(item, dt_util.now())
     return {
+        "original_expiry_date": item.get("original_expiry_date"),
+        "original_date_type": item.get("original_date_type"),
+        "handling_due_at": item.get("handling_due_at"),
+        "handling_reason": item.get("handling_reason"),
         "id": item.get("id"),
-        "code": item.get("code"),
+        "code": (str(item.get("code") or "") + "-" + str(item["portion_number"])) if item.get("handling_due_at") and len(item.get("portions") or []) > 1 else item.get("code"),
+        "portion": item.get("portion_number"),
         "name": item.get("name"),
         "emoji": item.get("emoji"),
         "location": item.get("location"),
@@ -269,6 +278,15 @@ class FridgeRuntime:
         targets = list(expired) if ids is None else [i for i in ids if i in expired]
         removed: list[dict[str, Any]] = []
         for iid in targets:
+            from .handling import inventory_groups
+            stock = self.store.items[iid]
+            expired_groups = [g for g in inventory_groups(stock, dt_util.now()) if (item_days_left(g, dt_util.now().date()) or 0) < 0]
+            portion_targets = [p['n'] for group in expired_groups for p in group['portions']]
+            if portion_targets and len(portion_targets) < sum(p.get('status') == 'open' for p in self.store._portions(stock)):
+                for n in portion_targets:
+                    self.store.consume_portion(iid, action=ACTION_TOSSED, portion=n, by=by, by_name=by_name)
+                removed.append(stock)
+                continue
             event = self.store.complete_item(
                 iid, ACTION_TOSSED, by=by, by_name=by_name
             )
@@ -283,8 +301,8 @@ class FridgeRuntime:
         warn_days = int(self.options[CONF_WARN_DAYS])
         today = dt_util.now().date()
         items = self.store.expiring_items(warn_days, today)
-        summaries = [{**item_summary(i, today),
-                      "location_label": self.store.location_label(i["location"])} for i in items]
+        summaries = [item_summary(i, today) for i in items]
+        summaries = [{**summary, "location_label":self.store.location_label(summary["location"])} for summary in summaries]
 
         self.hass.bus.async_fire(
             EVENT_EXPIRING,
@@ -353,6 +371,11 @@ def _notification_message(summaries: list[dict[str, Any]], lang: str) -> str:
 def _line(item: dict[str, Any], lang: str) -> str:
     s = _NOTIFY_STRINGS[lang]
     date_label = ("Ten minste houdbaar tot" if item.get("date_type") == "best_before" else "Te gebruiken tot") if lang == "nl" else ("Best Before" if item.get("date_type") == "best_before" else "Use By")
+    if item.get("handling_due_at"):
+        from .handling import timestamp
+        due = timestamp(item["handling_due_at"]).astimezone(dt_util.now().tzinfo)
+        reason = ("na openen" if item["handling_reason"] == "opened" else "na ontdooien") if lang == "nl" else ("after opening" if item["handling_reason"] == "opened" else "after defrosting")
+        return f"{item.get('emoji') or '•'} **{item['name']}** ({item.get('code') or ''} · {item.get('location_label') or item.get('location','')}) — {'Gebruiken voor' if lang == 'nl' else 'Use within'} {due:%d %b %H:%M} ({reason})"
     loc = item.get("location_label") or get_location_label(item["location"], lang)
     dl = item["days_left"]
     if dl is None:

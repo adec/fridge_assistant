@@ -1,11 +1,12 @@
+import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b25";
 /* Item inspector: drawer on desktop (list stays visible; selecting another
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b24";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b24";
-import { openSurface } from "../lib/surface.js?v=0.10.0b24";
-import { relTime } from "./history.js?v=0.10.0b24";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b25";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b25";
+import { openSurface } from "../lib/surface.js?v=0.10.0b25";
+import { relTime } from "./history.js?v=0.10.0b25";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length
@@ -63,9 +64,11 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         : (p.event_id
           ? `<button class="po-undo" data-undo="${esc(p.event_id)}" title="${panel.t("undoPortionTitle")}">${panel.t("backBtn")}</button>`
           : "");
-      return `<div class="po-row${isOpen ? "" : ` done ${p.status}`}${hl}">
+      const state=(i.portion_states||[]).find(v=>v.portion_number===p.n);
+      const handlingControls=isOpen && panel._state.options.handling_enabled ? `<div class="handling-row-actions">${!p.opened_at?`<button class="btn ghost" data-handling="opened" data-portion="${p.n}">${panel.t('handlingAction_opened')}</button>`:''}${!p.defrost_started_at && panel._storageType(p.location||i.location)==='freezer'?`<button class="btn ghost" data-handling="start_defrost" data-portion="${p.n}">${panel.t('handlingAction_start_defrost')}</button>`:''}${p.defrost_started_at&&!p.defrosted_at?`<button class="btn ghost" data-handling="defrosted" data-portion="${p.n}">${panel.t('handlingAction_defrosted')}</button>`:''}</div>`:'';
+      return `<div class="portion-handling-wrap"><div class="po-row${isOpen ? "" : ` done ${p.status}`}${hl}">
         <span class="code">${esc(code)}</span>${status}${actions}
-      </div>`;
+      </div>${state ? `<p class="location-help">${esc(panel._locMeta(state.location).label)}${handlingSummary(panel,state)?" · "+esc(handlingSummary(panel,state)):""}</p>`:""}${handlingControls}</div>`;
     };
 
     h.modal.innerHTML = `
@@ -74,21 +77,23 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         <div class="d-title"><h2>${esc(i.name)}</h2><div class="d-code">${esc(i.code)}${total > 1 ? ` · <span class="pbadge" title="${esc(panel.t("pbadgeTitle", open, total))}">${open}/${total}</span>` : ""}</div></div>
         <button class="icon-btn" id="d-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button>
       </div>
-      <div class="d-status" style="--c:${col}">${daysLabel(i.days_left, lang, i.date_type)}${i.expiry_date ? " · " + panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel") + " " + fmtDate(i.expiry_date, lang) : ""}</div>
+      <div class="d-status" style="--c:${col}">${i.effective_due_at ? esc(handlingDate(panel,i)) : daysLabel(i.days_left, lang, i.date_type)}${!i.effective_due_at && i.expiry_date ? " · " + panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel") + " " + fmtDate(i.expiry_date, lang) : ""}</div>
+      ${i.effective_due_at ? `<p class="location-help">${panel.t("handlingOriginal")}: ${panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} ${i.expiry_date || "—"}</p>`:""}
       <div class="po-sec">
         <div class="po-head">
           <span>${panel.t("portionsLabel")}</span>
           <span class="pstep">
-            <button type="button" class="ps-btn" id="po-minus" ${total <= Math.max(consumed, 1) ? "disabled" : ""}><ha-icon icon="mdi:minus"></ha-icon></button>
+            <button type="button" class="ps-btn" id="po-minus" ${total <= Math.max(consumed + portions.filter(p=>p.status === "open" && (p.opened_at || p.defrost_started_at)).length, 1) ? "disabled" : ""}><ha-icon icon="mdi:minus"></ha-icon></button>
             <b class="ps-n">${total}</b>
             <button type="button" class="ps-btn" id="po-plus" ${total >= 24 ? "disabled" : ""}><ha-icon icon="mdi:plus"></ha-icon></button>
           </span>
         </div>
         <small class="ps-note">${panel.t("portionsStepperNote")}</small>
-        ${total > 1 ? `<div class="po-rows">${portions.map(portionRow).join("")}</div>` : ""}
+        ${total > 1 || panel._state.options.handling_enabled || i.portions?.some(p=>p.opened_at||p.defrost_started_at) ? `<div class="po-rows">${portions.map(portionRow).join("")}</div>` : ""}
       </div>
+      ${i.portions?.some(p=>p.opened_at||p.defrost_started_at) ? `<button class="link" id="handling-history">${panel.t("handlingCorrections")}</button>`:""}
       <div class="d-rows">
-        <div class="d-row"><span>${panel.t("locationLabel")}</span><b>${lm.emoji || ""} ${esc(lm.label || i.location)}</b></div>
+        <div class="d-row"><span>${panel.t("locationLabel")}</span><b>${(i.portion_states||[]).some(p=>p.location!==i.location) ? panel.t("handlingMixedLocation") : (lm.emoji || "")+" "+esc(lm.label || i.location)}</b></div>
         ${i.added_by_name ? `<div class="d-row"><span>${panel.t("addedByLabel")}</span><b class="who">${panel._avatar(i.added_by_name, i.added_by_picture, 24)} ${esc(i.added_by_name)}</b></div>` : ""}
         ${i.contents && i.contents !== i.name ? `<div class="d-row"><span>${panel.t("contentsLabel")}</span><b>${esc(i.contents)}</b></div>` : ""}
         <div class="d-row"><span>${panel.t("dateInDetailLabel")}</span><b>${fmtDate(i.added_date, lang)}${i.age_days != null ? ` · ${esc(panel.t("daysAgoShort", i.age_days))}` : ""}</b></div>
@@ -100,12 +105,14 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         <button class="btn ghost" id="d-edit">${panel.t("editBtn")}</button>
       </div>
       <div class="modal-actions done-row">
-        <button class="btn good" id="d-eaten">${panel.t("eatenBtn")}</button>
-        <button class="btn tossed" id="d-tossed">${panel.t("tossedBtn")}</button>
+        <button class="btn good" id="d-eaten">${panel.t(total>1?"handlingEatBatch":"eatenBtn")}</button>
+        <button class="btn tossed" id="d-tossed">${panel.t(total>1?"handlingTossBatch":"tossedBtn")}</button>
       </div>
     `;
 
     const q = (s) => h.modal.querySelector(s);
+    h.modal.querySelectorAll("[data-handling]").forEach(b=>b.onclick=()=>openHandling(panel,i,b.dataset.handling,Number(b.dataset.portion)));
+    q("#handling-history")?.addEventListener("click",()=>{close();panel._openHistory();});
     q("#d-close").addEventListener("click", close);
     q("#d-print").addEventListener("click", () => panel._printSticker(i.id, i));
     q("#d-edit").addEventListener("click", () => { close(); panel._openAddModal({}, i); });

@@ -160,6 +160,7 @@ def canonical_kind(value: Any) -> Any:
 CONF_MEALIE_URL: Final = "mealie_url"
 CONF_MEALIE_TOKEN: Final = "mealie_token"
 CONF_WARN_DAYS: Final = "warn_days"
+CONF_HANDLING_ENABLED: Final = "handling_enabled"
 CONF_AI_ENABLED: Final = "ai_enabled"
 CONF_AI_AGENT: Final = "ai_agent"
 CONF_OPENAI_KEY: Final = "openai_api_key"

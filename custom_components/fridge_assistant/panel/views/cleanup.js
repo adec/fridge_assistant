@@ -1,7 +1,8 @@
+import { handlingStatus } from "./handling.js?v=0.10.0b25";
 /* Clean-up mode: bulk-remove expired/soon items. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b24";
-import { daysLabel, esc } from "../lib/format.js?v=0.10.0b24";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b25";
+import { daysLabel, esc } from "../lib/format.js?v=0.10.0b25";
 
 export function openCleanModal(panel) {
   const expired = panel._state.items.filter((i) => i.status === "expired");
@@ -13,7 +14,7 @@ export function openCleanModal(panel) {
       <input type="checkbox" data-id="${i.id}" ${checked ? "checked" : ""}>
       <span class="cr-emoji">${i.emoji || "🍽️"}</span>
       <span class="cr-name"><b>${esc(i.name)}</b><small>${lm.emoji || ""} ${esc(lm.label || i.location)} · ${esc(i.code)}</small></span>
-      <span class="cr-days" style="--c:${STATUS_COLOR[i.status]}">${daysLabel(i.days_left, lang, i.date_type)}</span>
+      <span class="cr-days" style="--c:${STATUS_COLOR[i.status]}">${handlingStatus(panel,i,daysLabel(i.days_left, lang, i.date_type))}</span>
     </label>`;
   };
   const h = panel._openModal(`

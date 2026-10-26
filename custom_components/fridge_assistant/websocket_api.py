@@ -109,6 +109,7 @@ TEMPLATE_SCHEMA = vol.Schema(
 
 
 def async_register_websocket(hass: HomeAssistant) -> None:
+    websocket_api.async_register_command(hass, ws_handling)
     websocket_api.async_register_command(hass, ws_categories)
     websocket_api.async_register_command(hass, ws_mealie)
     websocket_api.async_register_command(hass, ws_save_location)
@@ -157,6 +158,8 @@ def _history_event(ev: dict[str, Any], pictures: dict[str, str]) -> dict[str, An
 def _enrich(
     item: dict[str, Any], today, warn_days: int, pictures: dict[str, str]
 ) -> dict[str, Any]:
+    from .handling import earliest, portion_projection
+    effective = item if item.get("inventory_key") else earliest(item, dt_util.now())
     dl = item_days_left(item, today)
     if dl is None:
         status = "none"
@@ -168,6 +171,9 @@ def _enrich(
         status = "ok"
     return {
         **item,
+        "portion_states": [{k:v for k,v in portion_projection(item, p, dt_util.now()).items() if k in ("location","handling_due_at","handling_reason","handling_phase","is_opened","handling_overdue","portion_number","handling_lifetime_configured","opened_at","defrost_started_at","defrosted_at")} for p in item.get("portions", []) if p.get("status") == "open"] if not item.get("inventory_key") else [],
+        "effective_due_at": effective.get("handling_due_at"),
+        "effective_reason": effective.get("handling_reason"),
         "days_left": dl,
         "age_days": item_age_days(item, today),
         "status": status,
@@ -176,6 +182,7 @@ def _enrich(
 
 
 def _serialize_state(hass: HomeAssistant, runtime: FridgeRuntime) -> dict[str, Any]:
+    from .handling import inventory_groups
     opts = runtime.options
     warn = int(opts[CONF_WARN_DAYS])
     today = dt_util.now().date()
@@ -187,11 +194,12 @@ def _serialize_state(hass: HomeAssistant, runtime: FridgeRuntime) -> dict[str, A
         "expired": sum(1 for i in items if i["status"] == "expired"),
         "soon": sum(1 for i in items if i["status"] == "soon"),
         "by_location": {
-            loc: sum(1 for i in items if i["location"] == loc) for loc in runtime.store.locations_for_ui()
+            loc: runtime.store.locations_for_ui()[loc]["count"] for loc in runtime.store.locations_for_ui()
         },
     }
     return {
         "items": items,
+        "inventory_rows": [_enrich(g, today, warn, pictures) for i in runtime.store.items.values() for g in inventory_groups(i, dt_util.now())],
         "templates": runtime.store.templates_for_ui(),
         "hidden": runtime.store.hidden_templates(),
         "categories": runtime.store.categories,
@@ -209,6 +217,7 @@ def _serialize_state(hass: HomeAssistant, runtime: FridgeRuntime) -> dict[str, A
         "mealie": runtime.mealie.status(),
         "options": {
             "warn_days": warn,
+            "handling_enabled": bool(opts.get("handling_enabled", False)),
             "ai_enabled": bool(opts.get(CONF_AI_ENABLED)),
             "ai_has_key": bool((opts.get(CONF_OPENAI_KEY) or "").strip()),
             "code_format": opts.get(CONF_CODE_FORMAT),
@@ -449,11 +458,18 @@ async def ws_restore_item(hass, connection, msg) -> None:
     runtime = _runtime_or_error(hass, connection, msg)
     if runtime is None:
         return
+    from copy import deepcopy
+    previous = deepcopy((runtime.store.items, runtime.store.history))
     item = runtime.store.restore_item(msg["event_id"])
     if item is None:
         connection.send_error(msg["id"], "not_found", shared_text(hass, "cannot_restore"))
         return
-    await runtime.async_changed()
+    try:
+        await runtime.async_changed()
+    except Exception:
+        runtime.store.items, runtime.store.history = previous
+        connection.send_error(msg["id"], "storage_error", "Could not save undo")
+        return
     connection.send_result(msg["id"], {"item": item})
 
 
@@ -887,7 +903,7 @@ async def ws_mealie(hass, connection, msg):
     parsed, pending = split_parsed_recipes(mealie.cache.get("recipes", []))
     ranked = rank_recipes(parsed, foods, templates,
                           runtime.store.items.values(), runtime.store.locations, mappings,
-                          dt_util.now().date())
+                          dt_util.now().date(), now=dt_util.now())
     recipes = [{**r, "url": mealie.client.url + "/g/" + quote(mealie.cache["group_slug"], safe="") + "/r/" + quote(r["slug"], safe=""),
                 "image_url": mealie.client.url + "/api/media/recipes/" + quote(r["id"], safe="") + "/images/min-original.webp",
                 "unparsed": sum(not i["food_id"] for i in r["ingredients"])}
@@ -924,3 +940,33 @@ async def ws_categories(hass, connection, msg):
         connection.send_error(msg["id"], "category_error", str(err) if isinstance(err, ValueError) else "Could not save categories")
         return
     connection.send_result(msg["id"], {"saved": True})
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): f"{DOMAIN}/handling",
+    vol.Required("item_id"): str,
+    vol.Required("portions"): [int],
+    vol.Required("action"): vol.In(["opened","start_defrost","defrosted"]),
+    vol.Required("when"): str,
+    vol.Optional("location"): str,
+    vol.Optional("hours"): vol.Any(int, float, None),
+})
+@websocket_api.async_response
+async def ws_handling(hass, connection, msg):
+    runtime = _runtime_or_error(hass, connection, msg)
+    if runtime is None: return
+    if not runtime.options.get("handling_enabled", False):
+        connection.send_error(msg["id"], "handling_disabled", "Enable opened/defrosted tracking in settings first.")
+        return
+    from .handling import apply_event
+    from copy import deepcopy
+    previous = deepcopy((runtime.store.items,runtime.store.history))
+    try:
+        by, by_name = _user_attrs(connection)
+        event = apply_event(runtime.store,msg["item_id"],msg["portions"],msg["action"],msg["when"],msg.get("location"),msg.get("hours", "template"),dt_util.now(),by,by_name)
+        await runtime.async_changed()
+    except Exception as err:
+        runtime.store.items,runtime.store.history = previous
+        connection.send_error(msg["id"], "handling_error", str(err) if isinstance(err,ValueError) else "Could not save handling event")
+        return
+    connection.send_result(msg["id"], {"event":event})

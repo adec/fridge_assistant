@@ -178,6 +178,13 @@ async def async_render_png(
     specific printer's loaded label; without it the 99014 design canvas is
     used, exactly like before.
     """
+    from .handling import inventory_groups, portion_projection
+    portions = item.get('portions')
+    if isinstance(portions, list) and portions:
+        if portion is None and len(inventory_groups(item, dt_util.now())) > 1:
+            raise ValueError('Choose a specific portion for a mixed batch label')
+        target = next((p for p in portions if p['n'] == portion), None) if portion is not None else next((p for p in portions if p.get('status') == 'open'), None)
+        if target is not None: item = portion_projection(item, target, dt_util.now())
     ctx = build_label_context(hass, item, portion)
     if canvas:
         ctx["canvas"] = canvas

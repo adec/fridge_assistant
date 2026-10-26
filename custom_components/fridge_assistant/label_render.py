@@ -413,6 +413,14 @@ def render_label(item: dict[str, Any], ctx: dict[str, Any] | None = None) -> Ima
     expiry = _parse(item.get("expiry_date"))
     exp_str = _fmt_date(expiry, lang) or s["no_date"]
     date_heading = s["best_before" if item.get("date_type") == "best_before" else "use_by"]
+    if item.get('handling_due_at'):
+        from datetime import datetime
+        deadline = datetime.fromisoformat(item['handling_due_at'])
+        exp_str = (_fmt_date(deadline.date(), lang) or '') + ' ' + deadline.strftime('%H:%M')
+        date_heading = 'GEBRUIKEN VOOR' if lang == 'nl' else 'USE WITHIN'
+        reason = ('Na openen' if item['handling_reason'] == 'opened' else 'Na ontdooien') if lang == 'nl' else ('After opening' if item['handling_reason'] == 'opened' else 'After defrosting')
+        original_type = ('THT' if lang == 'nl' else 'Best Before') if item.get('original_date_type') == 'best_before' else ('Te gebruiken tot' if lang == 'nl' else 'Use By')
+        item = {**item, 'contents': f"{reason} · {original_type}: {item.get('original_expiry_date') or '-'} · {item.get('contents') or item.get('name', '')}"}
     label_font, _ = _fit_font(d, date_heading, sans_bold, inner_w - S(6) * (len(date_heading) - 1), start=S(26), min_size=S(14))
     exp_font, _ = _fit_font(d, exp_str, sans_bold, inner_w - S(56), start=S(58),
                             min_size=S(34))

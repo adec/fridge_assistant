@@ -1,7 +1,7 @@
-import { emptyFilters, filterInventory, activeFilterGroups } from '../lib/inventory-filters.js?v=0.10.0b24';
-import { esc } from '../lib/format.js?v=0.10.0b24';
-import { openSurface } from '../lib/surface.js?v=0.10.0b24';
-import { openLocationsManager } from './locations.js?v=0.10.0b24';
+import { emptyFilters, filterInventory, activeFilterGroups } from '../lib/inventory-filters.js?v=0.10.0b25';
+import { esc } from '../lib/format.js?v=0.10.0b25';
+import { openSurface } from '../lib/surface.js?v=0.10.0b25';
+import { openLocationsManager } from './locations.js?v=0.10.0b25';
 export const dueKeys = ['any','past','today','soon','week','none','custom'];
 export function filterLabel(panel, filters, key) {
   if (key==='locations') return filters.locations.map(id=>panel._locMeta(id).label || id).join(', ');
@@ -32,7 +32,7 @@ export function openInventoryFilters(panel) {
     {prefer:'drawer',onClose:()=>{if(panel._drawerEl===h.modal)h.modal.classList.remove('filter-surface');if(panel._refreshInventoryFilters===draw)panel._refreshInventoryFilters=null;}});
   h.modal.classList.add('filter-surface');
   const q=s=>h.modal.querySelector(s);
-  const matched=(f,skip='')=>filterInventory(panel._state.items,f,{search:panel._search,kindOf:i=>panel._kindOf(i),skip});
+  const matched=(f,skip='')=>filterInventory(panel._state.inventory_rows || panel._state.items,f,{search:panel._search,kindOf:i=>panel._kindOf(i),skip});
   const checks=(selector,key,ids,meta,itemKey)=>{
     const needle=q('#filter-category-search').value.trim().toLowerCase();
     const scrollTop=q(selector).scrollTop;

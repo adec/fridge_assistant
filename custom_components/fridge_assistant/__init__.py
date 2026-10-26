@@ -75,6 +75,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_track_time_change(hass, _midnight, hour=0, minute=0, second=5)
     )
 
+    # Handling lifetimes have hour precision, including when the feature is later hidden.
+    handling_signature = ()
+    async def _handling_tick(_now) -> None:
+        nonlocal handling_signature
+        from .handling import projected_items
+        from homeassistant.util import dt as dt_util
+        now = dt_util.now()
+        projections = [p for item in store.items.values() for p in projected_items(item, now) if p.get('handling_due_at')]
+        signature = tuple(sorted((p['id'],p['portion_number'],p['handling_overdue']) for p in projections))
+        if not signature and not handling_signature: return
+        changed = signature != handling_signature
+        await runtime.async_run_expiry_check(notify=changed and (any(p['handling_overdue'] for p in projections) or any(p[2] for p in handling_signature)))
+        handling_signature = signature
+    entry.async_on_unload(async_track_time_interval(hass, _handling_tick, timedelta(minutes=1)))
+
     # Run one check shortly after startup so the notification reflects reality.
     async def _initial(_event: Event | None = None) -> None:
         await runtime.async_run_expiry_check()

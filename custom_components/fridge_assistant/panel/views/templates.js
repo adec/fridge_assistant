@@ -1,11 +1,11 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b24";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b25";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { esc } from "../lib/format.js?v=0.10.0b24";
-import { openSurface } from "../lib/surface.js?v=0.10.0b24";
+import { esc } from "../lib/format.js?v=0.10.0b25";
+import { openSurface } from "../lib/surface.js?v=0.10.0b25";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -220,6 +220,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     <p class="date-type-help">${panel.t("useByUnchecked")}</p>
     <div class="te-sec">${panel.t("shelfLifeSectionLabel")}</div>
     <div class="grid3">${locs.map(dayField).join("")}</div>
+    ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] && t[key]%24===0 ? t[key]/24 : t[key]??''}" placeholder="${panel.t('handlingNoAutomatic')}"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0?'selected':''}>${panel.t('handlingDays')}</option></select></div></label>`).join('')}</details>`:''}
     <label class="field"><span>${panel.t("aliasesLabel")}</span><input id="te-aliases" value="${esc((t.aliases || []).join(", "))}" placeholder="${panel.t("aliasesPlaceholder")}"></label>
     <label class="field"><span>${panel.t("notesTipLabel")}</span><input id="te-notes" value="${esc(t.notes || "")}" placeholder="${panel.t("notesTipPlaceholder")}"></label>
     <div class="modal-actions ${!isNew ? "with-del" : ""}">
@@ -308,6 +309,14 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       notes: (q("#te-notes").value || "").trim(),
       source: "user",
     };
+    for(const key of ['after_opening_hours','after_defrosting_hours']) {
+      const field=q('#te-'+key);
+      if(field) {
+        const value=field.value.trim(),hours=value===''?null:Number(value)*Number(q('#te-'+key+'-unit').value);
+        if(hours!==null&&(!Number.isFinite(hours)||hours<=0||hours>8760)){field.focus();panel._toast(panel.t('handlingInvalidLifetime'),{type:'bad'});return;}
+        template[key]=hours;
+      } else if(t[key]!==undefined) template[key]=t[key];
+    }
     if (tpl && tpl.id) template.id = tpl.id; // keep id → overrides builtin / updates own
     submitting = true; q("#te-save").disabled = true;
     if (q("#te-save-next")) q("#te-save-next").disabled = true;

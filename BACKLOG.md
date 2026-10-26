@@ -23,7 +23,7 @@ Searchable curated offline food icons, optional product/personal photos, templat
 ## Future architecture option
 Consider extracting a standalone backend only if independent operation, persistent jobs or additional clients justify it. Keep new recipe logic separate from Home Assistant-specific code to preserve that option.
 
-## Backlog: opened and defrosted item lifetimes
+## Implemented: opened and defrosted item lifetimes
 Requested 6 October 2026. Optional lightweight tracking to answer when food needs eating,
 without structured quantities or a Grocy-style workflow. Design proposal, not implemented:
 
@@ -49,7 +49,7 @@ without structured quantities or a Grocy-style workflow. Design proposal, not im
 - Verify food-safety guidance before introducing any built-in duration or thawing rule;
   prefer user/package-specific instructions over a universal defrost lifetime.
 
-Record only at this stage; implementation belongs to a later feature branch/release.
+Implemented in v0.10.0b25: optional handling setting, hour/day template defaults, per-portion events and locations, undo, grouped inventory, portion-aware matching, expiry checks and labels. No universal food lifetimes are added.
 
 ## Deferred: unified category display symbol
 

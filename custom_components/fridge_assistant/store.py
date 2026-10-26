@@ -101,6 +101,12 @@ def parse_date(value: str | None) -> date | None:
 
 def item_days_left(item: dict[str, Any], today: date) -> int | None:
     """Days until expiry (negative = already expired), or None if no expiry."""
+    from .handling import earliest, timestamp
+    now = dt_util.now()
+    effective = item if item.get('inventory_key') else earliest(item, now)
+    if effective.get('handling_due_at') and today == now.date() and timestamp(effective['handling_due_at']) < now:
+        return -max(1, (today - timestamp(effective['handling_due_at']).astimezone(now.tzinfo).date()).days)
+    item = effective
     exp = parse_date(item.get("expiry_date"))
     if exp is None:
         return None
@@ -262,6 +268,12 @@ class FridgeStore:
             }
             self.hidden = set(data.get("hidden", []))
             self.history = list(data.get("history", []))[:MAX_HISTORY]
+        # Keep per-portion locations from imported stock readable too.
+        for item in self.items.values():
+            for portion in item.get("portions") or []:
+                key = portion.get("location")
+                if key and key not in self.locations:
+                    self.locations[key] = {"id":key,"name":key,"storage_type":"fridge","emoji":"📦","archived":True,"deleted":True}
         # Keep unknown IDs from imported inventories/history readable and restorable.
         for item in [*self.items.values(), *(ev.get("item") or {} for ev in self.history)]:
             key = item.get("location")
@@ -326,9 +338,9 @@ class FridgeStore:
         return loc["storage_type"]
 
     def locations_for_ui(self) -> dict[str, dict[str, Any]]:
-        in_use = {i.get("location") for i in self.items.values()}
+        in_use = {i.get("location") for i in self.items.values()} | {p.get("location") for i in self.items.values() for p in i.get("portions", []) if p.get("status") == "open"}
         return {key: {**loc, "label": self.location_label(key),
-                      "count": sum(i.get("location") == key for i in self.items.values())}
+                      "count": sum(any(p.get("status") == "open" and p.get("location", i.get("location")) == key for p in i.get("portions") or [{"status":"open"}]) for i in self.items.values())}
                 for key, loc in self.locations.items()
                 if not loc.get("deleted") or key in in_use}
 
@@ -370,7 +382,7 @@ class FridgeStore:
         loc = self.locations.get(key)
         if loc is None or loc.get("deleted"):
             raise LocationError("location_not_found")
-        if any(i.get("location") == key for i in self.items.values()):
+        if any(i.get("location") == key or any(p.get("location") == key and p.get("status") == "open" for p in i.get("portions", [])) for i in self.items.values()):
             raise LocationError("location_in_use")
         if key in self.active_locations() and len(self.active_locations()) == 1:
             raise LocationError("location_last_active")
@@ -564,6 +576,9 @@ class FridgeStore:
             tpl["opened_fridge"] = data.get(
                 "opened_fridge", existing.get("opened_fridge")
             )
+        from .handling import hours
+        for key in ("after_opening_hours", "after_defrosting_hours"):
+            tpl[key] = hours(data.get(key, existing.get(key)))
         self.user_templates[tpl_id] = tpl
         return tpl
 
@@ -820,7 +835,8 @@ class FridgeStore:
             return None
         portions = self._portions(item)
         consumed = [p for p in portions if p.get("status") != "open"]
-        total = max(len(consumed), min(int(total or 1), MAX_PORTIONS))
+        tracked = [p for p in portions if p.get("status") == "open" and (p.get("opened_at") or p.get("defrost_started_at"))]
+        total = max(len(consumed) + len(tracked), min(int(total or 1), MAX_PORTIONS))
         if total == 0:
             total = 1
         current = len(portions)
@@ -831,7 +847,7 @@ class FridgeStore:
         elif total < current:
             removable = current - total
             for p in sorted(
-                (p for p in portions if p.get("status") == "open"),
+                (p for p in portions if p.get("status") == "open" and p not in tracked),
                 key=lambda p: p.get("n", 0),
                 reverse=True,
             )[:removable]:
@@ -965,6 +981,13 @@ class FridgeStore:
         for i, ev in enumerate(self.history):
             if ev.get("id") != event_id:
                 continue
+            if ev.get("action") == "handling":
+                from .handling import undo_event
+                item = undo_event(self, ev)
+                if item is None: return None
+                item['updated_at'] = dt_util.now().isoformat()
+                del self.history[i]
+                return item
             if ev.get("action") in PORTION_ACTIONS:
                 # Portion undo: the item must still be live.
                 item = self.items.get(ev.get("item_id"))
