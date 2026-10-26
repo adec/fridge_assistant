@@ -1,13 +1,13 @@
-import { fmtCardDate } from "../lib/format.js?v=0.10.0b32";
-import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b32";
+import { fmtCardDate } from "../lib/format.js?v=0.10.0b33";
+import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b33";
 /* Item inspector: drawer on desktop (list stays visible; selecting another
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b32";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b32";
-import { openSurface } from "../lib/surface.js?v=0.10.0b32";
-import { relTime } from "./history.js?v=0.10.0b32";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b33";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b33";
+import { openSurface } from "../lib/surface.js?v=0.10.0b33";
+import { relTime } from "./history.js?v=0.10.0b33";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length
@@ -18,6 +18,13 @@ function portionsOf(item) {
 
 export function openPortions(item) {
   return portionsOf(item).filter((p) => p.status === "open").map((p) => p.n);
+}
+
+// Summarise the locations of remaining portions, not their original batch location.
+export function currentPortionLocations(item) {
+  const states = new Map((item.portion_states || []).map(p => [p.portion_number, p]));
+  return [...new Set(portionsOf(item).filter(p => p.status === 'open')
+    .map(p => p.location || states.get(p.n)?.location || item.location).filter(Boolean))];
 }
 
 export function openInspector(panel, item, { highlight = null } = {}) {
@@ -36,7 +43,9 @@ export function openInspector(panel, item, { highlight = null } = {}) {
   const render = () => {
     const i = (panel._state.items || []).find((x) => x.id === itemId);
     if (!i) { close(); return; }
-    const lm = panel._locMeta(i.location);
+    const locations = currentPortionLocations(i);
+    const location = locations[0] || i.location;
+    const lm = panel._locMeta(location);
     const col = STATUS_COLOR[i.status];
     const lang = panel._lang();
     const portions = portionsOf(i);
@@ -99,7 +108,7 @@ export function openInspector(panel, item, { highlight = null } = {}) {
       ${i.portions?.some(p=>p.opened_at||p.defrost_started_at) ? `<button class="link" id="handling-history">${panel.t("handlingCorrections")}</button>`:""}
       ${i.stock_count != null ? `<div class="d-row"><span>${panel.t('stockRemaining')}</span><b>${i.stock_count} ${esc(panel._state.templates.find(t=>t.id===i.template_id)?.stock_unit || '')}</b></div>` : ''}
       <div class="d-rows">
-        <div class="d-row"><span>${panel.t("locationLabel")}</span><b>${(i.portion_states||[]).some(p=>p.location!==i.location) ? panel.t("handlingMixedLocation") : (lm.emoji || "")+" "+esc(lm.label || i.location)}</b></div>
+        <div class="d-row"><span>${panel.t("locationLabel")}</span><b>${locations.length > 1 ? panel.t("handlingMixedLocation") : (lm.emoji || "")+" "+esc(lm.label || location)}</b></div>
         ${i.added_by_name ? `<div class="d-row"><span>${panel.t("addedByLabel")}</span><b class="who">${panel._avatar(i.added_by_name, i.added_by_picture, 24)} ${esc(i.added_by_name)}</b></div>` : ""}
         ${i.contents && i.contents !== i.name ? `<div class="d-row"><span>${panel.t("contentsLabel")}</span><b>${esc(i.contents)}</b></div>` : ""}
         <div class="d-row"><span>${panel.t("dateInDetailLabel")}</span><b>${fmtDate(i.added_date, lang)}${i.age_days != null ? ` · ${esc(panel.t("daysAgoShort", i.age_days))}` : ""}</b></div>
