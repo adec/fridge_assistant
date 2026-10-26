@@ -20,8 +20,30 @@ This is a backlog item, not part of the first Mealie recipe-suggestion release. 
 ## Deferred: wider food icon/image library
 Searchable curated offline food icons, optional product/personal photos, template defaults and item overrides. Deferred because the expected gain did not justify the work at present.
 
-## Future architecture option
-Consider extracting a standalone backend only if independent operation, persistent jobs or additional clients justify it. Keep new recipe logic separate from Home Assistant-specific code to preserve that option.
+## Backlog: standalone backend with a thin Home Assistant integration
+
+Recorded 26 October 2026. Preferred long-term architecture to evaluate, deferred for
+now with no implementation date or ordering commitment:
+
+- A standalone service owns inventory, templates, barcode mappings, portion lifetimes,
+  Mealie synchronisation and background jobs. Support Docker and consider an HAOS app
+  (add-on) package for convenient local installation and independent updates.
+- A thin Home Assistant integration connects through a versioned API and exposes
+  relevant entities/actions and access to the frontend. Preserve the in-HA experience;
+  external chat should not be required for normal use.
+- The backend owns its own database (SQLite initially if appropriate), schema migrations,
+  transactions, credentials and recovery. Never extend or depend on Recorder's schema.
+  Avoid an intermediate in-HA database migration if backend extraction is the next step.
+- Plan a validated, recoverable import from the existing storage data, preserving IDs,
+  stock, history, templates, barcode/Mealie links, portion state, dates and sticker codes.
+- Define API authentication, connection failures, unavailable/stale entities, compatibility
+  between backend/integration versions, and reliable backup/restore for both deployments.
+- Keep domain logic and persistence separated from HA-specific code meanwhile. Measure
+  performance before assuming extraction is required for capacity; independent updates,
+  runtime isolation and clearer ownership are the main architectural motivations.
+
+Keep the current integration/storage approach for now. Recording this item does not
+start a rewrite, database migration or deployment change.
 
 ## Implemented: opened and defrosted item lifetimes
 Requested 6 October 2026. Optional lightweight tracking to answer when food needs eating,
