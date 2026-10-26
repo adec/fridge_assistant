@@ -1,9 +1,9 @@
-import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b29";
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b29";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b29";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b29";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b29";
-import { openMealie } from "./views/mealie.js?v=0.10.0b29";
+import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b30";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b30";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b30";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b30";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b30";
+import { openMealie } from "./views/mealie.js?v=0.10.0b30";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -16,18 +16,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b29";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b29";
-import { STYLES } from "./styles.js?v=0.10.0b29";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b29";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b29";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b29";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b29";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b29";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b29";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b29";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b29";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b29";
-import { printSticker } from "./views/print.js?v=0.10.0b29";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b30";
+import { STYLES } from "./styles.js?v=0.10.0b30";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b30";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b30";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b30";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b30";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b30";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b30";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b30";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b30";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b30";
+import { printSticker } from "./views/print.js?v=0.10.0b30";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -340,8 +340,10 @@ class FridgeAssistantPanel extends HTMLElement {
     const items = this._filteredItems();
     const lang = this._lang();
 
+    const low = this._state.low_stock || [];
+    const lowHtml = low.length ? `<details class="low-stock"><summary>${this.t('lowStock')} · ${low.length}</summary>${low.map(t=>`<div class="d-row"><span>${esc(t.emoji || '')} ${esc(t.name)}</span><b>${t.remaining} ${esc(t.unit || '')} · ≤ ${t.limit}</b></div>`).join('')}</details>` : '';
     if (this._state.counts.total === 0) {
-      list.innerHTML = `<div class="empty">
+      list.innerHTML = lowHtml + `<div class="empty">
         <div class="empty-emoji">🧊</div>
         <h2>${this.t("emptyTitle")}</h2>
         <p>${this.t("emptySub")}</p>
@@ -351,7 +353,7 @@ class FridgeAssistantPanel extends HTMLElement {
       return;
     }
 
-    let html = "";
+    let html = lowHtml;
     if (!items.length) {
       // The active chips may be scrolled out of view, so an empty result
       // needs its own way out.
@@ -431,7 +433,7 @@ class FridgeAssistantPanel extends HTMLElement {
     return `<div class="card${selected}${i.status === "expired" ? " status-expired" : i.status === "soon" ? " status-soon" : ""}" data-item="${i.inventory_key || i.id}" role="button" tabindex="0" aria-label="${esc(i.name)}">
       <div class="card-emoji">${i.emoji || "🍽️"}</div>
       <div class="card-main">
-        <div class="card-title">${esc(i.name)}</div>
+        <div class="card-title">${esc(i.name)}${i.stock_count != null ? ` <span class="pbadge">${i.stock_count} ${esc(this._state.templates.find(t=>t.id===i.template_id)?.stock_unit || this.t("stockRemaining"))}</span>` : ""}</div>
         <div class="card-sub">
           ${this._filterLoc === "all" ? `<span class="cs-fix">${lm.emoji || ""} ${esc(locLabel)}</span><span class="cs-sep">·</span>` : ""}
           <span class="code">${esc(i.code)}${i.inventory_key && i.portions?.length === 1 && i.batch_portions_total > 1 ? "-"+i.portions[0].n : ""}</span>${pbadge}

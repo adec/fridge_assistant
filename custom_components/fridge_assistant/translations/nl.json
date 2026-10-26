@@ -54,6 +54,9 @@
       },
       "expired": {
         "name": "Over datum"
+      },
+      "low_stock": {
+        "name": "Lage voorraad"
       }
     }
   },
@@ -209,6 +212,23 @@
     "run_check": {
       "name": "Houdbaarheidscontrole uitvoeren",
       "description": "Voer nu de controle op bijna-over-datum items uit (event + melding)."
+    },
+    "consume_stock": {
+      "name": "Voorraad verbruiken",
+      "description": "Verbruik aantallen of verpakkingen van een sjabloon. Oudste datum eerst. Onvoldoende voorraad wijzigt niets.",
+      "fields": {
+        "template_id": {
+          "name": "Sjabloon-ID",
+          "description": "Kopieer het ID uit de sjablooneditor."
+        },
+        "amount": {
+          "name": "Aantal"
+        },
+        "item_id": {
+          "name": "Specifieke voorraadinvoer",
+          "description": "Optioneel; leeg kiest automatisch."
+        }
+      }
     }
   }
 }

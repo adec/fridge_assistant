@@ -259,6 +259,8 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
   border-radius:13px;padding:0 14px;font-size:16px;background:var(--fa-bg);color:var(--fa-text);
   outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;}
 .field input:focus{border-color:var(--fa-accent);box-shadow:0 0 0 4px var(--fa-accent-soft);}
+.low-stock{grid-column:1/-1;margin-bottom:12px;padding:12px;border:1px solid var(--fa-orange);border-radius:12px;}
+.low-stock summary{cursor:pointer;font-weight:800;color:var(--fa-orange);}
 .datefield{position:relative;min-width:0;}
 .datefield input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;
   z-index:1;cursor:pointer;-webkit-appearance:none;appearance:none;}

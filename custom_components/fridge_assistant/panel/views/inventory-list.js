@@ -1,5 +1,5 @@
-import { handlingSummary, handlingDate, handlingStatus } from "./handling.js?v=0.10.0b29";
-import { esc, fmtCardDate, daysLabel } from '../lib/format.js?v=0.10.0b29';
+import { handlingSummary, handlingDate, handlingStatus } from "./handling.js?v=0.10.0b30";
+import { esc, fmtCardDate, daysLabel } from '../lib/format.js?v=0.10.0b30';
 
 export function inventoryList(panel, items, lang) {
   if (!panel._inventorySort || panel._inventorySort.startsWith("due")) items = items.slice().sort((a,b) => {
@@ -17,7 +17,7 @@ export function inventoryList(panel, items, lang) {
       const status = handlingStatus(panel,i,daysLabel(i.days_left, lang, i.date_type));
       const type = i.handling_due_at ? panel.t('handlingUseWithin') : panel.t(i.date_type === 'best_before' ? 'bestBeforeLabel' : 'useByLabel');
       return `<tr data-item="${esc(i.inventory_key || i.id)}" tabindex="0" class="inventory-row ${i.status === 'expired' ? 'status-expired' : i.status === 'soon' ? 'status-soon' : ''} ${panel._inspectorItemId === i.id ? 'selected' : ''}" aria-label="${esc(i.name)}">
-        <td><div class="il-food"><span class="il-emoji">${esc(i.emoji || '🍽️')}</span><div class="il-name"><b>${esc(i.name)}</b>${handlingSummary(panel,i,false)?`<small class="inventory-handling">${esc(handlingSummary(panel,i,false))}</small>`:""}<code class="il-code">${esc(i.code)}${i.inventory_key && i.portions.length===1 && i.batch_portions_total>1 ? "-"+i.portions[0].n : ""}</code><span class="il-mobile-meta">${[showLocation ? esc(loc.label || i.location) : '', portionText ? esc(panel.t('listPortionsRemaining', portionText)) : ''].filter(Boolean).join(' · ')}</span></div></div></td>
+        <td><div class="il-food"><span class="il-emoji">${esc(i.emoji || '🍽️')}</span><div class="il-name"><b>${esc(i.name)}${i.stock_count != null ? ` · ${i.stock_count} ${esc(panel._state.templates.find(t=>t.id===i.template_id)?.stock_unit || panel.t("stockRemaining"))}` : ""}</b>${handlingSummary(panel,i,false)?`<small class="inventory-handling">${esc(handlingSummary(panel,i,false))}</small>`:""}<code class="il-code">${esc(i.code)}${i.inventory_key && i.portions.length===1 && i.batch_portions_total>1 ? "-"+i.portions[0].n : ""}</code><span class="il-mobile-meta">${[showLocation ? esc(loc.label || i.location) : '', portionText ? esc(panel.t('listPortionsRemaining', portionText)) : ''].filter(Boolean).join(' · ')}</span></div></div></td>
         ${showLocation ? `<td class="il-location">${esc(loc.label || i.location)}</td>` : ''}
         <td class="il-date">${i.expiry_date ? `<small>${esc(type)}</small><span>${i.handling_due_at ? handlingDate(panel,i).replace(panel.t("handlingUseWithin")+" · ","") : fmtCardDate(i.expiry_date, lang, panel._state.today, i.expiry_precision)}</span>` : `<span>—</span>`}<span class="il-mobile-time il-status ${esc(i.status)}">${esc(status)}</span></td>
         <td class="il-time il-status ${esc(i.status)}">${esc(status)}</td>

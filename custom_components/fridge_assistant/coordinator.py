@@ -190,6 +190,14 @@ class FridgeRuntime:
         )
         return item
 
+    async def async_consume_stock(self, template_id, amount=1, item_id=None, by=None, by_name=None):
+        from .stock import consume, low_stock
+        event = consume(self.store, template_id, amount, item_id, by, by_name)
+        await self.async_changed()
+        result = {'event':event, 'low_stock':low_stock(self.store)}
+        self.hass.bus.async_fire('fridge_assistant_stock_consumed', {'template_id':template_id, 'amount':amount, 'low_stock':result['low_stock']})
+        return result
+
     async def async_remove_item(self, item_id: str) -> dict[str, Any] | None:
         item = self.store.remove_item(item_id)
         if item is None:

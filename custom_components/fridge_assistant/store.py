@@ -574,6 +574,8 @@ class FridgeStore:
             "notes": data.get("notes", existing.get("notes", "")),
             "source": data.get("source", "user"),
         }
+        from .stock import template_fields
+        tpl.update(template_fields(data, existing))
         tpl["kind"] = canonical_kind(
             data.get("kind")
             or existing.get("kind")
@@ -736,6 +738,16 @@ class FridgeStore:
                 else self.category_kind(item.get("category"))
             )
         item["kind"] = kind
+        from .stock import integer
+        stock_count = data.get('stock_count')
+        if 'stock_count' not in data and template and template.get('stock_mode') == 'count':
+            stock_count = 1
+        if stock_count is not None:
+            if not template or template['id'] in self.hidden:
+                raise ValueError('Choose or create a template for counted stock')
+            if len(item.get('portions', [])) > 1:
+                raise ValueError('Counted stock cannot have individual portions')
+            item['stock_count'] = integer(stock_count, 1)
         return item
 
     def add_item(self, item: dict[str, Any]) -> dict[str, Any]:
@@ -746,6 +758,15 @@ class FridgeStore:
         item = self.items.get(item_id)
         if not item:
             return None
+        if 'stock_count' in changes:
+            from .stock import integer
+            if changes['stock_count'] is not None:
+                template = self.get_template(changes.get('template_id', item.get('template_id')))
+                if not template or template['id'] in self.hidden:
+                    raise ValueError('Choose or create a template for counted stock')
+                changes = {**changes, 'stock_count':integer(changes['stock_count'], 1)}
+                if len(item.get('portions', [])) > 1 or any(p.get('opened_at') or p.get('defrost_started_at') for p in item.get('portions', [])):
+                    raise ValueError('Counted stock cannot have individual or handled portions')
         if "expiry_date" in changes or "expiry_precision" in changes:
             precision = changes.get("expiry_precision", "day" if "expiry_date" in changes else item.get("expiry_precision", "day"))
             changes = {**changes, "expiry_precision": precision,
@@ -767,6 +788,7 @@ class FridgeStore:
             "photo",
             "template_id",
             "quantity",
+            "stock_count",
             "added_date",
             "expiry_date",
             "expiry_precision",
@@ -869,6 +891,8 @@ class FridgeStore:
         item = self.items.get(item_id)
         if item is None:
             return None
+        if item.get('stock_count') is not None:
+            raise ValueError('Use stock count instead of portions for counted items')
         portions = self._portions(item)
         consumed = [p for p in portions if p.get("status") != "open"]
         tracked = [p for p in portions if p.get("status") == "open" and (p.get("opened_at") or p.get("defrost_started_at"))]
@@ -928,6 +952,8 @@ class FridgeStore:
         item = self.items.get(item_id)
         if item is None:
             return "item_not_found"
+        if item.get('stock_count') is not None:
+            return 'Use consume_stock for counted items'
         if action not in HISTORY_ACTIONS:
             action = ACTION_EATEN
         portions = self._portions(item)
@@ -1017,6 +1043,12 @@ class FridgeStore:
         for i, ev in enumerate(self.history):
             if ev.get("id") != event_id:
                 continue
+            if ev.get('action') == 'stock_consumed':
+                from .stock import undo
+                item = undo(self, ev)
+                if item is not None:
+                    del self.history[i]
+                return item
             if ev.get("action") == "handling":
                 from .handling import undo_event
                 item = undo_event(self, ev)

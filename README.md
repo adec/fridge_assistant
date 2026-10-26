@@ -261,6 +261,48 @@ remain a fallback; they are not automatically promoted to permanent links.
 Removing a link leaves stock and history unchanged. Deleting a template, hiding a built-in template,
 or resetting its customisations removes its links; restoring the built-in does not restore them.
 
+### Simple counts and low-stock reminders
+
+For consumables such as dishwasher tablets, open the template's **Stock & reordering** section:
+choose **Simple count**, optionally label the count `tablets`, and set **Reorder at or below**
+(e.g. 15). Add a box with a remaining count of 80. This stores one entry with one count, not 80
+portions. Expiry dates are optional. New entries inherit the mode; existing stock is unchanged.
+Use **More options → Simple count** to convert a compatible existing entry linked to a template.
+Individual or opened/defrosted portions cannot be converted to counted stock.
+
+Cards and list rows show the count. The item inspector offers **Use one**, with undo; edit the
+entry to correct its remaining count. Reaching zero removes the entry, with a restorable history
+event. Consumption can span entries. Undo is refused if affected stock has changed since that
+consumption; undo newer consumption first. History retention limits still apply.
+
+Thresholds aggregate all physical stock linked to the template across locations, including dated,
+undated and past-date entries. Ordinary batches count as one pack/item, not as individual meal
+portions. The **Low stock** section has one row per template at or below its threshold, even with
+no stock left. Restocking above the limit removes the row automatically. Blank disables the
+threshold; zero flags out-of-stock templates. No weights, volumes or unit conversions are used.
+
+A **Low stock** sensor exposes the number of affected templates, with their IDs, totals, limits
+and count labels in its `templates` attribute. This initial version provides an in-app reminder
+list; automatic Mealie/Home Assistant shopping-list writes remain future work.
+
+For automations, copy **Template ID for automations** from the template editor and call:
+
+```yaml
+action: fridge_assistant.consume_stock
+data:
+  template_id: dishwasher_tablets  # Use the ID shown in your template editor.
+  amount: 1
+```
+
+Optional `item_id` selects one stock entry. Otherwise, the action consumes earliest-dated stock
+first, then the oldest undated entry. Counted stock subtracts the amount; ordinary stock consumes
+whole packs/items. Insufficient stock makes no changes and reports an error. Individually tracked
+or handled portions retain their existing actions. Mixed counted/pack entries require correction
+or selecting a compatible specific entry. Trigger once per dishwasher cycle (e.g. a transition
+into running); repeated calls each consume stock. The response includes the history event and
+current low-stock list. `fridge_assistant_stock_consumed` is also fired with the template ID,
+amount and current low-stock list. Consuming, undoing, editing and restocking all refresh the sensor.
+
 ### Portions
 
 Cooked a big batch? Set a portion count when adding the item (or later, in the inspector) and the

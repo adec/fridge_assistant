@@ -54,6 +54,9 @@
       },
       "expired": {
         "name": "Expired"
+      },
+      "low_stock": {
+        "name": "Low stock"
       }
     }
   },
@@ -209,6 +212,23 @@
     "run_check": {
       "name": "Run expiry check",
       "description": "Run the check for soon-to-expire items now (event + notification)."
+    },
+    "consume_stock": {
+      "name": "Consume stock",
+      "description": "Consume counts or packs from a template. Earliest date first. Insufficient stock makes no changes.",
+      "fields": {
+        "template_id": {
+          "name": "Template ID",
+          "description": "Copy the ID from the template editor’s Stock & reordering section."
+        },
+        "amount": {
+          "name": "Amount"
+        },
+        "item_id": {
+          "name": "Specific stock entry",
+          "description": "Optional; leave blank to select automatically."
+        }
+      }
     }
   }
 }

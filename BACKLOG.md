@@ -3,7 +3,9 @@
 ## In progress: Mealie recipe suggestions
 Keep the existing Home Assistant integration. Add an in-app “What can I cook?” view, direct Mealie API access, saved ingredient mappings, date-based ranking and optional AI-assisted matching reviewed by the user. See [the implementation plan](docs/mealie-integration-plan.md). Connection settings, atomic recipe caching and a read-only catalogue preview are implemented on `feature/mealie-integration`. Saved food mappings, deterministic presence matching and date ranking are also implemented. Optional AI review and live validation remain outstanding. No separate Docker backend yet.
 
-## Backlog: minimum-stock alerts and replenishment
+## Partially implemented: minimum-stock alerts and replenishment
+Initial delivery in beta 30: simple integer counts, template thresholds, an in-app low-stock list, a Low stock sensor and the `consume_stock` automation action. Shopping-list destinations, optional location scopes and usable-stock policies remain on the backlog.
+
 Requested 6 October 2026. Let users identify foods they want to keep in stock, set minimum stock thresholds and receive low-stock prompts.
 
 Proposed design, not yet finalised:

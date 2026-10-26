@@ -1,13 +1,13 @@
-import { fmtCardDate } from "../lib/format.js?v=0.10.0b29";
-import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b29";
+import { fmtCardDate } from "../lib/format.js?v=0.10.0b30";
+import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b30";
 /* Item inspector: drawer on desktop (list stays visible; selecting another
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b29";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b29";
-import { openSurface } from "../lib/surface.js?v=0.10.0b29";
-import { relTime } from "./history.js?v=0.10.0b29";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b30";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b30";
+import { openSurface } from "../lib/surface.js?v=0.10.0b30";
+import { relTime } from "./history.js?v=0.10.0b30";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length
@@ -80,7 +80,7 @@ export function openInspector(panel, item, { highlight = null } = {}) {
       </div>
       <div class="d-status" style="--c:${col}">${i.effective_due_at ? esc(handlingDate(panel,i)) : daysLabel(i.days_left, lang, i.date_type)}${!i.effective_due_at && i.expiry_date ? " · " + panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel") + " " + fmtCardDate(i.expiry_date, lang, panel._state.today, i.expiry_precision) : ""}</div>
       ${i.effective_due_at ? `<p class="location-help">${panel.t("handlingOriginal")}: ${panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} ${i.expiry_date ? fmtCardDate(i.expiry_date, lang, panel._state.today, i.expiry_precision) : "—"}</p>`:""}
-      <div class="po-sec">
+      <div class="po-sec" ${i.stock_count != null ? 'style="display:none"' : ""}>
         <div class="po-head">
           <span>${panel.t("portionsLabel")}</span>
           <span class="pstep">
@@ -93,6 +93,7 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         ${total > 1 || panel._state.options.handling_enabled || i.portions?.some(p=>p.opened_at||p.defrost_started_at) ? `<div class="po-rows">${portions.map(portionRow).join("")}</div>` : ""}
       </div>
       ${i.portions?.some(p=>p.opened_at||p.defrost_started_at) ? `<button class="link" id="handling-history">${panel.t("handlingCorrections")}</button>`:""}
+      ${i.stock_count != null ? `<div class="d-row"><span>${panel.t('stockRemaining')}</span><b>${i.stock_count} ${esc(panel._state.templates.find(t=>t.id===i.template_id)?.stock_unit || '')}</b></div>` : ''}
       <div class="d-rows">
         <div class="d-row"><span>${panel.t("locationLabel")}</span><b>${(i.portion_states||[]).some(p=>p.location!==i.location) ? panel.t("handlingMixedLocation") : (lm.emoji || "")+" "+esc(lm.label || i.location)}</b></div>
         ${i.added_by_name ? `<div class="d-row"><span>${panel.t("addedByLabel")}</span><b class="who">${panel._avatar(i.added_by_name, i.added_by_picture, 24)} ${esc(i.added_by_name)}</b></div>` : ""}
@@ -106,7 +107,7 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         <button class="btn ghost" id="d-edit">${panel.t("editBtn")}</button>
       </div>
       <div class="modal-actions done-row">
-        <button class="btn good" id="d-eaten">${panel.t(total>1?"handlingEatBatch":"eatenBtn")}</button>
+        <button class="btn good" id="d-eaten">${i.stock_count != null ? panel.t("stockUseOne") : panel.t(total>1?"handlingEatBatch":"eatenBtn")}</button>
         <button class="btn tossed" id="d-tossed">${panel.t(total>1?"handlingTossBatch":"tossedBtn")}</button>
       </div>
     `;
@@ -117,7 +118,14 @@ export function openInspector(panel, item, { highlight = null } = {}) {
     q("#d-close").addEventListener("click", close);
     q("#d-print").addEventListener("click", () => panel._printSticker(i.id, i));
     q("#d-edit").addEventListener("click", () => { close(); panel._openAddModal({}, i); });
-    q("#d-eaten").addEventListener("click", () => completeItem(panel, i, "eaten", close));
+    q("#d-eaten").addEventListener("click", async () => {
+      if (i.stock_count == null) { completeItem(panel, i, "eaten", close); return; }
+      q('#d-eaten').disabled = true;
+      try {
+        const result = await panel._call('consume_stock', {template_id:i.template_id, item_id:i.id, amount:1});
+        close(); panel._toast(panel.t('stockConsumed'), {actionLabel:panel.t('stockUndo'), onAction:()=>panel._call('restore_item',{event_id:result.event.id})});
+      } catch(e) { panel._toast(esc(e.message || e),{type:'bad'}); q('#d-eaten').disabled=false; }
+    });
     q("#d-tossed").addEventListener("click", () => completeItem(panel, i, "tossed", close));
 
     const stepTo = async (t) => {

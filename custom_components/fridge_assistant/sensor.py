@@ -22,6 +22,7 @@ async def async_setup_entry(
     runtime: FridgeRuntime = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
         [
+            FridgeLowStockSensor(runtime),
             FridgeTotalSensor(runtime),
             FridgeExpiringSensor(runtime),
             FridgeExpiredSensor(runtime),
@@ -122,3 +123,21 @@ class FridgeExpiredSensor(_FridgeSensorBase):
         return {
             "items": [item_summary(i, today) for i in self._runtime.store.expired_items(today)]
         }
+
+
+class FridgeLowStockSensor(_FridgeSensorBase):
+    _attr_icon = 'mdi:cart-arrow-down'
+    _attr_translation_key = 'low_stock'
+
+    def __init__(self, runtime):
+        super().__init__(runtime, 'low_stock')
+
+    @property
+    def native_value(self):
+        from .stock import low_stock
+        return len(low_stock(self._runtime.store))
+
+    @property
+    def extra_state_attributes(self):
+        from .stock import low_stock
+        return {'templates':low_stock(self._runtime.store)}

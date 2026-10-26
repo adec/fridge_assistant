@@ -1,12 +1,12 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b29";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b30";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b29";
-import { esc } from "../lib/format.js?v=0.10.0b29";
-import { openSurface } from "../lib/surface.js?v=0.10.0b29";
+import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b30";
+import { esc } from "../lib/format.js?v=0.10.0b30";
+import { openSurface } from "../lib/surface.js?v=0.10.0b30";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -221,6 +221,10 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     <label class="field"><span>${panel.t("categoryLabel")}</span><div class="select-wrap"><select id="te-cat">${catOptions}</select></div></label>
     <label class="date-type-check"><input type="checkbox" id="te-date-type" ${(t.date_type || "use_by") === "best_before" ? "checked" : ""}><span>${panel.t("bestBeforeCheckbox")}</span></label>
     <p class="date-type-help">${panel.t("useByUnchecked")}</p>
+    <details class="template-handling" ${t.stock_mode === 'count' || t.reorder_limit != null ? 'open' : ''}><summary>${panel.t('stockSettings')}</summary>
+      <label class="field"><span>${panel.t('stockMode')}</span><div class="select-wrap"><select id="te-stock-mode"><option value="packs">${panel.t('stockPacks')}</option><option value="count" ${t.stock_mode === 'count' ? 'selected' : ''}>${panel.t('stockCountMode')}</option></select></div></label>
+      <div class="grid2"><label class="field"><span>${panel.t('stockUnit')}</span><input id="te-stock-unit" maxlength="40" value="${esc(t.stock_unit || '')}" placeholder="${panel.t('stockUnitExample')}"></label><label class="field"><span>${panel.t('reorderLimit')}</span><input type="number" min="0" max="1000000" step="1" id="te-reorder" value="${t.reorder_limit ?? ''}" placeholder="${panel.t('stockDisabled')}"></label></div><p class="location-help">${panel.t('stockTemplateHelp')}</p>${t.id ? `<label class="field"><span>${panel.t('stockTemplateId')}</span><input readonly value="${esc(t.id)}"></label>` : ''}
+    </details>
     <div class="te-sec">${panel.t("shelfLifeSectionLabel")}</div>
     <div class="grid3">${locs.map(dayField).join("")}</div>
     <p class="location-help">${panel.t("shelfDurationHelp")}</p>
@@ -312,7 +316,11 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     }
     const cat = q("#te-cat").value;
     if (!cat) { panel._toast(panel.t("noKindCategories"), {type:"bad"}); return; }
+    const reorderText = q('#te-reorder').value.trim();
+    const reorder = reorderText === '' ? null : Number(reorderText);
+    if (reorder !== null && (!Number.isInteger(reorder) || reorder < 0 || reorder > 1000000)) { q('#te-reorder').focus(); return; }
     const template = {
+      stock_mode:q('#te-stock-mode').value, stock_unit:q('#te-stock-unit').value.trim(), reorder_limit:reorder,
       name,
       emoji: (q("#te-emoji").value || "").trim() || catOf(cat).emoji,
       icon: (tpl && tpl.icon) || catOf(cat).icon,

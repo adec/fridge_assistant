@@ -18,6 +18,7 @@ from homeassistant.core import (
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 
+from .stock import integer as stock_integer
 from .store import LocationError
 from .ai import AIEstimateError, async_estimate
 from .codes import split_portion_code
@@ -83,6 +84,7 @@ SERVICE_ADD_TEMPLATE = "add_template"
 SERVICE_PRINT_STICKER = "print_sticker"
 SERVICE_EXPORT_LABEL = "export_label"
 SERVICE_RUN_CHECK = "run_check"
+SERVICE_CONSUME_STOCK = "consume_stock"
 
 _ALL_SERVICES = [
     SERVICE_ADD_ITEM,
@@ -96,6 +98,7 @@ _ALL_SERVICES = [
     SERVICE_PRINT_STICKER,
     SERVICE_EXPORT_LABEL,
     SERVICE_RUN_CHECK,
+    SERVICE_CONSUME_STOCK,
 ]
 
 _SAMPLE_ITEM = {
@@ -138,6 +141,7 @@ ADD_ITEM_SCHEMA = vol.Schema(
         vol.Optional("expiry_date"): cv.string,
         vol.Optional("expiry_precision"): vol.In(["day", "month"]),
         vol.Optional("quantity"): cv.string,
+        vol.Optional("stock_count"): lambda value:stock_integer(value,1),
         vol.Optional("portions"): vol.All(
             vol.Coerce(int), vol.Range(min=1, max=MAX_PORTIONS)
         ),
@@ -198,6 +202,14 @@ def async_setup_services(hass: HomeAssistant) -> None:
     the two surfaces cannot drift apart.
     """
 
+    async def handle_consume_stock(call):
+        runtime = _get_runtime(hass)
+        by, by_name = await runtime.async_user_attrs(call.context.user_id)
+        try:
+            return await runtime.async_consume_stock(call.data['template_id'], call.data.get('amount', 1), call.data.get('item_id'), by, by_name)
+        except ValueError as err:
+            raise HomeAssistantError(str(err)) from err
+
     async def handle_add_item(call: ServiceCall) -> ServiceResponse:
         runtime = _get_runtime(hass)
         # Attribute the item to the HA user behind the service call, if any.
@@ -206,6 +218,8 @@ def async_setup_services(hass: HomeAssistant) -> None:
             item = await runtime.async_add_item(dict(call.data), by=by, by_name=by_name)
         except LocationError as err:
             raise HomeAssistantError(shared_text(hass, str(err))) from err
+        except ValueError as err:
+            raise HomeAssistantError(str(err)) from err
         return {"item": item}
 
     async def handle_update_item(call: ServiceCall) -> ServiceResponse:
@@ -216,6 +230,8 @@ def async_setup_services(hass: HomeAssistant) -> None:
             item = runtime.store.update_item(item_id, data)
         except LocationError as err:
             raise HomeAssistantError(shared_text(hass, str(err))) from err
+        except ValueError as err:
+            raise HomeAssistantError(str(err)) from err
         if item is None:
             raise HomeAssistantError(shared_text(hass, "item_not_found", id=item_id))
         await runtime.async_changed()
@@ -430,6 +446,8 @@ def async_setup_services(hass: HomeAssistant) -> None:
         DOMAIN, SERVICE_EXPORT_LABEL, handle_export_label,
         schema=EXPORT_LABEL_SCHEMA, supports_response=SupportsResponse.OPTIONAL,
     )
+    hass.services.async_register(DOMAIN, SERVICE_CONSUME_STOCK, handle_consume_stock,
+        schema=vol.Schema({vol.Required('template_id'):cv.string, vol.Optional('amount',default=1):lambda value:stock_integer(value,1), vol.Optional('item_id'):cv.string}), supports_response=SupportsResponse.OPTIONAL)
     hass.services.async_register(DOMAIN, SERVICE_RUN_CHECK, handle_run_check)
 
 

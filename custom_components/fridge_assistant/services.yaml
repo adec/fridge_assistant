@@ -44,6 +44,15 @@ add_item:
     expiry_date:
       selector:
         text:
+    stock_count:
+      name: Remaining count
+      description: "Optional integer count for a linked template; separate from portions."
+      selector:
+        number:
+          min: 1
+          max: 1000000
+          step: 1
+          mode: box
     quantity:
       example: 2 bakjes
       selector:
@@ -165,3 +174,29 @@ print_sticker:
         text:
 
 run_check:
+
+consume_stock:
+  name: Consume stock
+  description: "Consume whole counts or packs from a template. Earliest date first, then oldest undated entry. Insufficient stock makes no changes. Individually tracked portions use their existing actions."
+  fields:
+    template_id:
+      name: Template
+      description: "Copy the Template ID from the template editor's Stock & reordering section."
+      required: true
+      example: dishwasher_tablets
+      selector:
+        text:
+    amount:
+      name: Amount
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 1000000
+          step: 1
+          mode: box
+    item_id:
+      name: Specific stock entry
+      description: "Optional. Leave blank to choose automatically."
+      selector:
+        text:

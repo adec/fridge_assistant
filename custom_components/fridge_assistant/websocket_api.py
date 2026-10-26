@@ -42,6 +42,7 @@ from .const import (
     shared_text,
 )
 from .coordinator import FridgeRuntime, get_runtime
+from .stock import low_stock
 from .store import LocationError, item_age_days, item_days_left, parse_date
 
 _LOGGER = logging.getLogger(__name__)
@@ -84,6 +85,7 @@ _ITEM_FIELDS = {
     vol.Optional("notes"): _OPT_STR,
     vol.Optional("barcode"): _OPT_STR,
     vol.Optional("remember_barcode"): bool,
+    vol.Optional("stock_count"): vol.Any(None, vol.All(int, vol.Range(min=1, max=1000000))),
 }
 ITEM_SCHEMA = vol.Schema(_ITEM_FIELDS, extra=vol.REMOVE_EXTRA)
 CHANGES_SCHEMA = vol.Schema(
@@ -96,6 +98,9 @@ TEMPLATE_SCHEMA = vol.Schema(
         vol.Optional("name"): cv.string,
         vol.Optional("aliases"): [cv.string],
         vol.Optional("barcodes"): [cv.string],
+        vol.Optional("stock_mode"): vol.In(["packs", "count"]),
+        vol.Optional("stock_unit"): str,
+        vol.Optional("reorder_limit"): vol.Any(None, vol.All(int, vol.Range(min=0, max=1000000))),
         vol.Optional("category"): _OPT_STR,
         vol.Optional("kind"): _OPT_STR,
         vol.Optional("emoji"): _OPT_STR,
@@ -113,6 +118,7 @@ TEMPLATE_SCHEMA = vol.Schema(
 
 
 def async_register_websocket(hass: HomeAssistant) -> None:
+    websocket_api.async_register_command(hass, ws_consume_stock)
     websocket_api.async_register_command(hass, ws_handling)
     websocket_api.async_register_command(hass, ws_categories)
     websocket_api.async_register_command(hass, ws_mealie)
@@ -218,6 +224,7 @@ def _serialize_state(hass: HomeAssistant, runtime: FridgeRuntime) -> dict[str, A
         # Only a count in the live state; the full log is paged via ws_history so
         # every state push stays small.
         "history_count": len(runtime.store.history),
+        "low_stock": low_stock(runtime.store),
         "mealie": runtime.mealie.status(),
         "options": {
             "warn_days": warn,
@@ -243,6 +250,20 @@ def _runtime_or_error(hass, connection, msg) -> FridgeRuntime | None:
         connection.send_error(msg["id"], "not_ready", shared_text(hass, "not_loaded"))
         return None
     return runtime
+
+
+@websocket_api.websocket_command({vol.Required('type'):f'{DOMAIN}/consume_stock', vol.Required('template_id'):str, vol.Optional('amount', default=1):vol.All(int, vol.Range(min=1, max=1000000)), vol.Optional('item_id'):str})
+@websocket_api.async_response
+async def ws_consume_stock(hass, connection, msg):
+    runtime = _runtime_or_error(hass, connection, msg)
+    if runtime is None: return
+    by, by_name = _user_attrs(connection)
+    try:
+        result = await runtime.async_consume_stock(msg['template_id'], msg['amount'], msg.get('item_id'), by, by_name)
+    except ValueError as err:
+        connection.send_error(msg['id'], 'invalid_stock', str(err))
+        return
+    connection.send_result(msg['id'], result)
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/subscribe"})
@@ -319,8 +340,8 @@ async def ws_update_item(hass, connection, msg) -> None:
         return
     try:
         item = runtime.store.update_item(msg["item_id"], dict(msg["changes"]))
-    except LocationError as err:
-        connection.send_error(msg["id"], str(err), shared_text(hass, str(err)))
+    except ValueError as err:
+        connection.send_error(msg["id"], "invalid_item", str(err))
         return
     if item is None:
         connection.send_error(msg["id"], "not_found", shared_text(hass, "item_not_found", id=msg["item_id"]))

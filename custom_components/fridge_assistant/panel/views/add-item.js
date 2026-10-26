@@ -1,8 +1,8 @@
-import { monthEnd } from "../lib/date-precision.js?v=0.10.0b29";
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b29";
+import { monthEnd } from "../lib/date-precision.js?v=0.10.0b30";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b30";
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b29";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b30";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
@@ -45,7 +45,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     <div class="seg" id="f-kind">
       ${Object.keys(kinds).map((k) => { const km = panel._kindMeta(k); return `<button type="button" data-kind="${k}" class="${m.kind === k ? "on" : ""}">${km.emoji || ""} ${km.short}</button>`; }).join("")}
     </div>
-    ${!isEdit ? `<label class="field"><span>${panel.t("portionsLabel")}</span>
+    ${!isEdit ? `<label class="field" id="f-portions-wrap"><span>${panel.t("portionsLabel")}</span>
       <div class="pstep-row">
         <span class="pstep">
           <button type="button" class="ps-btn" id="ps-minus" disabled><ha-icon icon="mdi:minus"></ha-icon></button>
@@ -55,6 +55,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
         <small class="ps-note">${panel.t("portionsFieldNote")}</small>
       </div>
     </label>` : ""}
+    <label class="field hidden" id="f-count-wrap"><span>${panel.t('stockRemaining')}</span><input type="number" id="f-stock-count" min="1" max="1000000" step="1" value="${editItem?.stock_count ?? 1}"></label>
     <label class="date-type-check"><input type="checkbox" id="f-date-type" ${m.dateType === "best_before" ? "checked" : ""}><span>${panel.t("bestBeforeCheckbox")}</span></label>
     <p class="date-type-help">${panel.t("useByUnchecked")}</p>
     <div class="grid2">
@@ -67,6 +68,8 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     <div id="f-expiry-suggestion" class="expiry-suggestion hidden"></div>
     <button class="link" id="f-adv">${panel.t("moreOptions")}</button>
     <div class="adv hidden" id="f-advbox">
+    <label class="date-type-check"><input type="checkbox" id="f-counted" ${editItem?.stock_count != null ? 'checked' : ''}><span>${panel.t('stockCountMode')}</span></label>
+
       <label class="field"><span>${panel.t("categoryLabel")}</span><div class="select-wrap"><select id="f-category">${Object.keys(panel._state.categories || {}).filter(k => !panel._state.categories[k].archived || k === m.category).map(k => `<option value="${esc(k)}" ${k === (m.category || "other") ? "selected" : ""}>${esc(panel._catMeta(k).label)}</option>`).join("")}</select></div></label>
       <label class="field"><span>${panel.t("displayNameLabel")}</span><input id="f-dispname" placeholder="${panel.t("displayNamePlaceholder")}" value="${esc(editItem?.name || "")}"></label>
       <div class="grid2">
@@ -89,6 +92,15 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   const nameEl = q("#f-name"), addedEl = q("#f-added"), expEl = q("#f-expiry");
   const emojiEl = q("#m-emoji"), suggestEl = q("#f-suggest"), hintEl = q("#f-hint");
   const lang = panel._lang();
+  let countManual = isEdit;
+  const syncCount = () => {
+    const counted = q('#f-counted').checked;
+    q('#f-count-wrap').classList.toggle('hidden', !counted);
+    q('#f-portions-wrap')?.classList.toggle('hidden', counted);
+    if (counted) { m.portions = 1; if(q('#ps-n')) q('#ps-n').textContent = '1'; if(q('#ps-minus')) q('#ps-minus').disabled = true; }
+  };
+  q('#f-counted').onchange = () => { countManual = true; syncCount(); };
+  syncCount();
   let labelNoteManual = (isEdit && editItem.label_note != null) || prefill.label_note != null;
   const applyLabelNote = template => { q('#f-label-note-reset').disabled=!template; if (!labelNoteManual) q('#f-label-note').value = template?.label_note || ''; };
   q('#f-label-note').addEventListener('input',()=>{labelNoteManual=true;});
@@ -215,6 +227,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       const t = res.template;
       if (!m.dateTypeManual) setDateType(t.date_type);
       m.template_id = t.id; applyLabelNote(t);
+      if (!countManual) { q('#f-counted').checked = t.stock_mode === 'count'; syncCount(); }
       if (!m.kindManual) setKind(panel._kindOf(t));
       setCategory(t.category); setEmoji(t.emoji || "🍽️");
       const sl = t.shelf_life || {};
@@ -306,10 +319,12 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     // Prevent pending recognition from overwriting an explicitly created link.
     ++matchVersion;
     const seed = { name, emoji: m.emoji, kind: m.kind, category: m.category || "other",
+      stock_mode:q('#f-counted').checked ? 'count' : 'packs',
       date_type: m.dateType, shelf_life: { ...(m.aiResult?.shelf_life || {}) }, aliases: [], notes: "", label_note:q("#f-label-note").value.trim() };
     panel._openTemplateEditor(seed, true, template => {
       if (!template || !h.modal.isConnected) return;
       ++matchVersion; m.noAutoMatch = true; m.aiResult = null;
+      if (!countManual) { q('#f-counted').checked = template.stock_mode === 'count'; syncCount(); }
       m.template_id = template.id; nameEl.value = template.name; applyLabelNote(template);
       m.kindManual = true; setKind(template.kind);
       m.categoryManual = true; setCategory(template.category, true); setEmoji(template.emoji || m.emoji);
@@ -355,6 +370,9 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       payload.expiry_precision = m.expiryPrecision;
       payload.expiry_date = expEl.value || null;
       payload.expiry_source = m.expiryManual ? "manual" : m.expirySource;
+      payload.stock_count = q('#f-counted').checked ? Number(q('#f-stock-count').value) : null;
+      if (payload.stock_count !== null && (!Number.isInteger(payload.stock_count) || payload.stock_count < 1 || payload.stock_count > 1000000)) throw new Error(panel.t('stockInvalid'));
+      if (!isEdit && payload.stock_count !== null) payload.portions = 1;
       payload.template_id = m.template_id;
       if (!isEdit) payload.remember_barcode = !!(q("#f-remember-barcode")?.checked && m.template_id);
       payload.location = m.location;
@@ -379,6 +397,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
               shelf_life: m.aiResult.shelf_life,
               label_note: labelNoteManual ? q("#f-label-note").value.trim() : "",
               notes: m.aiResult.notes,
+              stock_mode:q("#f-counted").checked ? "count" : "packs",
               source: "ai",
             },
           });
