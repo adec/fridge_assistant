@@ -1,4 +1,4 @@
-import { esc } from '../lib/format.js?v=0.10.0b35';
+import { esc } from '../lib/format.js?v=0.10.0b36';
 export function handlingTime(panel, iso) {
   return new Intl.DateTimeFormat(panel._lang()==='nl'?'nl-NL':'en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
 }
@@ -13,7 +13,7 @@ export function handlingSummary(panel, item, withDeadline = true) {
 }
 export function handlingDate(panel, item) {
   const iso=item.handling_due_at || item.effective_due_at;
-  return iso?`${panel.t('handlingUseWithin')} · ${handlingTime(panel,iso)}`:null;
+  return iso?`${panel.t('handlingUseWithin')} ${handlingTime(panel,iso)}`:null;
 }
 export function handlingStatus(panel, item, fallback) {
   const iso=item.handling_due_at || item.effective_due_at;

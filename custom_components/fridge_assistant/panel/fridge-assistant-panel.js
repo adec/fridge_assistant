@@ -1,10 +1,10 @@
-import { homePath } from "./lib/navigation.js?v=0.10.0b35";
-import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b35";
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b35";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b35";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b35";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b35";
-import { openMealie } from "./views/mealie.js?v=0.10.0b35";
+import { homePath } from "./lib/navigation.js?v=0.10.0b36";
+import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b36";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b36";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b36";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b36";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b36";
+import { openMealie } from "./views/mealie.js?v=0.10.0b36";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -17,18 +17,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b35";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b35";
-import { STYLES } from "./styles.js?v=0.10.0b35";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b35";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b35";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b35";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b35";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b35";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b35";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b35";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b35";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b35";
-import { printSticker } from "./views/print.js?v=0.10.0b35";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b36";
+import { STYLES } from "./styles.js?v=0.10.0b36";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b36";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b36";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b36";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b36";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b36";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b36";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b36";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b36";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b36";
+import { printSticker } from "./views/print.js?v=0.10.0b36";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -345,7 +345,7 @@ class FridgeAssistantPanel extends HTMLElement {
     const lang = this._lang();
 
     const low = this._state.low_stock || [];
-    const lowHtml = low.length ? `<details class="low-stock"><summary>${this.t('lowStock')} · ${low.length}</summary>${low.map(t=>`<div class="d-row"><span>${esc(t.emoji || '')} ${esc(t.name)}</span><b>${t.remaining} ${esc(t.unit || '')} · ≤ ${t.limit}</b></div>`).join('')}</details>` : '';
+    const lowHtml = low.length ? `<details class="low-stock"><summary>${this.t('lowStock')} ${low.length}</summary>${low.map(t=>`<div class="d-row"><span>${esc(t.emoji || '')} ${esc(t.name)}</span><b>${t.remaining} ${esc(t.unit || '')} · ≤ ${t.limit}</b></div>`).join('')}</details>` : '';
     if (this._state.counts.total === 0) {
       list.innerHTML = lowHtml + `<div class="empty">
         <div class="empty-emoji">🧊</div>
@@ -447,7 +447,7 @@ class FridgeAssistantPanel extends HTMLElement {
       </div>
       <div class="card-right">
         <div class="status" style="--c:${STATUS_COLOR[i.status]}">${handlingStatus(this,i,daysLabel(i.days_left, lang, i.date_type))}</div>
-        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${handlingDate(this,i) || this.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")+" · "+fmtCardDate(i.expiry_date, lang, this._state.today, i.expiry_precision)}</span>` : ""}</div>
+        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${handlingDate(this,i) || this.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")+" "+fmtCardDate(i.expiry_date, lang, this._state.today, i.expiry_precision)}</span>` : ""}</div>
       </div>
       <button class="card-print icon-btn" data-print="${i.inventory_key || i.id}" title="${this.t("printSticker")}" aria-label="${this.t("printSticker")}"><ha-icon icon="mdi:tag-outline"></ha-icon></button>
     </div>`;

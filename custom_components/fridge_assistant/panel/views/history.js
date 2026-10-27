@@ -1,8 +1,8 @@
 /* Paged history (newest first) + restore. Drawer on desktop. */
 
-import { MONTHS } from "../strings.js?v=0.10.0b35";
-import { esc } from "../lib/format.js?v=0.10.0b35";
-import { openSurface } from "../lib/surface.js?v=0.10.0b35";
+import { MONTHS } from "../strings.js?v=0.10.0b36";
+import { esc } from "../lib/format.js?v=0.10.0b36";
+import { openSurface } from "../lib/surface.js?v=0.10.0b36";
 
 export function relTime(panel, ts) {
   if (!ts) return "";
@@ -29,7 +29,7 @@ export function historyRow(panel, e) {
   const isPortion = e.action === "portion_eaten" || e.action === "portion_tossed";
   const eaten = e.action === "eaten" || e.action === "portion_eaten";
   const code = it.code ? (isPortion && e.portion ? `${it.code}-${e.portion}` : it.code) : "";
-  const act = e.action === "stock_consumed" ? `<span class="hi-act eaten">${panel.t("stockConsumed")} · ${e.amount}</span>` : e.action === "handling" ? `<span class="hi-act">${panel.t("handlingAction_"+e.handling_action)} · ${Object.keys(e.handling_after || {}).join(", ")}</span>` : `<span class="hi-act ${eaten ? "eaten" : "tossed"}">${eaten ? panel.t("eatenBtn") : panel.t("tossedBtn")}</span>`;
+  const act = e.action === "stock_consumed" ? `<span class="hi-act eaten">${panel.t("stockConsumed")} ${e.amount}</span>` : e.action === "handling" ? `<span class="hi-act">${panel.t("handlingAction_"+e.handling_action)} · ${Object.keys(e.handling_after || {}).join(", ")}</span>` : `<span class="hi-act ${eaten ? "eaten" : "tossed"}">${eaten ? panel.t("eatenBtn") : panel.t("tossedBtn")}</span>`;
   const portionTag = isPortion
     ? ` · ${esc(panel.t("histPortionLabel", e.portion, e.portions_total))}`
     : "";

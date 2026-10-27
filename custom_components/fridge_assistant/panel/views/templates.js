@@ -1,12 +1,12 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b35";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b36";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b35";
-import { esc } from "../lib/format.js?v=0.10.0b35";
-import { openSurface } from "../lib/surface.js?v=0.10.0b35";
+import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b36";
+import { esc } from "../lib/format.js?v=0.10.0b36";
+import { openSurface } from "../lib/surface.js?v=0.10.0b36";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
