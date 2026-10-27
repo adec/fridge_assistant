@@ -1,4 +1,4 @@
-import { esc, fmtCardDate } from '../lib/format.js?v=0.10.0b41';
+import { esc, fmtCardDate } from '../lib/format.js?v=0.10.0b42';
 
 export function openLowStock(panel, templateId) {
   const template=panel._state.templates.find(t=>t.id===templateId);

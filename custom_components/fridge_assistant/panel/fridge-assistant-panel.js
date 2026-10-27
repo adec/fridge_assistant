@@ -1,11 +1,11 @@
-import { bindLowStock } from "./views/low-stock.js?v=0.10.0b41";
-import { homePath } from "./lib/navigation.js?v=0.10.0b41";
-import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b41";
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b41";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b41";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b41";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b41";
-import { openMealie } from "./views/mealie.js?v=0.10.0b41";
+import { bindLowStock } from "./views/low-stock.js?v=0.10.0b42";
+import { homePath } from "./lib/navigation.js?v=0.10.0b42";
+import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b42";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b42";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b42";
+import { inventoryList, bindInventoryGroups } from "./views/inventory-list.js?v=0.10.0b42";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b42";
+import { openMealie } from "./views/mealie.js?v=0.10.0b42";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -18,18 +18,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b41";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b41";
-import { STYLES } from "./styles.js?v=0.10.0b41";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b41";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b41";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b41";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b41";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b41";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b41";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b41";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b41";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b41";
-import { printSticker } from "./views/print.js?v=0.10.0b41";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b42";
+import { STYLES } from "./styles.js?v=0.10.0b42";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b42";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b42";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b42";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b42";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b42";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b42";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b42";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b42";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b42";
+import { printSticker } from "./views/print.js?v=0.10.0b42";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -44,6 +44,14 @@ class FridgeAssistantPanel extends HTMLElement {
     this._shellBuilt = false;
     this._activeTab = "inventory";
     this._inventoryView = "cards";
+    this._inventoryGrouping='auto';this._inventoryGroupOpen={};
+    try {
+      const mode=localStorage.getItem('fridge_assistant.inventory_grouping');
+      if(['auto','due','location','category','none'].includes(mode))this._inventoryGrouping=mode;
+      const saved=JSON.parse(localStorage.getItem('fridge_assistant.inventory_group_open')||'{}');
+      if(saved && typeof saved==='object' && !Array.isArray(saved))this._inventoryGroupOpen=saved;
+    } catch {}
+
     this._statusColours = true;
     try { this._statusColours = localStorage.getItem("fridge_assistant.status_colours") !== "off"; } catch {}
     try { if (localStorage.getItem("fridge_assistant.inventory_view") === "list") this._inventoryView = "list"; } catch {}
@@ -396,6 +404,7 @@ class FridgeAssistantPanel extends HTMLElement {
       ).join("")}</div>`;
     }
     list.innerHTML = html;
+    bindInventoryGroups(this,list);
     bindLowStock(this, list);
 
     list.querySelector("#list-sort")?.addEventListener("click", () => { this._listDescending = this._inventorySort.startsWith("due") ? !this._listDescending : false; this._inventorySort=this._listDescending?"due-desc":"due"; this._renderList(); });

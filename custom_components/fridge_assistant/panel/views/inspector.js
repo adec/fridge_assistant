@@ -1,13 +1,13 @@
-import { fmtCardDate } from "../lib/format.js?v=0.10.0b41";
-import { openHandling, handlingSummary, handlingDate, handlingTime } from "./handling.js?v=0.10.0b41";
+import { fmtCardDate } from "../lib/format.js?v=0.10.0b42";
+import { openHandling, handlingSummary, handlingDate, handlingTime } from "./handling.js?v=0.10.0b42";
 /* Item inspector: drawer on desktop (list stays visible; selecting another
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b41";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b41";
-import { openSurface } from "../lib/surface.js?v=0.10.0b41";
-import { relTime } from "./history.js?v=0.10.0b41";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b42";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b42";
+import { openSurface } from "../lib/surface.js?v=0.10.0b42";
+import { relTime } from "./history.js?v=0.10.0b42";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length

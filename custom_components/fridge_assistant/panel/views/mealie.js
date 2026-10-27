@@ -1,8 +1,8 @@
-import { serializeRequests } from "../lib/request-queue.js?v=0.10.0b41";
+import { serializeRequests } from "../lib/request-queue.js?v=0.10.0b42";
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b41";
+import { esc } from "../lib/format.js?v=0.10.0b42";
 
-import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b41";
+import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b42";
 
 export async function openMealie(panel, container) {
   const markup = `
@@ -47,10 +47,9 @@ export async function openMealie(panel, container) {
     q("#mr-list").className = "recipe-grid";
     q("#mr-list").innerHTML = recipes.map((r, index) => `<button class="recipe-tile" data-recipe="${index}">
       <div class="recipe-photo"><span aria-hidden="true">🍽️</span><img src="${esc(r.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer"></div>
-      <div class="recipe-tile-body"><b>${esc(r.name)}</b><p>${r.all_present ? panel.t("mealieReady") : [r.missing.length ? `${r.missing.length} ${panel.t("mealieMissing")}` : "", r.unresolved.length ? `${r.unresolved.length} ${panel.t("mealieReview")}` : ""].filter(Boolean).join(" · ")}</p>
-      ${r.due_soon_count ? `<p>${panel.t("mealieUseSoon")}: ${r.due_soon_count}</p>` : ""}
-      ${r.matched.some(i => i.thaw) ? `<p>${panel.t("mealieThaw")}</p>` : ""}
-      ${r.matched.some(i => i.past_best_before) ? `<p>${panel.t("mealiePastBest")}</p>` : ""}</div></button>`).join("")
+      <div class="recipe-tile-body"><b>${esc(r.name)}</b>
+      ${r.due_soon_count || r.matched.some(i=>i.thaw) || r.matched.some(i=>i.past_best_before) ? `<div class="recipe-meta">${[r.due_soon_count ? panel.t('recipeDueSoonCount',r.due_soon_count) : '', r.matched.some(i=>i.thaw) ? panel.t('mealieThaw') : '', r.matched.some(i=>i.past_best_before) ? panel.t('mealiePastBest') : ''].filter(Boolean).map(esc).join(' · ')}</div>` : ''}
+      <div class="recipe-badges">${r.all_present ? `<span class="recipe-badge ready">${panel.t('mealieReady')}</span>` : [r.missing.length ? `<span class="recipe-badge">${esc(panel.t('recipeMissingCount',r.missing.length))}</span>` : '', r.unresolved.length ? `<span class="recipe-badge">${esc(panel.t('recipeReviewCount',r.unresolved.length))}</span>` : ''].join('')}</div></div></button>`).join("")
       || `<p class="location-help">${panel.t("mealieEmpty")}</p>`;
     q("#mr-list").querySelectorAll("img").forEach(img => img.addEventListener("error", () => img.remove(), { once: true }));
     q("#mr-list").querySelectorAll("[data-recipe]").forEach(button => button.addEventListener("click", () => {
