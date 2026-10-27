@@ -1,9 +1,10 @@
-import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b33";
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b33";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b33";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b33";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b33";
-import { openMealie } from "./views/mealie.js?v=0.10.0b33";
+import { homePath } from "./lib/navigation.js?v=0.10.0b34";
+import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b34";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b34";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b34";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b34";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b34";
+import { openMealie } from "./views/mealie.js?v=0.10.0b34";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -16,18 +17,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b33";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b33";
-import { STYLES } from "./styles.js?v=0.10.0b33";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b33";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b33";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b33";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b33";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b33";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b33";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b33";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b33";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b33";
-import { printSticker } from "./views/print.js?v=0.10.0b33";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b34";
+import { STYLES } from "./styles.js?v=0.10.0b34";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b34";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b34";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b34";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b34";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b34";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b34";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b34";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b34";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b34";
+import { printSticker } from "./views/print.js?v=0.10.0b34";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -212,12 +213,14 @@ class FridgeAssistantPanel extends HTMLElement {
       ).join("\n");
       document.head.appendChild(st);
     }
+    const home = homePath(window.location.search, window.location.origin);
     this.shadowRoot.innerHTML = `
       <style>${STYLES}</style>
       <div class="wrap">
         <header class="topbar">
           <div class="topbar-row">
-            <span class="menu-slot" id="menu-slot"></span>
+            ${home ? `<button class="btn ghost launch-home" id="btn-launch-home" aria-label="${this.t('homeDashboard')}" title="${this.t('homeDashboard')}"><ha-icon icon="mdi:home-outline"></ha-icon><span>${this.t('homeDashboard')}</span></button>` : ''}
+            ${!home ? '<span class="menu-slot" id="menu-slot"></span>' : ""}
             <div class="brand"><ha-icon class="brand-emoji" icon="mdi:fridge-outline"></ha-icon><h1 title="${this.t("appTitle")}"><span class="brand-title-full">${this.t("appTitle")}</span><span class="brand-title-short">${this.t("appTitleShort")}</span></h1></div>
             <span class="spacer"></span>
             <button class="icon-btn" id="btn-history" title="${this.t("historyTooltip", 0)}"><ha-icon icon="mdi:history"></ha-icon></button>
@@ -256,6 +259,7 @@ class FridgeAssistantPanel extends HTMLElement {
     $("tab-recipes").addEventListener("click", () => this._selectTab("recipes"));
     $("btn-filters").addEventListener("click", () => openInventoryFilters(this));
     $("btn-clean").addEventListener("click", () => this._openCleanModal());
+    $("btn-launch-home")?.addEventListener("click", () => window.location.assign(home));
     $("btn-history").addEventListener("click", () => this._openHistory());
     $("btn-templates").addEventListener("click", () => this._openTemplatesManager());
     $("btn-categories").addEventListener("click", () => openCategoriesManager(this));

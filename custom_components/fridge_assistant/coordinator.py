@@ -89,6 +89,7 @@ def item_summary(item: dict[str, Any], today: date) -> dict[str, Any]:
     from .handling import earliest
     item = earliest(item, dt_util.now())
     return {
+        "expiry_precision": item.get("expiry_precision", "day"),
         "original_expiry_date": item.get("original_expiry_date"),
         "original_date_type": item.get("original_date_type"),
         "handling_due_at": item.get("handling_due_at"),

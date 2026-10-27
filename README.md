@@ -698,3 +698,10 @@ inventory group's portions; mixed batches require portion-specific labels.
 Disabling the setting hides new controls but retains existing events, deadlines and
 visible status. Existing installations need no data reset. Printer output has been
 rendered locally; physical printer and real-HA validation remain beta testing tasks.
+
+### Dashboard return button
+
+Dashboard tiles can open `/fridge-assistant?return_to=%2Fcasora-dashboard%2Fhome`
+to show an optional **Home** button that returns to that view. Only paths on the
+same Home Assistant instance are accepted. Ordinary sidebar launches are unchanged.
+On phones the button uses a home icon to preserve header space.

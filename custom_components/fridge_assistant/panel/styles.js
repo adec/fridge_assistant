@@ -261,6 +261,8 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .field input:focus{border-color:var(--fa-accent);box-shadow:0 0 0 4px var(--fa-accent-soft);}
 .low-stock{grid-column:1/-1;margin-bottom:12px;padding:12px;border:1px solid var(--fa-orange);border-radius:12px;}
 .low-stock summary{cursor:pointer;font-weight:800;color:var(--fa-orange);}
+.launch-home{flex:none;gap:6px;padding:8px;}
+@media(max-width:600px){.launch-home span{display:none}.launch-home{min-width:40px;}}
 .datefield{position:relative;min-width:0;}
 .datefield input[type=date]{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;
   z-index:1;cursor:pointer;-webkit-appearance:none;appearance:none;}
