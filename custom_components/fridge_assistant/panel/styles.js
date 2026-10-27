@@ -30,6 +30,7 @@ export const STYLES = `
   overflow-x:hidden;-webkit-tap-highlight-color:transparent;
 }
 *{box-sizing:border-box;}
+:host{container-type:inline-size;}
 .wrap{max-width:960px;margin:0 auto;padding:0 var(--fa-gr) calc(108px + env(safe-area-inset-bottom)) var(--fa-gl);overflow-x:hidden;}
 
 /* ------------------------------------------------------------ top chrome */
@@ -160,8 +161,7 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .card-print{font-size:15px;flex:none;}
 .card.selected{border-color:var(--fa-accent);
   box-shadow:0 0 0 3px var(--fa-accent-soft),var(--fa-shadow-s);}
-/* Give names the full content width on phones; expiry gets its own row. */
-@media(max-width:639px){
+/* Names and dates have separate rows at every card width. */
   .card{display:grid;grid-template-columns:48px minmax(0,1fr) 44px;
     column-gap:10px;row-gap:6px;}
   .card-emoji{grid-column:1;grid-row:1;}
@@ -170,7 +170,6 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
   .card-right .status{max-width:100%;box-sizing:border-box;overflow-wrap:anywhere;}
   .card-when{justify-content:flex-start;flex-wrap:wrap;}
   .card-print{grid-column:3;grid-row:2;justify-self:end;}
-}
 /* Portion badge on a card: how many of the batch are still open. */
 .pbadge{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;font-weight:700;
   background:var(--fa-accent-soft);color:var(--fa-accent);border-radius:6px;
@@ -259,6 +258,7 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
   border-radius:13px;padding:0 14px;font-size:16px;background:var(--fa-bg);color:var(--fa-text);
   outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit;}
 .field input:focus{border-color:var(--fa-accent);box-shadow:0 0 0 4px var(--fa-accent-soft);}
+.low-stock-entry{width:100%;text-align:left;background:transparent;color:inherit;font:inherit;border:0;cursor:pointer;gap:12px}.low-stock-entry:hover{background:var(--fa-soft)}.low-stock-entry:focus-visible{outline:2px solid var(--fa-accent)}.low-stock-entry small{display:block;color:var(--fa-muted);margin-top:4px}
 .low-stock{grid-column:1/-1;margin-bottom:12px;padding:12px;border:1px solid var(--fa-orange);border-radius:12px;}
 .low-stock summary{cursor:pointer;font-weight:800;color:var(--fa-orange);}
 .launch-home{flex:none;gap:6px;padding:8px;}
@@ -479,8 +479,8 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .filepick input{position:absolute;inset:0;opacity:0;font-size:0;}
 
 /* ---------------------------------------------------------------- drawer */
-/* Desktop side-peek (Attio-style): fixed on the right, no scrim, the list
-   stays interactive. The page content shifts left so nothing is covered. */
+/* The drawer overlays compact desktops without reflowing the inventory.
+   Only wide panel widths reserve space alongside it; the list stays interactive. */
 .drawer{position:fixed;top:0;right:0;bottom:0;z-index:45;width:min(420px,100vw);
   background:var(--fa-card);border-left:1px solid var(--fa-line);
   box-shadow:-18px 0 60px rgba(8,12,35,.14);display:flex;flex-direction:column;
@@ -493,12 +493,14 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 /* The drawer is a flex column; .search carries flex:1 for the topbar row and
    would stretch vertically into a giant pill here. Same guard for .seg. */
 .drawer .search,.drawer .seg{flex:none;}
+@container (min-width:1400px){
 :host(.fa-drawer-open) .wrap{max-width:none;
   margin-right:calc(420px + 24px);margin-left:24px;
   transition:margin .24s var(--fa-ease);}
 :host(.fa-drawer-open) .fab{right:calc(438px + env(safe-area-inset-right));}
 :host(.fa-drawer-open) .fab-scan{right:calc(514px + env(safe-area-inset-right));}
 :host(.fa-drawer-open) #toast-root{right:444px;left:0;}
+}
 
 /* --------------------------------------------------------------- portions */
 .po-sec{margin:4px 0 10px;padding:12px;border-radius:16px;background:var(--fa-soft);}
@@ -551,9 +553,7 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 @media (min-width:640px){
   .brand h1{font-size:25px;}
 }
-@media (min-width:760px){
-  .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:10px;}
 
 /* Named storage locations and their manager. */
 .location-select{flex-wrap:wrap;}

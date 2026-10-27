@@ -2,10 +2,11 @@
  * wiring and toasts. All functions take the panel instance as their first
  * argument (for shadowRoot access); state lives on the panel, not here. */
 
-import { esc, fmtDate, parseISO } from "./format.js?v=0.10.0b38";
+import { esc, fmtDate, parseISO } from "./format.js?v=0.10.0b39";
 
 /* On desktop, data-rich views open in a drawer that slides in from the right
  * (Attio-style side peek): no scrim, the list stays visible and clickable, and
+ * it overlays laptop inventories and sits alongside on wide displays;
  * opening another view swaps the drawer's content in place. On narrow screens
  * everything stays a bottom sheet. */
 const DRAWER_MQ = "(min-width: 900px)";

@@ -54,6 +54,8 @@ export const STATUS_COLOR = {
 /* ---------------------------------------------------------------- strings */
 export const STRINGS = {
   nl: {
+    lowStockChoose: "Kies een voorraadregel om details of het aantal te wijzigen.",
+    lowStockSummary: (count,unit,limit) => `Totaal: ${count} ${unit} · Aanvullen bij ${limit} of minder`,
     manageLocations: "Locaties beheren",
     locationsHelp: "Voeg aparte koelkasten, vriezers en kasten toe. Het opslagtype bepaalt de houdbaarheidsschattingen.",
     newLocation: "Locatie toevoegen",
@@ -517,6 +519,8 @@ export const STRINGS = {
   },
 
   en: {
+    lowStockChoose: "Choose an entry to update its details or count.",
+    lowStockSummary: (count,unit,limit) => `Total: ${count} ${unit} · Reorder at or below ${limit}`,
     manageLocations: "Manage locations",
     locationsHelp: "Add separate fridges, freezers and cupboards. The storage type determines shelf-life estimates.",
     newLocation: "Add location",

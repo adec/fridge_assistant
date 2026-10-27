@@ -1,10 +1,11 @@
-import { homePath } from "./lib/navigation.js?v=0.10.0b38";
-import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b38";
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b38";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b38";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b38";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b38";
-import { openMealie } from "./views/mealie.js?v=0.10.0b38";
+import { bindLowStock } from "./views/low-stock.js?v=0.10.0b39";
+import { homePath } from "./lib/navigation.js?v=0.10.0b39";
+import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b39";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b39";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b39";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b39";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b39";
+import { openMealie } from "./views/mealie.js?v=0.10.0b39";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -17,18 +18,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b38";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b38";
-import { STYLES } from "./styles.js?v=0.10.0b38";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b38";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b38";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b38";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b38";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b38";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b38";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b38";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b38";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b38";
-import { printSticker } from "./views/print.js?v=0.10.0b38";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b39";
+import { STYLES } from "./styles.js?v=0.10.0b39";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b39";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b39";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b39";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b39";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b39";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b39";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b39";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b39";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b39";
+import { printSticker } from "./views/print.js?v=0.10.0b39";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -345,7 +346,7 @@ class FridgeAssistantPanel extends HTMLElement {
     const lang = this._lang();
 
     const low = this._state.low_stock || [];
-    const lowHtml = low.length ? `<details class="low-stock"><summary>${this.t('lowStock')} ${low.length}</summary>${low.map(t=>`<div class="d-row"><span>${esc(t.emoji || '')} ${esc(t.name)}</span><b>${t.remaining} ${esc(t.unit || '')} · ≤ ${t.limit}</b></div>`).join('')}</details>` : '';
+    const lowHtml = low.length ? `<details class="low-stock"><summary>${this.t('lowStock')} ${low.length}</summary>${low.map(t=>`<button class="low-stock-entry d-row" data-low-stock="${esc(t.template_id)}"><span>${esc(t.emoji || '')} ${esc(t.name)}</span><b>${t.remaining} ${esc(t.unit || '')} · ≤ ${t.limit}</b></button>`).join('')}</details>` : '';
     if (this._state.counts.total === 0) {
       list.innerHTML = lowHtml + `<div class="empty">
         <div class="empty-emoji">🧊</div>
@@ -353,6 +354,7 @@ class FridgeAssistantPanel extends HTMLElement {
         <p>${this.t("emptySub")}</p>
         <button class="btn primary" id="empty-add">${this.t("addItemBtn")}</button>
       </div>`;
+      bindLowStock(this, list);
       list.querySelector("#empty-add").addEventListener("click", () => this._openAddModal());
       return;
     }
@@ -390,6 +392,7 @@ class FridgeAssistantPanel extends HTMLElement {
       ).join("")}</div>`;
     }
     list.innerHTML = html;
+    bindLowStock(this, list);
 
     list.querySelector("#list-sort")?.addEventListener("click", () => { this._listDescending = this._inventorySort.startsWith("due") ? !this._listDescending : false; this._inventorySort=this._listDescending?"due-desc":"due"; this._renderList(); });
     const clearBtn = list.querySelector("#clear-filters");

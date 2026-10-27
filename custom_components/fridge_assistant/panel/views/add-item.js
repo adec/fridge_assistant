@@ -1,8 +1,8 @@
-import { monthEnd } from "../lib/date-precision.js?v=0.10.0b38";
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b38";
+import { monthEnd } from "../lib/date-precision.js?v=0.10.0b39";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b39";
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b38";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b39";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
@@ -200,7 +200,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   };
 
   let lastMatched = null;
-  let chosenTemplateId = prefill.barcode ? prefill.template_id : null;
+  let chosenTemplateId = prefill.template_id || null;
   let matchVersion = 0;
   const matchNow = async () => {
     const version = ++matchVersion;
