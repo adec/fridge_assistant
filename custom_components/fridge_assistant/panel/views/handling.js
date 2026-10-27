@@ -1,4 +1,4 @@
-import { esc } from '../lib/format.js?v=0.10.0b40';
+import { esc } from '../lib/format.js?v=0.10.0b41';
 export function handlingTime(panel, iso) {
   return new Intl.DateTimeFormat(panel._lang()==='nl'?'nl-NL':'en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
 }
@@ -6,14 +6,14 @@ export function handlingSummary(panel, item, withDeadline = true) {
   const parts=[];
   if(item.is_opened)parts.push(panel.t('handlingOpened')+(withDeadline && item.opened_at ? ' '+handlingTime(panel,item.opened_at):''));
   if(item.handling_phase)parts.push(panel.t('handlingPhase_'+item.handling_phase)+(withDeadline && item.defrosted_at ? ' '+handlingTime(panel,item.defrosted_at):''));
-  if(item.handling_due_at)parts.push((withDeadline ? panel.t('handlingUseWithin')+' '+handlingTime(panel,item.handling_due_at)+' · ' : '')+panel.t('handlingReason_'+item.handling_reason));
+  if(item.handling_due_at)parts.push((withDeadline ? panel.t('handlingUseBy')+' '+handlingTime(panel,item.handling_due_at)+' · ' : '')+panel.t('handlingReason_'+item.handling_reason));
   else if(item.handling_phase==='defrosting')parts.push(panel.t('handlingAwaiting'));
   else if(item.handling_phase==='defrosted'||item.is_opened)parts.push(panel.t(item.handling_lifetime_configured?'handlingOriginalEarlier':'handlingNoLifetime'));
   return parts.join(' · ');
 }
 export function handlingDate(panel, item) {
   const iso=item.handling_due_at || item.effective_due_at;
-  return iso?`${panel.t('handlingUseWithin')} ${handlingTime(panel,iso)}`:null;
+  return iso?`${panel.t('handlingUseBy')} ${handlingTime(panel,iso)}`:null;
 }
 export function handlingStatus(panel, item, fallback) {
   const iso=item.handling_due_at || item.effective_due_at;

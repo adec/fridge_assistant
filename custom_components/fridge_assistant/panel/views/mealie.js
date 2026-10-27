@@ -1,8 +1,8 @@
-import { serializeRequests } from "../lib/request-queue.js?v=0.10.0b40";
+import { serializeRequests } from "../lib/request-queue.js?v=0.10.0b41";
 /* Mealie recipe presence, use-first ranking and saved food mappings. */
-import { esc } from "../lib/format.js?v=0.10.0b40";
+import { esc } from "../lib/format.js?v=0.10.0b41";
 
-import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b40";
+import { openMealieMappings, recipeMappingData } from "./mealie-mappings.js?v=0.10.0b41";
 
 export async function openMealie(panel, container) {
   const markup = `
@@ -12,15 +12,17 @@ export async function openMealie(panel, container) {
     <p class="location-help">${panel.t("mealiePresence")}</p>
     <p id="mr-status" role="status"></p>
     <div id="mr-controls" hidden><div class="modal-actions"><button class="btn ghost" id="mr-config">${panel.t("mealieConfigure")}</button><button class="btn ghost" id="mr-test">${panel.t("mealieTest")}</button><button class="btn primary" id="mr-sync">${panel.t("mealieSync")}</button></div></div>
-    <label class="field"><span>${panel.t("mealieSearch")}</span><input id="mr-search" type="search"></label>
+    <div class="recipe-search-controls"><label class="field"><span>${panel.t("mealieSearch")}</span><input id="mr-search" type="search"></label>
     <label class="field"><span>${panel.t("mealieFilter")}</span><select id="mr-filter"><option value="all">${panel.t("mealieAll")}</option><option value="ready">${panel.t("mealieReady")}</option><option value="near">${panel.t("mealieNear")}</option></select></label>
-    <div id="mr-list"></div>
+    </div><div id="mr-list"></div>
     <div id="mr-management" hidden><details id="mr-pending"><summary id="mr-pending-title"></summary><p class="location-help">${panel.t("mealieParseHelp")}</p><div id="mr-pending-list"></div></details>
     <button class="btn ghost" id="mr-mappings">${panel.t("mealieMappings")}</button></div>
   `;
   const h = container ? { modal: container, close() {} } : panel._openModal(markup);
   if (container) container.innerHTML = markup;
-  const q = s => h.modal.querySelector(s);
+  const toolbar=container ? panel.shadowRoot.getElementById('recipe-toolbar') : null;
+  if(toolbar){toolbar.replaceChildren(h.modal.querySelector('.recipe-search-controls'));}
+  const q = s => h.modal.querySelector(s) || toolbar?.querySelector(s);
   let data = { status: {}, recipes: [], foods: [], templates: [], needs_parsing: [] }, busy = false, closed = false;
   const close = () => { closed = true; h.close(); };
   q("#mr-close").hidden = !!container;

@@ -93,6 +93,8 @@ def apply_event(store, item_id, selected, action, when, location, lifetime, now,
     item = store.items.get(item_id)
     if item is None:
         raise ValueError('Item not found')
+    if item.get('kind') == 'household':
+        raise ValueError('Household stock does not support opening or thawing')
     if item.get('stock_count') is not None:
         raise ValueError('Handling actions are unavailable for counted stock')
     when_dt = timestamp(when)

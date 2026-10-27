@@ -1,0 +1,11 @@
+{
+  "environment": "development",
+  "host": "",
+  "user": "root",
+  "port": 22,
+  "config_path": "/config",
+  "identity": "",
+  "blocked_hosts": [
+    "production.example.invalid"
+  ]
+}

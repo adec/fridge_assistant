@@ -15,7 +15,7 @@ export const MONTHS = {
 // label text is overridden here, per the active language.
 export const LOCATION_LABELS = {
   nl: { fridge: "Koelkast", freezer: "Vriezer", pantry: "Buiten koelkast" },
-  en: { fridge: "Fridge", freezer: "Freezer", pantry: "Pantry" },
+  en: { fridge: "Fridge", freezer: "Freezer", pantry: "Cupboard" },
 };
 export const CATEGORY_LABELS = {
   nl: {
@@ -23,24 +23,26 @@ export const CATEGORY_LABELS = {
     breakfast: "Ontbijt", lunch: "Lunch", dinner: "Avondeten", snack: "Snack",
     bread_bakery: "Brood & bakkerij",
     sauces_spices: "Saus & kruiden", drinks: "Dranken", eggs: "Eieren",
-    leftovers: "Restjes", other: "Overig",
+    leftovers: "Restjes", other: "Overig", household:"Huishouden",
   },
   en: {
     vegetables: "Vegetables", fruit: "Fruit", dairy: "Dairy", meat: "Meat", fish: "Fish",
     breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner", snack: "Snack",
     bread_bakery: "Bakery",
     sauces_spices: "Sauces & spices", drinks: "Drinks", eggs: "Eggs",
-    leftovers: "Leftovers", other: "Other",
+    leftovers: "Leftovers", other: "Other", household:"Household",
   },
 };
 export const KIND_LABELS = {
   nl: {
     ingredient: { label: "Losse ingrediënten", short: "Ingrediënten" },
     dish: { label: "Gerechten", short: "Gerechten" },
+    household: {label:"Huishouden",short:"Huishouden"},
   },
   en: {
     ingredient: { label: "Individual ingredients", short: "Ingredients" },
     dish: { label: "Dishes", short: "Dishes" },
+    household: {label:"Household",short:"Household"},
   },
 };
 
@@ -54,6 +56,8 @@ export const STATUS_COLOR = {
 /* ---------------------------------------------------------------- strings */
 export const STRINGS = {
   nl: {
+    householdHelp: "Huishoudelijke artikelen gebruiken aantallen. Datums zijn optioneel; voedselbewaring is niet van toepassing.",
+    householdUsed: "Gebruikt",
     lowStockChoose: "Kies een voorraadregel om details of het aantal te wijzigen.",
     lowStockSummary: (count,unit,limit) => `Totaal: ${count} ${unit} · Aanvullen bij ${limit} of minder`,
     manageLocations: "Locaties beheren",
@@ -190,6 +194,10 @@ export const STRINGS = {
     handlingPhase_defrosting: "Aan het ontdooien",
     handlingPhase_defrosted: "Ontdooid",
     handlingUseWithin: "Gebruiken voor",
+    handlingUseBy: "Te gebruiken tot",
+    portionRemoveUnused: "Ongebruikte portie verwijderen",
+    portionAdd: "Portie toevoegen",
+    portionsMultipleLocations: "Meerdere locaties",
     handlingReason_opened: "Na openen",
     handlingReason_defrosted: "Na ontdooien",
     handlingAwaiting: "Bevestig wanneer volledig ontdooid",
@@ -519,6 +527,8 @@ export const STRINGS = {
   },
 
   en: {
+    householdHelp: "Household items use simple counts. Dates are optional; food handling and shelf-life estimates do not apply.",
+    householdUsed: "Used",
     lowStockChoose: "Choose an entry to update its details or count.",
     lowStockSummary: (count,unit,limit) => `Total: ${count} ${unit} · Reorder at or below ${limit}`,
     manageLocations: "Manage locations",
@@ -655,6 +665,10 @@ export const STRINGS = {
     handlingPhase_defrosting: "Defrosting",
     handlingPhase_defrosted: "Thawed",
     handlingUseWithin: "Use within",
+    handlingUseBy: "Use by",
+    portionRemoveUnused: "Remove unused portion",
+    portionAdd: "Add portion",
+    portionsMultipleLocations: "Multiple locations",
     handlingReason_opened: "After opening",
     handlingReason_defrosted: "After defrosting",
     handlingAwaiting: "Confirm when fully defrosted",

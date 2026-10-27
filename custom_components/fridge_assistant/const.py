@@ -44,7 +44,7 @@ LOCATION_META: Final = {
 LOCATION_LABELS_EN: Final = {
     LOCATION_FRIDGE: "Fridge",
     LOCATION_FREEZER: "Freezer",
-    LOCATION_PANTRY: "Pantry",
+    LOCATION_PANTRY: "Cupboard",
 }
 
 # Categories (keys must match seed_templates.json). The four meal-time
@@ -52,6 +52,7 @@ LOCATION_LABELS_EN: Final = {
 # bucket so prepared meals can be filtered/glanced at by when they're eaten;
 # see LEGACY_CATEGORIES for the old-data remap.
 CATEGORIES: Final = {
+    "household": {"label":"Household", "emoji":"🧹", "icon":"mdi:spray-bottle"},
     "vegetables": {"label": "Groente", "emoji": "🥦", "icon": "mdi:carrot"},
     "fruit": {"label": "Fruit", "emoji": "🍎", "icon": "mdi:food-apple"},
     "dairy": {"label": "Zuivel", "emoji": "🧀", "icon": "mdi:cheese"},
@@ -78,6 +79,7 @@ UNKNOWN_ITEM_NAME: Final = {"nl": "Onbekend", "en": "Unknown"}
 # Two top-level groups every template belongs to.
 KIND_INGREDIENT: Final = "ingredient"
 KIND_DISH: Final = "dish"
+KIND_HOUSEHOLD: Final = "household"
 KINDS: Final = {
     KIND_INGREDIENT: {
         "label": "Losse ingrediënten", "short": "Ingrediënten",
@@ -87,14 +89,17 @@ KINDS: Final = {
         "label": "Gerechten", "short": "Gerechten",
         "emoji": "🍲", "icon": "mdi:pot-steam",
     },
+    KIND_HOUSEHOLD: {"label":"Household", "short":"Household", "emoji":"🧹", "icon":"mdi:spray-bottle"},
 }
 # English labels for server-rendered text (printed labels); see LOCATION_LABELS_EN.
 KIND_LABELS_EN: Final = {
+    KIND_HOUSEHOLD: {"label":"Household", "short":"Household"},
     KIND_INGREDIENT: {"label": "Individual ingredients", "short": "Ingredients"},
     KIND_DISH: {"label": "Dishes", "short": "Dishes"},
 }
 # Which fine category rolls up into which big group (used as the default).
 CATEGORY_KIND: Final = {
+    "household": KIND_HOUSEHOLD,
     "vegetables": KIND_INGREDIENT,
     "fruit": KIND_INGREDIENT,
     "dairy": KIND_INGREDIENT,

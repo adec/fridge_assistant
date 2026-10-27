@@ -1,12 +1,12 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b40";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b41";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b40";
-import { esc } from "../lib/format.js?v=0.10.0b40";
-import { openSurface } from "../lib/surface.js?v=0.10.0b40";
+import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b41";
+import { esc } from "../lib/format.js?v=0.10.0b41";
+import { openSurface } from "../lib/surface.js?v=0.10.0b41";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -225,10 +225,10 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       <label class="field"><span>${panel.t('stockMode')}</span><div class="select-wrap"><select id="te-stock-mode"><option value="packs">${panel.t('stockPacks')}</option><option value="count" ${t.stock_mode === 'count' ? 'selected' : ''}>${panel.t('stockCountMode')}</option></select></div></label>
       <div class="grid2"><label class="field"><span>${panel.t('stockUnit')}</span><input id="te-stock-unit" maxlength="40" value="${esc(t.stock_unit || '')}" placeholder="${panel.t('stockUnitExample')}"></label><label class="field"><span>${panel.t('reorderLimit')}</span><input type="number" min="0" max="1000000" step="1" id="te-reorder" value="${t.reorder_limit ?? ''}" placeholder="${panel.t('stockDisabled')}"></label></div><p class="location-help">${panel.t('stockTemplateHelp')}</p>${t.id ? `<label class="field"><span>${panel.t('stockTemplateId')}</span><input readonly value="${esc(t.id)}"></label>` : ''}
     </details>
-    <div class="te-sec">${panel.t("shelfLifeSectionLabel")}</div>
+    <div id="te-food-shelf"><div class="te-sec">${panel.t("shelfLifeSectionLabel")}</div>
     <div class="grid3">${locs.map(dayField).join("")}</div>
-    <p class="location-help">${panel.t("shelfDurationHelp")}</p>
-    ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p><label class="field"><span>${panel.t('openingStorage')}</span><div class="select-wrap"><select id="te-opening-location"><option value="">${panel.t('openingKeepLocation')}</option>${[...(panel._state.active_locations || []), ...((t.after_opening_location && !(panel._state.active_locations || []).includes(t.after_opening_location)) ? [t.after_opening_location] : [])].map(id=>`<option value="${esc(id)}" ${t.after_opening_location===id?'selected':''}>${esc(panel._locMeta(id).label)}${!(panel._state.active_locations || []).includes(id)?' · '+panel.t('locationArchived'):''}</option>`).join('')}</select></div><small class="location-help">${panel.t('openingStorageHelp')}</small></label>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] ? t[key]/(key==='after_opening_hours' && t[key]%168===0 ? 168 : t[key]%24===0 ? 24 : 1) : ''}" placeholder="${panel.t('handlingNoAutomatic')}"><div class="select-wrap"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0 && !(key==='after_opening_hours' && t[key]%168===0)?'selected':''}>${panel.t('handlingDays')}</option>${key==='after_opening_hours'?`<option value="168" ${t[key] && t[key]%168===0?'selected':''}>${panel.t('handlingWeeks')}</option>`:''}</select></div></div></label>`).join('')}</details>`:''}
+    <p class="location-help">${panel.t("shelfDurationHelp")}</p></div>
+    ${panel._state.options.handling_enabled ? `<details id="te-food-handling" class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p><label class="field"><span>${panel.t('openingStorage')}</span><div class="select-wrap"><select id="te-opening-location"><option value="">${panel.t('openingKeepLocation')}</option>${[...(panel._state.active_locations || []), ...((t.after_opening_location && !(panel._state.active_locations || []).includes(t.after_opening_location)) ? [t.after_opening_location] : [])].map(id=>`<option value="${esc(id)}" ${t.after_opening_location===id?'selected':''}>${esc(panel._locMeta(id).label)}${!(panel._state.active_locations || []).includes(id)?' · '+panel.t('locationArchived'):''}</option>`).join('')}</select></div><small class="location-help">${panel.t('openingStorageHelp')}</small></label>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] ? t[key]/(key==='after_opening_hours' && t[key]%168===0 ? 168 : t[key]%24===0 ? 24 : 1) : ''}" placeholder="${panel.t('handlingNoAutomatic')}"><div class="select-wrap"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0 && !(key==='after_opening_hours' && t[key]%168===0)?'selected':''}>${panel.t('handlingDays')}</option>${key==='after_opening_hours'?`<option value="168" ${t[key] && t[key]%168===0?'selected':''}>${panel.t('handlingWeeks')}</option>`:''}</select></div></div></label>`).join('')}</details>`:''}
     <label class="field"><span>${panel.t("aliasesLabel")}</span><input id="te-aliases" value="${esc((t.aliases || []).join(", "))}" placeholder="${panel.t("aliasesPlaceholder")}"></label>
     <label class="field"><span>${panel.t('templateBarcodes')}</span><textarea id="te-barcodes" rows="2" spellcheck="false" placeholder="0123456789012">${esc((t.barcodes || []).join('\n'))}</textarea><small class="location-help">${panel.t('templateBarcodesHelp')}</small></label>
     <label class="field"><span>${panel.t("labelNote")}</span><textarea id="te-label-note" maxlength="500" rows="2">${esc(t.label_note || "")}</textarea><small class="location-help">${panel.t("labelNoteTemplateHelp")}</small></label>
@@ -268,10 +268,22 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
   let selKind = curKind;
   fillCategorySelect(panel, q("#te-cat"), selKind, t.category, tpl && selKind === curKind ? t.category : null);
   syncCategoryEmoji();
+  const syncHousehold = () => {
+    const household=selKind==='household';
+    q('#te-food-shelf').hidden=household;
+    if(q('#te-food-handling'))q('#te-food-handling').hidden=household;
+    q('#te-stock-mode').disabled=household;
+    q('#te-stock-mode').closest('label').hidden=household;
+    if(household)q('#te-stock-mode').closest('details').open=true;
+    if(household)q('#te-stock-mode').value='count';
+    if(q('#te-emoji-ai'))q('#te-emoji-ai').hidden=household;
+  };
+  syncHousehold();
   const kindEl = q("#te-kind");
   if (kindEl) kindEl.querySelectorAll("button").forEach((b) =>
     b.addEventListener("click", () => {
       selKind = b.dataset.kind;
+      syncHousehold();
       fillCategorySelect(panel, q("#te-cat"), selKind, q("#te-cat").value, tpl && selKind === curKind ? t.category : null);
       syncCategoryEmoji();
       kindEl.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
@@ -319,6 +331,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     if (!name) { q("#te-name").focus(); return; }
     const shelf = {};
     for (const inp of h.modal.querySelectorAll(".te-day")) {
+      if(selKind==='household')continue;
       try {
         shelf[inp.dataset.loc] = parseShelfDuration(inp.value);
       } catch {
@@ -347,6 +360,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       source: "user",
     };
     for(const key of ['after_opening_hours','after_defrosting_hours']) {
+      if(selKind==='household'){template[key]=null;continue;}
       const field=q('#te-'+key);
       if(field) {
         const value=field.value.trim(),hours=value===''?null:Number(value)*Number(q('#te-'+key+'-unit').value);

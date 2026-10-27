@@ -8,6 +8,7 @@ def normal(value):
 
 
 def food_links(foods, templates, saved):
+    templates = [t for t in templates if t.get('kind', 'ingredient') == 'ingredient']
     by_id = {t['id']: t for t in templates}
     names = {}
     for template in templates:
@@ -34,7 +35,7 @@ def rank_recipes(recipes, foods, templates, items, locations, saved, today=None,
     now = now or datetime.now(timezone.utc)
     for item in [p for batch in items for p in projected_items(batch, now)]:
         # Meals are not treated as raw ingredients.
-        if item.get('kind') in ('dish', 'meal') or (item.get('portions') and not any(p.get('status') == 'open' for p in item['portions'])):
+        if item.get('kind') in ('dish', 'meal', 'household') or (item.get('portions') and not any(p.get('status') == 'open' for p in item['portions'])):
             continue
         try:
             due = date.fromisoformat(item.get('expiry_date') or '')

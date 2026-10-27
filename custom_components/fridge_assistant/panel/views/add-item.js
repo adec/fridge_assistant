@@ -1,13 +1,16 @@
-import { monthEnd } from "../lib/date-precision.js?v=0.10.0b40";
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b40";
+import { monthEnd } from "../lib/date-precision.js?v=0.10.0b41";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b41";
 /* Add/edit modal + AI shelf-life estimate. */
 
-import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b40";
+import { addDays, daysBetween, daysLabel, debounce, esc, todayISO } from "../lib/format.js?v=0.10.0b41";
 
 export function openAddModal(panel, prefill = {}, editItem = null) {
   const isEdit = !!editItem;
+  const initialKind=editItem?.kind || prefill.kind || panel._state.templates.find(t=>t.id===prefill.template_id)?.kind || 'ingredient';
+  const cupboard=()=>panel._state.active_locations?.find(id=>panel._storageType(id)==='pantry');
+  let locationManual=isEdit || !!prefill.location;
   const m = {
-    location: prefill.location || editItem?.location || panel._state.active_locations?.[0] || "fridge",
+    location: prefill.location || editItem?.location || cupboard() || panel._state.active_locations?.[0] || "fridge",
     added: prefill.added_date || editItem?.added_date || todayISO(),
     dateType: editItem?.date_type || prefill.date_type || "use_by",
     dateTypeManual: isEdit || !!prefill.date_type,
@@ -20,7 +23,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     template_id: prefill.template_id || editItem?.template_id || null,
     category: prefill.category || editItem?.category || null,
     categoryManual: isEdit || !!prefill.category,
-    kind: editItem?.kind || prefill.kind || "ingredient",
+    kind: initialKind,
     kindManual: isEdit,
     portions: 1,
     aiResult: null,
@@ -39,12 +42,13 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
       <button class="icon-btn" id="m-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button>
     </div>
     <div class="suggest" id="f-suggest"></div>
-    <div class="seg location-select" id="f-loc">
-      ${locs.map((l) => { const lm = panel._locMeta(l); return `<button data-loc="${l}" class="${m.location === l ? "on" : ""}">${esc(lm.emoji)} ${esc(lm.label)}${lm.archived ? " · " + panel.t("locationArchived") : ""}</button>`; }).join("")}
-    </div>
     <div class="seg" id="f-kind">
       ${Object.keys(kinds).map((k) => { const km = panel._kindMeta(k); return `<button type="button" data-kind="${k}" class="${m.kind === k ? "on" : ""}">${km.emoji || ""} ${km.short}</button>`; }).join("")}
     </div>
+    <div class="seg location-select" id="f-loc" role="group" aria-label="${esc(panel.t('locationLabel'))}">
+      ${locs.map((l) => { const lm = panel._locMeta(l); return `<button data-loc="${l}" class="${m.location === l ? "on" : ""}">${esc(lm.emoji)} ${esc(lm.label)}${lm.archived ? " · " + panel.t("locationArchived") : ""}</button>`; }).join("")}
+    </div>
+      <label class="field"><span>${panel.t("categoryLabel")}</span><div class="select-wrap"><select id="f-category">${Object.keys(panel._state.categories || {}).filter(k => !panel._state.categories[k].archived || k === m.category).map(k => `<option value="${esc(k)}" ${k === (m.category || "other") ? "selected" : ""}>${esc(panel._catMeta(k).label)}</option>`).join("")}</select></div></label>
     ${!isEdit ? `<label class="field" id="f-portions-wrap"><span>${panel.t("portionsLabel")}</span>
       <div class="pstep-row">
         <span class="pstep">
@@ -55,7 +59,9 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
         <small class="ps-note">${panel.t("portionsFieldNote")}</small>
       </div>
     </label>` : ""}
+    <p class="location-help hidden" id="f-household-help">${panel.t("householdHelp")}</p>
     <label class="field hidden" id="f-count-wrap"><span>${panel.t('stockRemaining')}</span><input type="number" id="f-stock-count" min="1" max="1000000" step="1" value="${editItem?.stock_count ?? 1}"></label>
+    <div id="f-dates-slot"><div id="f-dates">
     <label class="date-type-check"><input type="checkbox" id="f-date-type" ${m.dateType === "best_before" ? "checked" : ""}><span>${panel.t("bestBeforeCheckbox")}</span></label>
     <p class="date-type-help">${panel.t("useByUnchecked")}</p>
     <div class="grid2">
@@ -66,11 +72,12 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
     <div class="grid2"><label class="field"><span>${panel.t('datePrecision')}</span><div class="select-wrap"><select id="f-date-precision"><option value="day">${panel.t('exactDate')}</option><option value="month">${panel.t('monthYear')}</option></select></div></label><label class="field hidden" id="f-month-wrap"><span id="f-month-label">${panel.t(m.dateType === 'best_before' ? 'bestBeforeLabel' : 'useByLabel')}</span><input type="month" id="f-expiry-month"></label></div>
     <p class="location-help hidden" id="f-month-hint"></p>
     <div id="f-expiry-suggestion" class="expiry-suggestion hidden"></div>
+    </div></div>
     <button class="link" id="f-adv">${panel.t("moreOptions")}</button>
     <div class="adv hidden" id="f-advbox">
     <label class="date-type-check"><input type="checkbox" id="f-counted" ${editItem?.stock_count != null ? 'checked' : ''}><span>${panel.t('stockCountMode')}</span></label>
 
-      <label class="field"><span>${panel.t("categoryLabel")}</span><div class="select-wrap"><select id="f-category">${Object.keys(panel._state.categories || {}).filter(k => !panel._state.categories[k].archived || k === m.category).map(k => `<option value="${esc(k)}" ${k === (m.category || "other") ? "selected" : ""}>${esc(panel._catMeta(k).label)}</option>`).join("")}</select></div></label>
+
       <label class="field"><span>${panel.t("displayNameLabel")}</span><input id="f-dispname" placeholder="${panel.t("displayNamePlaceholder")}" value="${esc(editItem?.name || "")}"></label>
       <div class="grid2">
         <label class="field"><span>${panel.t("quantityLabel")}</span><input id="f-qty" placeholder="${panel.t("quantityPlaceholder")}" value="${esc(editItem?.quantity ?? prefill.quantity ?? "")}"></label>
@@ -94,6 +101,13 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   const lang = panel._lang();
   let countManual = isEdit;
   const syncCount = () => {
+    const household=m.kind==='household';
+    const dates=q('#f-dates'), target=q(household?'#f-advbox':'#f-dates-slot');
+    if(dates.parentElement!==target)target.prepend(dates);
+    if(household)q('#f-counted').checked=true;
+    q('#f-household-help').classList.toggle('hidden', !household);
+    q('#f-counted').disabled=household;
+    q('#f-counted').closest('label').hidden=household;
     const counted = q('#f-counted').checked;
     q('#f-count-wrap').classList.toggle('hidden', !counted);
     q('#f-portions-wrap')?.classList.toggle('hidden', counted);
@@ -114,7 +128,15 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   };
   const setKind = (k) => {
     if (!k) return;
+    const previousEmoji=panel._catMeta(m.category).emoji;
     m.kind = k;
+    if(!locationManual && cupboard()) {
+      m.location=cupboard();
+      q('#f-loc').querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.loc===m.location));
+    }
+    if(k==='household' && (m.emoji==='🍽️' || m.emoji===previousEmoji))setEmoji(panel._kindMeta(k).emoji || '🧹');
+    if(k==='household')q('#s-ai')?.remove();
+    syncCount();
     m.category = fillCategorySelect(panel, q("#f-category"), m.kind, m.category, isEdit && m.kind === editItem.kind ? editItem.category : null);
     const ke = q("#f-kind");
     if (ke) ke.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x.dataset.kind === k));
@@ -158,6 +180,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   syncPrecision();
 
   const applySuggestion = (expiryDate, source) => {
+    if(m.kind==='household'){q("#f-expiry-suggestion").classList.add("hidden");return;}
     const proposal = q("#f-expiry-suggestion");
     if (m.expiryLocked || m.expiryManual) {
       proposal.classList.toggle("hidden", !expiryDate || expiryDate === expEl.value);
@@ -238,10 +261,10 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
         <button type="button" class="s-take" id="s-take" title="${panel.t("useTemplateNameTitle")}">
           <span class="s-emoji">${t.emoji || "📋"}</span>
           <div class="s-body"><b>${esc(t.name)}</b>
-            <div class="s-sub">${noHere ? panel.t("notSuitableHere") : esc(panel.t("daysAtLocation", panel._locMeta(m.location).label, sl[panel._storageType(m.location)]))}${t.notes ? " · " + esc(t.notes) : ""}</div></div>
+            <div class="s-sub">${m.kind==='household' ? panel.t("householdHelp") : noHere ? panel.t("notSuitableHere") : esc(panel.t("daysAtLocation", panel._locMeta(m.location).label, sl[panel._storageType(m.location)]))}${t.notes ? " · " + esc(t.notes) : ""}</div></div>
         </button>
         <div class="s-actions">
-          ${panel._state.options.ai_enabled ? `<button class="s-mini" id="s-ai" title="${panel.t("aiEstimateTitle")}"><ha-icon icon="mdi:creation"></ha-icon></button>` : ""}
+          ${panel._state.options.ai_enabled && m.kind!=='household' ? `<button class="s-mini" id="s-ai" title="${panel.t("aiEstimateTitle")}"><ha-icon icon="mdi:creation"></ha-icon></button>` : ""}
           <button class="s-mini" id="s-other" title="${panel.t("otherTemplateTitle")}"><ha-icon icon="mdi:book-multiple"></ha-icon></button>
           <button class="s-mini ghost" id="s-dismiss" title="${panel.t("notThisManualTitle")}"><ha-icon icon="mdi:close"></ha-icon></button>
         </div>`;
@@ -282,7 +305,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
   q("#f-loc").querySelectorAll("button").forEach((b) =>
     b.addEventListener("click", () => {
       if (b.dataset.loc !== editItem?.location && panel._locMeta(b.dataset.loc).archived) return;
-      m.location = b.dataset.loc; ++matchVersion;
+      locationManual = true; m.location = b.dataset.loc; ++matchVersion;
       q("#f-expiry-suggestion").classList.add("hidden");
       q("#f-loc").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
       if (m.aiResult) {
@@ -437,6 +460,7 @@ export function openAddModal(panel, prefill = {}, editItem = null) {
 
 export async function aiEstimate(panel, name, ctx) {
   const { m, setEmoji, setKind, suggestEl } = ctx;
+  if(m.kind==='household')return;
   const lang = panel._lang();
   suggestEl.className = "suggest";
   suggestEl.innerHTML = `<div class="s-body"><b>${panel.t("aiThinking")}</b><div class="s-sub">${esc(panel.t("estimatingFor", name))}</div></div><div class="spinner"></div>`;
@@ -447,6 +471,7 @@ export async function aiEstimate(panel, name, ctx) {
     suggestEl.innerHTML = `<div class="s-body"><b>${panel.t("aiFailed")}</b><div class="s-sub">${esc(e.message || e)}</div></div>`;
     return;
   }
+  if(m.kind==='household')return;
   const est = res.estimate;
   m.aiResult = est;
   if (!m.kindManual && setKind) setKind(est.kind);

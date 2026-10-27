@@ -1,11 +1,11 @@
-import { openSurface } from "../lib/surface.js?v=0.10.0b40";
-import { categoryIds } from "../lib/categories.js?v=0.10.0b40";
-import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b40";
-import { esc } from "../lib/format.js?v=0.10.0b40";
+import { openSurface } from "../lib/surface.js?v=0.10.0b41";
+import { categoryIds } from "../lib/categories.js?v=0.10.0b41";
+import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b41";
+import { esc } from "../lib/format.js?v=0.10.0b41";
 
 export function openCategoriesManager(panel) {
   const h = openSurface(panel,`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
-    <p class="location-help">${panel.t("categoriesHelp")}</p><button class="btn primary" id="cm-add">${panel.t("newCategory")}</button><div class="seg" id="cm-kind"><button data-kind="ingredient" class="on">${esc(panel._kindMeta("ingredient").short)}</button><button data-kind="dish">${esc(panel._kindMeta("dish").short)}</button></div><div id="cm-list"></div>`,
+    <p class="location-help">${panel.t("categoriesHelp")}</p><button class="btn primary" id="cm-add">${panel.t("newCategory")}</button><div class="seg" id="cm-kind"><button data-kind="ingredient" class="on">${esc(panel._kindMeta("ingredient").short)}</button><button data-kind="dish">${esc(panel._kindMeta("dish").short)}</button><button data-kind="household">${esc(panel._kindMeta("household").short)}</button></div><div id="cm-list"></div>`,
     {prefer: "drawer", wide: true, onClose: () => { disposeReorder(); if (panel._refreshCategories === render) panel._refreshCategories = null; }});
   let selectedKind = "ingredient";
   let busy = false, disposeReorder = () => {};
@@ -47,7 +47,7 @@ function editCategory(panel,id,run,defaultKind="ingredient") {
   const c=id ? panel._catMeta(id) : {label:"",emoji:"🍽️",icon:"mdi:food",kind:defaultKind};
   const h=panel._openModal(`<div class="modal-head"><h3>${panel.t(id?"editCategory":"newCategory")}</h3><button class="icon-btn" id="ce-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
     <label class="field"><span>${panel.t("categoryName")}</span><input id="ce-name" maxlength="80" value="${esc(c.label)}"></label>
-    <label class="field"><span>${panel.t("categoryDefaultKind")}</span><select id="ce-kind"><option value="ingredient" ${c.kind==="ingredient"?"selected":""}>${esc(panel._kindMeta("ingredient").short)}</option><option value="dish" ${c.kind==="dish"?"selected":""}>${esc(panel._kindMeta("dish").short)}</option></select></label>
+    <label class="field"><span>${panel.t("categoryDefaultKind")}</span><select id="ce-kind"><option value="ingredient" ${c.kind==="ingredient"?"selected":""}>${esc(panel._kindMeta("ingredient").short)}</option><option value="dish" ${c.kind==="dish"?"selected":""}>${esc(panel._kindMeta("dish").short)}</option><option value="household" ${c.kind==="household"?"selected":""}>${esc(panel._kindMeta("household").short)}</option></select></label>
     <label class="field"><span>${panel.t("locationEmoji")}</span><input id="ce-emoji" maxlength="16" value="${esc(c.emoji)}" aria-describedby="ce-emoji-help"></label>
     <p class="location-help" id="ce-emoji-help">${panel.t("categoryEmojiHelp")}</p>
     <div class="modal-actions"><button class="btn primary" id="ce-save">${panel.t("saveBtn")}</button></div>`);

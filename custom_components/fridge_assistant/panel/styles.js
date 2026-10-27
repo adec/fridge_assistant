@@ -505,7 +505,7 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 /* --------------------------------------------------------------- portions */
 .po-sec{margin:4px 0 10px;padding:12px;border-radius:16px;background:var(--fa-soft);}
 .po-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.po-head>span{font-size:13px;font-weight:800;color:var(--fa-muted);
+.po-heading>span{font-size:13px;font-weight:800;color:var(--fa-muted);
   text-transform:uppercase;letter-spacing:.05em;}
 .pstep{display:inline-flex;align-items:center;gap:6px;}
 .pstep .ps-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--fa-line);
@@ -518,8 +518,7 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .pstep .ps-n{min-width:26px;text-align:center;font-size:16px;font-weight:800;}
 .ps-note{display:block;font-size:11.5px;color:var(--fa-muted);margin-top:6px;}
 .po-rows{display:flex;flex-direction:column;margin-top:8px;}
-.po-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 2px;
-  border-bottom:1px solid var(--fa-line);}
+.po-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:2px 0;}
 .po-row:last-child{border-bottom:none;}
 .po-row .code{flex:none;}
 .po-row.done .code{opacity:.55;text-decoration:line-through;}
@@ -556,8 +555,8 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:10px;}
 
 /* Named storage locations and their manager. */
-.location-select{flex-wrap:wrap;}
-.location-select button{flex:1 1 140px;white-space:normal;overflow-wrap:anywhere;}
+.location-select{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scroll-padding-inline:4px;}
+.location-select button{flex:1 0 auto;min-width:90px;max-width:240px;padding-inline:12px;white-space:normal;overflow-wrap:anywhere;min-height:44px;}
 .location-row{border:1px solid var(--fa-line);border-radius:14px;padding:12px;margin:10px 0;}
 .location-row-head{display:flex;align-items:flex-start;gap:8px;}
 .location-row-main{flex:1;min-width:0;overflow-wrap:anywhere;}
@@ -575,8 +574,8 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .date-type-help { margin:4px 0 14px 32px; font-size:12px; color:var(--fa-muted); }
 
 [hidden]{display:none!important}
-.main-tabs{display:flex;gap:8px;padding:10px 0}
-.main-tabs [aria-selected="true"]{background:var(--fa-accent-soft);color:var(--fa-accent);box-shadow:inset 0 -3px currentColor}
+.view-toolbar{display:flex;align-items:center;gap:10px;margin:12px 0 8px}.view-toolbar .searchrow{flex:1;min-width:0;margin:0}.main-tabs{display:flex;gap:3px;padding:4px;background:var(--fa-soft);border-radius:14px;flex:none}.main-tabs .btn{min-height:36px;padding:6px 13px;border-radius:11px;border:0;box-shadow:none;font-size:13px}
+.main-tabs [aria-selected="true"]{background:var(--fa-card);color:var(--fa-text);box-shadow:var(--fa-shadow-s);font-weight:800}
 #recipes-view{padding:16px 0 40px}
 .recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:16px 0}
 .recipe-tile{padding:0;border:1px solid var(--fa-border);border-radius:16px;overflow:hidden;background:var(--fa-card);color:var(--fa-text);text-align:left;cursor:pointer;font:inherit;width:100%}
@@ -674,6 +673,10 @@ ha-icon{--mdc-icon-size:18px;vertical-align:-4px;}
 .status-colours .inventory-row.selected{outline:2px solid var(--fa-accent);outline-offset:-2px;}
 
 .inventory-handling{display:block;font-size:11px;color:var(--fa-muted);line-height:1.5;margin-top:5px;overflow-wrap:anywhere;}
-.portion-handling-wrap{padding:8px 0;border-bottom:1px solid var(--fa-line);}.template-handling{margin:16px 0;}.template-handling summary{cursor:pointer;font-weight:700;font-size:13px;}
+.portion-handling-wrap{padding:8px 0;border-bottom:1px solid var(--fa-line);}.portion-handling-wrap:last-child{border-bottom:0}.po-identity{display:flex;align-items:center;flex-wrap:wrap;gap:6px;flex:1;min-width:90px}.po-location,.po-shared-location{font-size:12px;color:var(--fa-muted);overflow-wrap:anywhere}.po-shared-location{display:block;margin-top:3px}.po-detail{font-size:11.5px;color:var(--fa-muted);margin:3px 0 0;overflow-wrap:anywhere}.template-handling{margin:16px 0;}.template-handling summary{cursor:pointer;font-weight:700;font-size:13px;}
 .field textarea{width:100%;resize:vertical;font:inherit;font-size:14px;color:var(--fa-text);background:var(--fa-soft);border:1px solid var(--fa-line);border-radius:10px;padding:10px;margin-top:7px;}
+
+.recipe-toolbar{flex:1;min-width:0}.recipe-search-controls{display:flex;align-items:center;gap:8px;width:100%}.recipe-search-controls .field{margin:0;min-width:0;flex:1}.recipe-search-controls .field>span{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}.recipe-search-controls input,.recipe-search-controls select{width:100%;min-height:44px}.recipe-search-controls .field:last-child{flex:0 1 190px}
+.card{display:flex;align-items:center;gap:11px;padding:13px;min-width:0}.card-emoji{width:38px;height:38px;font-size:29px;background:transparent;box-shadow:none;border-radius:0;align-self:center}.card-main{flex:1;min-width:0}.card-title{font-size:15px;line-height:1.4}.card-sub{display:block;font-size:11px;line-height:1.5;margin-top:3px;white-space:normal;overflow:visible;overflow-wrap:anywhere}.card-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px}.card-badges:empty{display:none}.card .status{font-size:11px;padding:3px 7px;max-width:100%;overflow-wrap:anywhere;border-radius:7px}.card .status::before{display:none}
+@container (max-width:760px){.view-toolbar{flex-wrap:wrap}.main-tabs{width:100%}.main-tabs .btn{flex:1;min-height:40px}.view-toolbar .searchrow,.recipe-toolbar{flex-basis:100%}}
 `;

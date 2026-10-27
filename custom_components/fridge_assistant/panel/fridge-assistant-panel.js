@@ -1,11 +1,11 @@
-import { bindLowStock } from "./views/low-stock.js?v=0.10.0b40";
-import { homePath } from "./lib/navigation.js?v=0.10.0b40";
-import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b40";
-import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b40";
-import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b40";
-import { inventoryList } from "./views/inventory-list.js?v=0.10.0b40";
-import { openCategoriesManager } from "./views/categories.js?v=0.10.0b40";
-import { openMealie } from "./views/mealie.js?v=0.10.0b40";
+import { bindLowStock } from "./views/low-stock.js?v=0.10.0b41";
+import { homePath } from "./lib/navigation.js?v=0.10.0b41";
+import { handlingSummary, handlingDate, handlingStatus } from "./views/handling.js?v=0.10.0b41";
+import { emptyFilters, filterInventory } from "./lib/inventory-filters.js?v=0.10.0b41";
+import { openInventoryFilters, renderFilterChips } from "./views/inventory-filters.js?v=0.10.0b41";
+import { inventoryList } from "./views/inventory-list.js?v=0.10.0b41";
+import { openCategoriesManager } from "./views/categories.js?v=0.10.0b41";
+import { openMealie } from "./views/mealie.js?v=0.10.0b41";
 /* Fridge Assistant panel — vanilla custom element, no external deps.
  *
  * Entry module: the custom element (shell, state subscription, list and
@@ -18,18 +18,18 @@ import { openMealie } from "./views/mealie.js?v=0.10.0b40";
  * `t()` below. Only nl/en exist; there is no third language.
  */
 
-import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b40";
-import { STYLES } from "./styles.js?v=0.10.0b40";
-import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b40";
-import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b40";
-import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b40";
-import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b40";
-import { openLocationsManager } from "./views/locations.js?v=0.10.0b40";
-import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b40";
-import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b40";
-import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b40";
-import { openCleanModal } from "./views/cleanup.js?v=0.10.0b40";
-import { printSticker } from "./views/print.js?v=0.10.0b40";
+import { CATEGORY_LABELS, KIND_LABELS, LOCATION_LABELS, STATUS_COLOR, STRINGS } from "./strings.js?v=0.10.0b41";
+import { STYLES } from "./styles.js?v=0.10.0b41";
+import { daysLabel, esc, fmtCardDate } from "./lib/format.js?v=0.10.0b41";
+import { openModal, toast, wireDateField } from "./lib/surface.js?v=0.10.0b41";
+import { aiEstimate, openAddModal } from "./views/add-item.js?v=0.10.0b41";
+import { completeItem, openInspector } from "./views/inspector.js?v=0.10.0b41";
+import { openLocationsManager } from "./views/locations.js?v=0.10.0b41";
+import { aiNewTemplate, openTemplateEditor, openTemplatePicker, openTemplatesManager } from "./views/templates.js?v=0.10.0b41";
+import { eatScanned, onRetailBarcode, onScan, openScanner } from "./views/scanner.js?v=0.10.0b41";
+import { historyRow, openHistory, relTime } from "./views/history.js?v=0.10.0b41";
+import { openCleanModal } from "./views/cleanup.js?v=0.10.0b41";
+import { printSticker } from "./views/print.js?v=0.10.0b41";
 
 class FridgeAssistantPanel extends HTMLElement {
   constructor() {
@@ -229,14 +229,17 @@ class FridgeAssistantPanel extends HTMLElement {
             <button class="icon-btn" id="btn-categories" title="${this.t("manageCategories")}"><ha-icon icon="mdi:shape-outline"></ha-icon></button>
             <button class="icon-btn" id="btn-settings" title="${this.t("settings")}"><ha-icon icon="mdi:cog-outline"></ha-icon></button>
           </div>
+          <div class="view-toolbar">
           <nav class="main-tabs" role="tablist"><button class="btn ghost" id="tab-inventory" role="tab" aria-selected="true">${this.t("inventoryTab")}</button><button class="btn ghost" id="tab-recipes" role="tab" aria-selected="false">${this.t("recipesTab")}</button></nav>
-          <div class="counts" id="counts"></div>
           <div class="searchrow">
             <div class="search"><ha-icon icon="mdi:magnify" style="--mdc-icon-size:18px;color:var(--fa-muted)"></ha-icon><input id="search" placeholder="${this.t("searchPlaceholder")}" autocomplete="off" enterkeyhint="search"></div>
         <div class="inventory-view-switch" id="inventory-view-switch" role="group" aria-label="${this.t("inventoryViewLabel")}"><button class="btn ghost" data-view="cards" aria-pressed="${this._inventoryView === "cards"}"><ha-icon icon="mdi:view-grid-outline"></ha-icon> ${this.t("cardView")}</button><button class="btn ghost" data-view="list" aria-pressed="${this._inventoryView === "list"}"><ha-icon icon="mdi:format-list-bulleted"></ha-icon> ${this.t("listView")}</button></div>
             <button class="btn ghost filter-trigger" id="btn-filters" aria-haspopup="dialog"><ha-icon icon="mdi:filter-variant"></ha-icon> ${this.t("filterButton")}<span id="filter-badge" hidden></span></button>
             <button class="btn ghost icon-only" id="btn-clean" title="${this.t("cleanUp")}"><ha-icon icon="mdi:broom"></ha-icon></button>
           </div>
+            <div id="recipe-toolbar" class="recipe-toolbar" hidden></div>
+          </div>
+          <div class="counts" id="counts"></div>
         </header>
         <nav class="filters" id="filters"></nav>
         <main id="list"><div class="loading">${this.t("loading")}</div></main>
@@ -279,6 +282,7 @@ class FridgeAssistantPanel extends HTMLElement {
     const recipes = tab === "recipes";
     for (const id of ["counts", "filters", "list", "fab-add", "fab-scan", "inventory-view-switch"]) this.shadowRoot.getElementById(id).hidden = recipes;
     this.shadowRoot.querySelector(".searchrow").hidden = recipes;
+    this.shadowRoot.getElementById("recipe-toolbar").hidden = !recipes;
     this.shadowRoot.getElementById("recipes-view").hidden = !recipes;
     for (const name of ["inventory", "recipes"]) this.shadowRoot.getElementById(`tab-${name}`).setAttribute("aria-selected", String(tab === name));
     if (!recipes && this._state) this._renderFilters();
@@ -429,30 +433,25 @@ class FridgeAssistantPanel extends HTMLElement {
   _itemCard(i, lang) {
     const lm = this._locMeta(i.location);
     const locLabel = lm.label || i.location || "";
-    const contents = i.contents && i.contents !== i.name ? i.contents : "";
     const portions = i.portions || [];
     const total = i.batch_portions_total || portions.length;
-    const open = portions.filter((p) => p.status === "open").length;
-    const pbadge = total > 1
-      ? `<span class="cs-sep">·</span><span class="pbadge" title="${esc(this.t("pbadgeTitle", open, total))}">${open}/${total}</span>`
-      : "";
+    const open = portions.filter(p=>p.status==='open').length;
+    const date = handlingDate(this,i) || (i.expiry_date ? this.t(i.date_type==='best_before'?'bestBeforeLabel':'useByLabel')+' '+fmtCardDate(i.expiry_date,lang,this._state.today,i.expiry_precision) : '');
+    const meta = [this._filterLoc==='all' ? locLabel : '', date].filter(Boolean);
+    const status = handlingStatus(this,i,daysLabel(i.days_left,lang,i.date_type));
+    const handling = handlingSummary(this,i,false);
     const selected = this._inspectorItemId === i.id ? " selected" : "";
     return `<div class="card${selected}${i.status === "expired" ? " status-expired" : i.status === "soon" ? " status-soon" : ""}" data-item="${i.inventory_key || i.id}" role="button" tabindex="0" aria-label="${esc(i.name)}">
       <div class="card-emoji">${i.emoji || "🍽️"}</div>
       <div class="card-main">
         <div class="card-title">${esc(i.name)}${i.stock_count != null ? ` <span class="pbadge">${i.stock_count} ${esc(this._state.templates.find(t=>t.id===i.template_id)?.stock_unit || this.t("stockRemaining"))}</span>` : ""}</div>
-        <div class="card-sub">
-          ${this._filterLoc === "all" ? `<span class="cs-fix">${lm.emoji || ""} ${esc(locLabel)}</span><span class="cs-sep">·</span>` : ""}
-          <span class="code">${esc(i.code)}${i.inventory_key && i.portions?.length === 1 && i.batch_portions_total > 1 ? "-"+i.portions[0].n : ""}</span>${pbadge}
-          ${contents ? `<span class="cs-sep">·</span><span class="cs-more">${esc(contents)}</span>` : ""}
+        ${meta.length ? `<div class="card-sub">${meta.map(esc).join(' · ')}</div>` : ''}
+        ${handling ? `<div class="inventory-handling">${esc(handling)}</div>` : ''}
+        <div class="card-badges">
+          ${i.expiry_date || i.handling_due_at || i.effective_due_at ? `<span class="status" style="--c:${STATUS_COLOR[i.status]}">${esc(status)}</span>` : ''}
+          ${total>1?`<span class="pbadge" title="${esc(this.t('pbadgeTitle',open,total))}">${open}/${total}</span>`:''}
         </div>
-        ${handlingSummary(this,i,false) ? `<div class="inventory-handling">${esc(handlingSummary(this,i,false))}</div>` : ""}
       </div>
-      <div class="card-right">
-        <div class="status" style="--c:${STATUS_COLOR[i.status]}">${handlingStatus(this,i,daysLabel(i.days_left, lang, i.date_type))}</div>
-        <div class="card-when">${i.added_by_name ? `<span class="who" title="${esc(i.added_by_name)}">${this._avatar(i.added_by_name, i.added_by_picture, 15)}</span>` : ""}${i.expiry_date ? `<span>${handlingDate(this,i) || this.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")+" "+fmtCardDate(i.expiry_date, lang, this._state.today, i.expiry_precision)}</span>` : ""}</div>
-      </div>
-      <button class="card-print icon-btn" data-print="${i.inventory_key || i.id}" title="${this.t("printSticker")}" aria-label="${this.t("printSticker")}"><ha-icon icon="mdi:tag-outline"></ha-icon></button>
     </div>`;
   }
 }

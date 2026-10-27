@@ -109,3 +109,94 @@ catalogue without adding friction to everyday inventory entry. Proposal only:
   absent from the current Mealie catalogue.
 
 Recording the idea does not implement cleanup or authorise deleting any templates.
+
+## Backlog: CI/CD and dev deployment pipeline
+
+Requested 27 October 2026. Begin with the local working-copy deployment command in
+[scripts/deploy_dev.py](scripts/deploy_dev.py), documented in
+[dev deployment](docs/dev-deployment.md), to test before commits and HACS releases.
+
+Future work: pull-request validation, deployment of a reviewed revision to a dedicated
+dev Home Assistant, startup and feature smoke checks, manual release approval, and
+repeatable HACS beta/stable packaging. Keep deployment credentials scoped to dev,
+serialize deploys, and plan backup/rollback and storage migrations. Production must
+remain a separate, explicitly approved deployment. No CI runner access or automatic
+production deployment is configured by this backlog entry.
+
+## Backlog: optional package-photo entry
+
+Requested 27 October 2026. Deferred until the Household workflow is established;
+no implementation or delivery date committed. Useful for ingredients, dishes and
+household items when a barcode is unknown, missing or unreadable.
+
+- Offer “Read packaging” after an unmatched barcode scan, plus a direct “Add from
+  photo” action. Allow taking or choosing a photo and an optional second photo of
+  the date or pack details. Keep existing manual entry and barcode scanning usable
+  without AI configured.
+- Suggest name, an existing template, category, emoji, count/count label and clearly
+  printed dates. Prefill the existing add-item form for review; never save stock or
+  permanent barcode mappings without the user's confirmation. Preserve a scanned
+  barcode and offer linking it to the selected template on save.
+- Distinguish transcription from inference. Preserve printed date type and precision:
+  “Best before Aug 2027” uses month/year precision and its existing last-day rule.
+  Leave unclear or absent dates blank; do not invent expiry dates. Show uncertainty
+  and allow correction before saving.
+- Keep counts separate from measured quantities: “80 tablets” may suggest 80 units;
+  “500 g” stays descriptive, not 500 items. Do not add structured weights, volumes
+  or unit conversion.
+- A handwritten meal label may provide useful text. A meal photo alone supports
+  tentative identification only, not claims about ingredients, allergens or safe
+  use-by dates. Do not generate household chemical-safety or storage instructions.
+- Make image transmission to the configured provider clear before first use; define
+  retention and avoid retaining photos unnecessarily. Handle unsupported image
+  providers, unreadable photos and service failures with a manual-entry fallback.
+
+OpenAI Codex helped record this proposal. This entry does not enable image uploads
+or change the existing AI configuration.
+
+## Backlog: illustrated household user guide
+
+Requested 27 October 2026. A friendly, non-technical guide to help household members
+learn Fridge Assistant, using clear screenshots and short task-based instructions.
+No delivery date committed.
+
+- Cover everyday flows: adding/scanning items, choosing templates and locations,
+  reading dates/status colours, opening or thawing selected portions, consuming or
+  discarding stock, correcting mistakes through History, and low-stock reminders.
+  Include recipe suggestions where configured and Household tracking when implemented.
+- Follow the preview mockups’ visual style: calm colours, rounded panels, generous
+  spacing, readable type and clear visual hierarchy. Keep examples concise and easy
+  on the eyes; annotations should clarify rather than clutter. Preserve this style
+  in the guide layout, not just its screenshots.
+- Use short steps with annotated screenshots, especially for the phone and kitchen
+  display. Explain action icons and the distinction between a batch, portions and
+  a simple count through practical examples, rather than implementation details.
+- Reuse preview layouts to plan illustrations, but capture the released interface
+  with sample data for the final guide. Clearly label proposed features/mockups;
+  do not present them as currently available. Avoid household names, tokens, URLs
+  or other personal details in shared documentation.
+- Keep screenshots and wording matched to an identified app version. Store source
+  images and guide text in the repo; prefer maintainable Markdown/HTML initially,
+  with a printable PDF as a possible later output. Prioritise a brief getting-started
+  guide over an exhaustive manual.
+
+This records documentation work only; no screenshots are published by this entry.
+
+
+## Backlog: translation review
+
+English is the default language for this fork, including default metadata sent by
+its backend. Preserve user-supplied names and their casing. Retain existing Dutch
+translation support where available; broader languages and a systematic translation
+review are future work. Do not allow untranslated backend defaults to leak into the
+English interface. Requested 27 October 2026.
+
+
+## Implemented on dev: Household and compact inventory UI
+
+Household adds count-only stock, optional dates, category management and exclusion
+from Mealie matching. All new items default to an active cupboard; explicit choices
+and existing locations are preserved. Includes simplified cards, a compact view
+selector and compact portion rows with consistent location headings. See
+[Household stock](docs/household.md). Stock-to-template navigation remains an idea
+for a later update; it is not part of this implementation.

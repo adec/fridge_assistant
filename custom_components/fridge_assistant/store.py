@@ -32,6 +32,7 @@ from .const import (
     DEFAULT_KIND,
     HISTORY_ACTIONS,
     KIND_DISH,
+    KIND_HOUSEHOLD,
     KIND_INGREDIENT,
     DATE_TYPES,
     DEFAULT_DATE_TYPE,
@@ -124,7 +125,7 @@ def item_age_days(item: dict[str, Any], today: date) -> int | None:
 
 
 def template_kind(tpl: dict[str, Any]) -> str:
-    """Big group a template belongs to: 'ingredient' or 'dish'."""
+    """Built-in kind: ingredient, dish or household."""
     return tpl.get("kind") or CATEGORY_KIND.get(tpl.get("category"), DEFAULT_KIND)
 
 
@@ -271,6 +272,10 @@ class FridgeStore:
             }
             self.hidden = set(data.get("hidden", []))
             self.history = list(data.get("history", []))[:MAX_HISTORY]
+        self.categories.setdefault("household", {**CATEGORIES["household"], "id":"household", "name":None, "kind":KIND_HOUSEHOLD, "archived":False})
+        # Refresh built-in default metadata without changing a user-chosen name.
+        if not self.categories['household'].get('name'):
+            self.categories['household']['label'] = 'Household'
         # Keep per-portion locations from imported stock readable too.
         for item in self.items.values():
             for portion in item.get("portions") or []:
@@ -412,7 +417,7 @@ class FridgeStore:
         if not name or len(name) > 80: raise ValueError("Enter a category name of 1–80 characters")
         if any(k != key and not c.get("deleted") and (c.get("name") or c.get("label", "")).casefold() == name.casefold() for k,c in self.categories.items()): raise ValueError("Category name already exists")
         kind = data.get("kind", old.get("kind", DEFAULT_KIND))
-        if kind not in ("ingredient", "dish"): raise ValueError("Choose Ingredient or Dish")
+        if kind not in ("ingredient", "dish", "household"): raise ValueError("Choose Ingredient, Dish or Household")
         emoji = str(data.get("emoji", old.get("emoji", DEFAULT_EMOJI))).strip() or DEFAULT_EMOJI
         icon = str(data.get("icon", old.get("icon", DEFAULT_ICON))).strip() or DEFAULT_ICON
         if len(emoji) > 16 or not icon.startswith("mdi:") or len(icon) > 80: raise ValueError("Choose a short emoji and an mdi: icon")
@@ -592,6 +597,10 @@ class FridgeStore:
         from .handling import hours
         for key in ("after_opening_hours", "after_defrosting_hours"):
             tpl[key] = hours(data.get(key, existing.get(key)))
+        if tpl['kind'] not in (KIND_INGREDIENT, KIND_DISH, KIND_HOUSEHOLD):
+            raise ValueError('Choose Ingredient, Dish or Household')
+        if tpl['kind'] == KIND_HOUSEHOLD:
+            tpl.update(stock_mode='count', shelf_life={}, after_opening_hours=None, after_defrosting_hours=None, after_opening_location=None)
         self.user_templates[tpl_id] = tpl
         return tpl
 
@@ -635,7 +644,7 @@ class FridgeStore:
         return uuid.uuid4().hex
 
     def shelf_life_days(self, template: dict[str, Any] | None, location: str) -> int | None:
-        if not template:
+        if not template or template.get("kind") == KIND_HOUSEHOLD:
             return None
         sl = template.get("shelf_life") or {}
         val = sl.get(self.storage_type(location))
@@ -676,11 +685,14 @@ class FridgeStore:
         if template is None and data.get("name"):
             template = self.match_template(data["name"])
 
+        if not loc:
+            location = next((key for key in self.active_locations() if self.storage_type(key) == 'pantry'), location)
+
         added_date = data.get("added_date") or today.isoformat()
 
         expiry_date = data.get("expiry_date")
         expiry_source = data.get("expiry_source") or SOURCE_MANUAL
-        if not expiry_date and data.get("expiry_source") != SOURCE_MANUAL:
+        if not expiry_date and data.get("expiry_source") != SOURCE_MANUAL and canonical_kind(data.get("kind") or (template or {}).get("kind")) != KIND_HOUSEHOLD:
             days = self.shelf_life_days(template, location)
             if days is not None:
                 base = parse_date(added_date) or today
@@ -735,7 +747,7 @@ class FridgeStore:
         self._decorate_from_template(item, template)
         # An explicit kind from the user wins; otherwise derive it.
         kind = canonical_kind(data.get("kind"))
-        if kind not in (KIND_INGREDIENT, KIND_DISH):
+        if kind not in (KIND_INGREDIENT, KIND_DISH, KIND_HOUSEHOLD):
             kind = (
                 template_kind(template)
                 if template
@@ -744,6 +756,8 @@ class FridgeStore:
         item["kind"] = kind
         from .stock import integer
         stock_count = data.get('stock_count')
+        if kind == KIND_HOUSEHOLD and stock_count is None:
+            stock_count = 1
         if 'stock_count' not in data and template and template.get('stock_mode') == 'count':
             stock_count = 1
         if stock_count is not None:
@@ -762,6 +776,8 @@ class FridgeStore:
         item = self.items.get(item_id)
         if not item:
             return None
+        if changes.get('kind', item.get('kind')) == KIND_HOUSEHOLD:
+            changes = {**changes, 'stock_count': changes.get('stock_count') if changes.get('stock_count') is not None else item.get('stock_count') or 1}
         if 'stock_count' in changes:
             from .stock import integer
             if changes['stock_count'] is not None:
@@ -813,7 +829,7 @@ class FridgeStore:
                 self.validate_item_location(value, item.get("location"))
             if key == "kind":
                 value = canonical_kind(value)
-                if value not in (KIND_INGREDIENT, KIND_DISH):
+                if value not in (KIND_INGREDIENT, KIND_DISH, KIND_HOUSEHOLD):
                     continue
             if key == "category":
                 value = canonical_category(value)

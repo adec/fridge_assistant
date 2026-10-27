@@ -1,13 +1,13 @@
-import { fmtCardDate } from "../lib/format.js?v=0.10.0b40";
-import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b40";
+import { fmtCardDate } from "../lib/format.js?v=0.10.0b41";
+import { openHandling, handlingSummary, handlingDate, handlingTime } from "./handling.js?v=0.10.0b41";
 /* Item inspector: drawer on desktop (list stays visible; selecting another
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b40";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b40";
-import { openSurface } from "../lib/surface.js?v=0.10.0b40";
-import { relTime } from "./history.js?v=0.10.0b40";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b41";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b41";
+import { openSurface } from "../lib/surface.js?v=0.10.0b41";
+import { relTime } from "./history.js?v=0.10.0b41";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length
@@ -55,11 +55,12 @@ export function openInspector(panel, item, { highlight = null } = {}) {
 
     const portionRow = (p) => {
       const isOpen = p.status === "open";
+      const state=(i.portion_states||[]).find(v=>v.portion_number===p.n);
       const code = total > 1 ? `${i.code}-${p.n}` : i.code;
       const hl = highlight != null && p.n === highlight ? " hl" : "";
       let status;
       if (isOpen) {
-        status = `<span class="po-status">${p.opened_at ? `<span class="portion-opened-badge">${panel.t("handlingOpened")}</span>` : panel.t("portionOpenLabel")}</span>`;
+        status = [p.opened_at ? panel.t('handlingOpened') : '', p.defrost_started_at ? panel.t(p.defrosted_at?'handlingPhase_defrosted':'handlingPhase_defrosting') : ''].filter(Boolean).map(label=>`<span class="portion-opened-badge">${esc(label)}</span>`).join('');
       } else {
         const icon = p.status === "eaten" ? "mdi:silverware-fork-knife" : "mdi:delete-outline";
         const who = p.by_name ? `${esc(p.by_name)} · ` : "";
@@ -79,10 +80,19 @@ export function openInspector(panel, item, { highlight = null } = {}) {
         : (p.event_id
           ? `<button class="po-undo" data-undo="${esc(p.event_id)}" title="${panel.t("undoPortionTitle")}">${panel.t("backBtn")}</button>`
           : "");
-      const state=(i.portion_states||[]).find(v=>v.portion_number===p.n);
+      const rowLocation=p.location || state?.location || i.location;
+      const detail=[];
+      if(isOpen && state){
+        if(p.opened_at)detail.push(panel.t('handlingOpened')+' '+handlingTime(panel,p.opened_at));
+        if(p.defrosted_at)detail.push(panel.t('handlingPhase_defrosted')+' '+handlingTime(panel,p.defrosted_at));
+        else if(p.defrost_started_at)detail.push(panel.t('handlingPhase_defrosting')+' '+handlingTime(panel,p.defrost_started_at));
+        if(state.handling_due_at)detail.push(handlingDate(panel,state));
+        else if(state.handling_phase==='defrosting')detail.push(panel.t('handlingAwaiting'));
+        else if(state.is_opened || state.handling_phase==='defrosted')detail.push(panel.t(state.handling_lifetime_configured?'handlingOriginalEarlier':'handlingNoLifetime'));
+      }
       return `<div class="portion-handling-wrap"><div class="po-row${isOpen ? "" : ` done ${p.status}`}${hl}">
-        <span class="code">${esc(code)}</span>${status}${actions}
-      </div>${state ? `<p class="location-help">${esc(panel._locMeta(state.location).label)}${handlingSummary(panel,state)?" · "+esc(handlingSummary(panel,state)):""}</p>`:""}</div>`;
+        <div class="po-identity"><span class="code">${esc(code)}</span>${isOpen && locations.length>1?`<span class="po-location">${esc(panel._locMeta(rowLocation).label)}</span>`:''}${status}</div>${actions}
+      </div>${detail.length ? `<p class="po-detail">${detail.map(esc).join(' · ')}</p>`:''}</div>`;
     };
 
     h.modal.innerHTML = `
@@ -95,19 +105,19 @@ export function openInspector(panel, item, { highlight = null } = {}) {
       ${i.effective_due_at ? `<p class="location-help">${panel.t("handlingOriginal")}: ${panel.t(i.date_type === "best_before" ? "bestBeforeLabel" : "useByLabel")} ${i.expiry_date ? fmtCardDate(i.expiry_date, lang, panel._state.today, i.expiry_precision) : "—"}</p>`:""}
       <div class="po-sec" ${i.stock_count != null ? 'style="display:none"' : ""}>
         <div class="po-head">
-          <span>${panel.t("portionsLabel")}</span>
+          <div class="po-heading"><span>${panel.t("portionsLabel")}</span><small class="po-shared-location">${locations.length>1 ? esc(panel.t("portionsMultipleLocations")) : esc(lm.label || location)}</small></div>
           <span class="pstep">
-            <button type="button" class="ps-btn" id="po-minus" ${total <= Math.max(consumed + portions.filter(p=>p.status === "open" && (p.opened_at || p.defrost_started_at)).length, 1) ? "disabled" : ""}><ha-icon icon="mdi:minus"></ha-icon></button>
+            <button type="button" class="ps-btn" id="po-minus" title="${esc(panel.t('portionRemoveUnused'))}" aria-label="${esc(panel.t('portionRemoveUnused'))}" ${total <= Math.max(consumed + portions.filter(p=>p.status === "open" && (p.opened_at || p.defrost_started_at)).length, 1) ? "disabled" : ""}><ha-icon icon="mdi:minus"></ha-icon></button>
             <b class="ps-n">${total}</b>
-            <button type="button" class="ps-btn" id="po-plus" ${total >= 24 ? "disabled" : ""}><ha-icon icon="mdi:plus"></ha-icon></button>
+            <button type="button" class="ps-btn" id="po-plus" title="${esc(panel.t('portionAdd'))}" aria-label="${esc(panel.t('portionAdd'))}" ${total >= 24 ? "disabled" : ""}><ha-icon icon="mdi:plus"></ha-icon></button>
           </span>
         </div>
-        <small class="ps-note">${panel.t("portionsStepperNote")}</small>
         ${total > 1 || panel._state.options.handling_enabled || i.portions?.some(p=>p.opened_at||p.defrost_started_at) ? `<div class="po-rows">${portions.map(portionRow).join("")}</div>` : ""}
       </div>
       ${i.portions?.some(p=>p.opened_at||p.defrost_started_at) ? `<button class="link" id="handling-history">${panel.t("handlingCorrections")}</button>`:""}
       ${i.stock_count != null ? `<div class="d-row"><span>${panel.t('stockRemaining')}</span><b>${i.stock_count} ${esc(panel._state.templates.find(t=>t.id===i.template_id)?.stock_unit || '')}</b></div>` : ''}
       <div class="d-rows">
+        <div class="d-row"><span>${panel.t("categoryLabel")}</span><b>${esc(panel._catMeta(i.category).label || i.category || "—")}</b></div>
         <div class="d-row"><span>${panel.t("locationLabel")}</span><b>${locations.length > 1 ? panel.t("handlingMixedLocation") : (lm.emoji || "")+" "+esc(lm.label || location)}</b></div>
         ${i.added_by_name ? `<div class="d-row"><span>${panel.t("addedByLabel")}</span><b class="who">${panel._avatar(i.added_by_name, i.added_by_picture, 24)} ${esc(i.added_by_name)}</b></div>` : ""}
         ${i.contents && i.contents !== i.name ? `<div class="d-row"><span>${panel.t("contentsLabel")}</span><b>${esc(i.contents)}</b></div>` : ""}
@@ -136,7 +146,7 @@ export function openInspector(panel, item, { highlight = null } = {}) {
       q('#d-eaten').disabled = true;
       try {
         const result = await panel._call('consume_stock', {template_id:i.template_id, item_id:i.id, amount:1});
-        close(); panel._toast(panel.t('stockConsumed'), {actionLabel:panel.t('stockUndo'), onAction:()=>panel._call('restore_item',{event_id:result.event.id})});
+        close(); panel._toast(panel.t(i.kind==='household'?'householdUsed':'stockConsumed'), {actionLabel:panel.t('stockUndo'), onAction:()=>panel._call('restore_item',{event_id:result.event.id})});
       } catch(e) { panel._toast(esc(e.message || e),{type:'bad'}); q('#d-eaten').disabled=false; }
     });
     q("#d-tossed").addEventListener("click", () => completeItem(panel, i, "tossed", close));

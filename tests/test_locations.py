@@ -33,7 +33,7 @@ class TestLocations(unittest.TestCase):
 
     def test_defaults_keep_legacy_ids(self):
         self.assertEqual(self.store.active_locations(), ["fridge", "freezer", "pantry"])
-        self.assertEqual(self.store.location_label("pantry"), "Pantry")
+        self.assertEqual(self.store.location_label("pantry"), "Cupboard")
 
     def test_custom_freezer_uses_freezer_duration(self):
         loc = self.create()
@@ -131,10 +131,13 @@ class TestLocations(unittest.TestCase):
             self.store.upsert_location({"id": "fridge", "name": "Fridge", "storage_type": "fridge", "archived": True})
         self.assertEqual(self.store.active_locations(), ["fridge"])
 
-    def test_default_add_uses_first_active_location(self):
+    def test_default_add_prefers_cupboard_then_first_active_location(self):
         loc = self.create()
         self.store.reorder_locations([loc["id"], "fridge", "freezer", "pantry"])
+        self.assertEqual(self.store.build_item({"name": "Milk"})["location"], 'pantry')
+        self.store.upsert_location({'id':'pantry','storage_type':'pantry','archived':True})
         self.assertEqual(self.store.build_item({"name": "Milk"})["location"], loc["id"])
+        self.assertEqual(self.store.build_item({"name":"Milk","location":"freezer"})['location'],'freezer')
 
     def test_reordering_rejects_missing_or_duplicate_ids(self):
         before = copy.deepcopy(self.store.locations)

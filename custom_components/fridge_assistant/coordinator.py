@@ -386,7 +386,7 @@ def _line(item: dict[str, Any], lang: str) -> str:
         from .handling import timestamp
         due = timestamp(item["handling_due_at"]).astimezone(dt_util.now().tzinfo)
         reason = ("na openen" if item["handling_reason"] == "opened" else "na ontdooien") if lang == "nl" else ("after opening" if item["handling_reason"] == "opened" else "after defrosting")
-        return f"{item.get('emoji') or '•'} **{item['name']}** ({item.get('code') or ''} · {item.get('location_label') or item.get('location','')}) — {'Gebruiken voor' if lang == 'nl' else 'Use within'} {due:%d %b %H:%M} ({reason})"
+        return f"{item.get('emoji') or '•'} **{item['name']}** ({item.get('code') or ''} · {item.get('location_label') or item.get('location','')}) — {'Gebruiken voor' if lang == 'nl' else 'Use by'} {due:%d %b %H:%M} ({reason})"
     loc = item.get("location_label") or get_location_label(item["location"], lang)
     dl = item["days_left"]
     if dl is None:

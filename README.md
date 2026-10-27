@@ -705,3 +705,8 @@ Dashboard tiles can open `/fridge-assistant?return_to=%2Fcasora-dashboard%2Fhome
 to show an optional **Home** button that returns to that view. Only paths on the
 same Home Assistant instance are accepted. Ordinary sidebar launches are unchanged.
 On phones the button uses a home icon to preserve header space.
+
+### Test changes on a dev instance
+
+Deploy uncommitted changes without a GitHub release using `python3 scripts/deploy_dev.py`.
+See [dev deployment](docs/dev-deployment.md) for pairing, backups, startup checks and rollback.
