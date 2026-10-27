@@ -381,7 +381,7 @@ def _notification_message(summaries: list[dict[str, Any]], lang: str) -> str:
 
 def _line(item: dict[str, Any], lang: str) -> str:
     s = _NOTIFY_STRINGS[lang]
-    date_label = ("Ten minste houdbaar tot" if item.get("date_type") == "best_before" else "Te gebruiken tot") if lang == "nl" else ("Best Before" if item.get("date_type") == "best_before" else "Use By")
+    date_label = ("Ten minste houdbaar tot" if item.get("date_type") == "best_before" else "Te gebruiken tot") if lang == "nl" else ("Best before" if item.get("date_type") == "best_before" else "Use by")
     if item.get("handling_due_at"):
         from .handling import timestamp
         due = timestamp(item["handling_due_at"]).astimezone(dt_util.now().tzinfo)

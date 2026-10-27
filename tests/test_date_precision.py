@@ -39,7 +39,7 @@ class DatePrecisionTests(unittest.TestCase):
         self.assertEqual(projected['expiry_precision'], 'day')
         self.assertEqual(projected['original_expiry_precision'], 'month')
         details = load_module('label_details').label_sections(projected)
-        self.assertIn('Best Before: Feb 2028', details[0][1])
+        self.assertIn('Best before: Feb 2028', details[0][1])
         projected = handling.portion_projection(item, {'n':1}, datetime(2026,10,26,tzinfo=timezone.utc))
         self.assertEqual(projected['expiry_precision'], 'month')
 

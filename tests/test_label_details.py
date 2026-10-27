@@ -21,14 +21,14 @@ class LabelDetailsTests(unittest.TestCase):
         sections=mod.label_sections({'name':'Curry','contents':'Curry','handling_due_at':'2026-10-27T18:00:00+00:00','handling_reason':'defrosted','opened_at':'2026-10-26T18:00:00+00:00','defrosted_at':'2026-10-26T18:00:00+00:00','original_expiry_date':'2027-12-18','original_date_type':'best_before','label_note':'Remove lid'})
         self.assertEqual([s[0] for s in sections],['HANDLING DETAILS','INSTRUCTIONS'])
         self.assertTrue(sections[0][1].startswith('After defrosting'))
-        self.assertIn('Fully defrosted: 26 Oct 2026 18:00',sections[0][1])
-        self.assertIn('Best Before: 18 Dec 2027',sections[0][1])
+        self.assertIn('Thawed: 26 Oct 2026 18:00',sections[0][1])
+        self.assertIn('Best before: 18 Dec 2027',sections[0][1])
         self.assertNotIn('Curry',sections[0][1])
 
     def test_pending_defrost_not_declared_complete(self):
         details=mod.label_sections({'name':'Curry','defrost_started_at':'2026-10-26T18:00:00+00:00'})[0][1]
         self.assertIn('Confirm when fully defrosted',details)
-        self.assertNotIn('Fully defrosted:',details)
+        self.assertNotIn('Thawed:',details)
 
     def test_dutch_headings_and_date(self):
         sections=mod.label_sections({'name':'Soep','label_note':'Deksel verwijderen','contents':'Met wortels'},'nl')

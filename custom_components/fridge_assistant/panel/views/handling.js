@@ -1,4 +1,4 @@
-import { esc } from '../lib/format.js?v=0.10.0b37';
+import { esc } from '../lib/format.js?v=0.10.0b38';
 export function handlingTime(panel, iso) {
   return new Intl.DateTimeFormat(panel._lang()==='nl'?'nl-NL':'en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(iso));
 }

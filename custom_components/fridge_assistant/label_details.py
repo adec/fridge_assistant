@@ -32,7 +32,7 @@ def _time(value, lang):
 def label_sections(item, lang='en'):
     nl = lang=='nl'
     handling = []
-    for key,en,dutch in [('opened_at','Opened','Geopend'),('defrost_started_at','Defrosting started','Ontdooien gestart'),('defrosted_at','Fully defrosted','Volledig ontdooid')]:
+    for key,en,dutch in [('opened_at','Opened','Geopend'),('defrost_started_at','Defrosting started','Ontdooien gestart'),('defrosted_at','Thawed','Volledig ontdooid')]:
         if item.get(key) and (key!='defrost_started_at' or not item.get('defrosted_at')):
             handling.append(f'{dutch if nl else en}: {_time(item[key],lang)}')
     if item.get('defrost_started_at') and not item.get('defrosted_at'):
@@ -42,7 +42,7 @@ def label_sections(item, lang='en'):
         handling.insert(0, ('Na openen' if reason=='opened' else 'Na ontdooien') if nl else ('After opening' if reason=='opened' else 'After defrosting'))
         original=item.get('original_expiry_date')
         if original:
-            kind=('THT' if nl else 'Best Before') if item.get('original_date_type')=='best_before' else ('Te gebruiken tot' if nl else 'Use By')
+            kind=('THT' if nl else 'Best before') if item.get('original_date_type')=='best_before' else ('Te gebruiken tot' if nl else 'Use by')
             original_text = _date(original, lang)
             if item.get('original_expiry_precision') == 'month':
                 original_text = original_text.split(' ', 1)[1]

@@ -1,6 +1,6 @@
 /* Small date/text helpers (timezone-safe, YYYY-MM-DD). */
 
-import { MONTHS } from "../strings.js?v=0.10.0b37";
+import { MONTHS } from "../strings.js?v=0.10.0b38";
 
 export function todayISO() {
   const n = new Date();
@@ -46,7 +46,9 @@ export function daysLabel(daysLeft, lang, dateType = "use_by") {
     const abs = Math.abs(daysLeft);
     return lang === "nl"
       ? `${dateType === "best_before" ? "Na THT" : "Verlopen"} ${abs} dag${abs === 1 ? "" : "en"}`
-      : `${dateType === "best_before" ? "Past best before" : "Expired"} ${abs} day${abs === 1 ? "" : "s"}`;
+      : dateType === "best_before"
+        ? `Best ${abs} day${abs === 1 ? "" : "s"} ago`
+        : `Expired ${abs} day${abs === 1 ? "" : "s"} ago`;
   }
   if (daysLeft === 0) return lang === "nl" ? "vandaag!" : "today!";
   if (daysLeft === 1) return lang === "nl" ? "nog 1 dag" : "1 day left";
