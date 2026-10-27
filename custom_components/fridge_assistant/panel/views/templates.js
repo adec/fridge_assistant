@@ -1,12 +1,12 @@
-import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b34";
+import { fillCategorySelect } from "../lib/categories.js?v=0.10.0b35";
 /* Template picker, manager (view/edit/add — no AI required) and editor.
  * The manager opens as a drawer on desktop; the picker (part of the add
  * flow) and the editor (also reachable from the add-modal's AI flow, and
  * stacked on top of the manager drawer) stay modals. */
 
-import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b34";
-import { esc } from "../lib/format.js?v=0.10.0b34";
-import { openSurface } from "../lib/surface.js?v=0.10.0b34";
+import { parseShelfDuration, formatShelfDuration } from "../lib/durations.js?v=0.10.0b35";
+import { esc } from "../lib/format.js?v=0.10.0b35";
+import { openSurface } from "../lib/surface.js?v=0.10.0b35";
 
 export function openTemplatePicker(panel, onPick) {
   const templates = panel._state.templates;
@@ -228,7 +228,7 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
     <div class="te-sec">${panel.t("shelfLifeSectionLabel")}</div>
     <div class="grid3">${locs.map(dayField).join("")}</div>
     <p class="location-help">${panel.t("shelfDurationHelp")}</p>
-    ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p><label class="field"><span>${panel.t('openingStorage')}</span><div class="select-wrap"><select id="te-opening-location"><option value="">${panel.t('openingKeepLocation')}</option>${[...(panel._state.active_locations || []), ...((t.after_opening_location && !(panel._state.active_locations || []).includes(t.after_opening_location)) ? [t.after_opening_location] : [])].map(id=>`<option value="${esc(id)}" ${t.after_opening_location===id?'selected':''}>${esc(panel._locMeta(id).label)}${!(panel._state.active_locations || []).includes(id)?' · '+panel.t('locationArchived'):''}</option>`).join('')}</select></div><small class="location-help">${panel.t('openingStorageHelp')}</small></label>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] && t[key]%24===0 ? t[key]/24 : t[key]??''}" placeholder="${panel.t('handlingNoAutomatic')}"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0?'selected':''}>${panel.t('handlingDays')}</option></select></div></label>`).join('')}</details>`:''}
+    ${panel._state.options.handling_enabled ? `<details class="template-handling" ${t.after_opening_hours || t.after_defrosting_hours ? "open":""}><summary>${panel.t('handlingTemplateSection')}</summary><p class="location-help">${panel.t('handlingTemplateHelp')}</p><label class="field"><span>${panel.t('openingStorage')}</span><div class="select-wrap"><select id="te-opening-location"><option value="">${panel.t('openingKeepLocation')}</option>${[...(panel._state.active_locations || []), ...((t.after_opening_location && !(panel._state.active_locations || []).includes(t.after_opening_location)) ? [t.after_opening_location] : [])].map(id=>`<option value="${esc(id)}" ${t.after_opening_location===id?'selected':''}>${esc(panel._locMeta(id).label)}${!(panel._state.active_locations || []).includes(id)?' · '+panel.t('locationArchived'):''}</option>`).join('')}</select></div><small class="location-help">${panel.t('openingStorageHelp')}</small></label>${['after_opening_hours','after_defrosting_hours'].map(key=>`<label class="field"><span>${panel.t(key==='after_opening_hours'?'handlingOpeningLifetime':'handlingDefrostLifetime')}</span><div class="grid2"><input type="number" min="1" max="8760" id="te-${key}" value="${t[key] ? t[key]/(key==='after_opening_hours' && t[key]%168===0 ? 168 : t[key]%24===0 ? 24 : 1) : ''}" placeholder="${panel.t('handlingNoAutomatic')}"><div class="select-wrap"><select id="te-${key}-unit"><option value="1" ${!t[key] || t[key]%24!==0?'selected':''}>${panel.t('handlingHours')}</option><option value="24" ${t[key] && t[key]%24===0 && !(key==='after_opening_hours' && t[key]%168===0)?'selected':''}>${panel.t('handlingDays')}</option>${key==='after_opening_hours'?`<option value="168" ${t[key] && t[key]%168===0?'selected':''}>${panel.t('handlingWeeks')}</option>`:''}</select></div></div></label>`).join('')}</details>`:''}
     <label class="field"><span>${panel.t("aliasesLabel")}</span><input id="te-aliases" value="${esc((t.aliases || []).join(", "))}" placeholder="${panel.t("aliasesPlaceholder")}"></label>
     <label class="field"><span>${panel.t('templateBarcodes')}</span><textarea id="te-barcodes" rows="2" spellcheck="false" placeholder="0123456789012">${esc((t.barcodes || []).join('\n'))}</textarea><small class="location-help">${panel.t('templateBarcodesHelp')}</small></label>
     <label class="field"><span>${panel.t("labelNote")}</span><textarea id="te-label-note" maxlength="500" rows="2">${esc(t.label_note || "")}</textarea><small class="location-help">${panel.t("labelNoteTemplateHelp")}</small></label>
@@ -276,6 +276,17 @@ export function openTemplateEditor(panel, tpl, isNew, onChanged, options = {}) {
       syncCategoryEmoji();
       kindEl.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
     }));
+  for (const key of ['after_opening_hours','after_defrosting_hours']) {
+    const unit=q('#te-'+key+'-unit'), field=q('#te-'+key);
+    if (!unit) continue;
+    let previous=Number(unit.value);
+    field.step='any'; field.min='0.001';
+    unit.addEventListener('change',()=>{
+      const next=Number(unit.value);
+      if(field.value.trim()!=='') field.value=String(Number((Number(field.value)*previous/next).toPrecision(12)));
+      previous=next;
+    });
+  }
   q("#te-close").addEventListener("click", h.close);
   let savedTemplate = null, saveNext = false, submitting = false;
   q("#te-emoji-ai")?.addEventListener("click", async () => {

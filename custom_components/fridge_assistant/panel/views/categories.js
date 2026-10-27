@@ -1,7 +1,7 @@
-import { openSurface } from "../lib/surface.js?v=0.10.0b34";
-import { categoryIds } from "../lib/categories.js?v=0.10.0b34";
-import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b34";
-import { esc } from "../lib/format.js?v=0.10.0b34";
+import { openSurface } from "../lib/surface.js?v=0.10.0b35";
+import { categoryIds } from "../lib/categories.js?v=0.10.0b35";
+import { bindReorder, mergeVisibleOrder } from "../lib/reorder.js?v=0.10.0b35";
+import { esc } from "../lib/format.js?v=0.10.0b35";
 
 export function openCategoriesManager(panel) {
   const h = openSurface(panel,`<div class="modal-head"><h3>${panel.t("manageCategories")}</h3><button class="icon-btn" id="cm-close" aria-label="${panel.t("closeBtn")}"><ha-icon icon="mdi:close"></ha-icon></button></div>
