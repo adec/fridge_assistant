@@ -1,13 +1,13 @@
-import { fmtCardDate } from "../lib/format.js?v=0.10.0b39";
-import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b39";
+import { fmtCardDate } from "../lib/format.js?v=0.10.0b40";
+import { openHandling, handlingSummary, handlingDate } from "./handling.js?v=0.10.0b40";
 /* Item inspector: drawer on desktop (list stays visible; selecting another
  * item swaps the content), bottom sheet on mobile. Shows the portions of a
  * batch with per-portion eat/toss/print/undo, plus the item details. */
 
-import { STATUS_COLOR } from "../strings.js?v=0.10.0b39";
-import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b39";
-import { openSurface } from "../lib/surface.js?v=0.10.0b39";
-import { relTime } from "./history.js?v=0.10.0b39";
+import { STATUS_COLOR } from "../strings.js?v=0.10.0b40";
+import { daysLabel, esc, fmtDate } from "../lib/format.js?v=0.10.0b40";
+import { openSurface } from "../lib/surface.js?v=0.10.0b40";
+import { relTime } from "./history.js?v=0.10.0b40";
 
 function portionsOf(item) {
   const list = Array.isArray(item.portions) && item.portions.length
@@ -35,7 +35,7 @@ export function openInspector(panel, item, { highlight = null } = {}) {
       panel._renderList();
     }
   };
-  const h = openSurface(panel, "", { prefer: "drawer", onClose: clearSelection });
+  const h = openSurface(panel, "", { prefer: "drawer", onClose: clearSelection, dismissOutside: true });
   panel._inspectorItemId = itemId;
   panel._renderList();
   const close = () => h.close();

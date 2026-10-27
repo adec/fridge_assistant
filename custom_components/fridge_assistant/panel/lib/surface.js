@@ -2,7 +2,7 @@
  * wiring and toasts. All functions take the panel instance as their first
  * argument (for shadowRoot access); state lives on the panel, not here. */
 
-import { esc, fmtDate, parseISO } from "./format.js?v=0.10.0b39";
+import { esc, fmtDate, parseISO } from "./format.js?v=0.10.0b40";
 
 /* On desktop, data-rich views open in a drawer that slides in from the right
  * (Attio-style side peek): no scrim, the list stays visible and clickable, and
@@ -26,16 +26,17 @@ function _focusFirst(container) {
   if (el) try { el.focus(); } catch (_) {}
 }
 
-export function openSurface(panel, innerHTML, { prefer = "modal", wide = false, onClose = null } = {}) {
+export function openSurface(panel, innerHTML, { prefer = "modal", wide = false, onClose = null, dismissOutside = false } = {}) {
   if (prefer === "drawer" && window.matchMedia(DRAWER_MQ).matches) {
-    const h = openDrawer(panel, innerHTML);
+    const h = openDrawer(panel, innerHTML, { dismissOutside });
     if (onClose) panel._onDrawerClosed = onClose;
     return h;
   }
   return openModal(panel, innerHTML, { wide, onClose });
 }
 
-export function openDrawer(panel, innerHTML) {
+export function openDrawer(panel, innerHTML, { dismissOutside = false } = {}) {
+  panel._drawerDismissOutside = dismissOutside;
   let d = panel._drawerEl;
   if (d) {
     // Reuse the open drawer: let the previous view clean up, then swap.
@@ -62,6 +63,26 @@ export function openDrawer(panel, innerHTML) {
     panel._drawerStackEntry = entry;
     document.addEventListener("keydown", onKey);
     panel._drawerKeyHandler = onKey;
+    const onOutside = (e) => {
+      if (!panel._drawerDismissOutside || _stack[_stack.length - 1] !== entry) return;
+      const path = e.composedPath();
+      if (path.includes(d)) return;
+      // Match the CSS container breakpoint using the app's available width,
+      // rather than the window (Home Assistant's sidebar also takes space).
+      if (panel.getBoundingClientRect().width >= 1400) return;
+      // Item clicks swap the existing drawer through openInspector. Closing
+      // here would detach it before the click handler can reuse it.
+      if (path.some(node => node instanceof Element &&
+          (node.hasAttribute("data-item") || node.hasAttribute("data-low-stock")))) return;
+      // Only empty inventory space dismisses the overlay. Controls, links and
+      // selections elsewhere in Home Assistant retain their normal behaviour.
+      if (!path.includes(panel.shadowRoot.getElementById("list"))) return;
+      if (path.some(node => node instanceof Element &&
+          node.matches('button,a,input,select,textarea,summary,[role="button"],[role="tab"],[contenteditable="true"]'))) return;
+      closeDrawer(panel, { restoreFocus: false });
+    };
+    document.addEventListener("pointerdown", onOutside, true);
+    panel._drawerOutsideHandler = onOutside;
   }
   d.innerHTML = innerHTML;
   d.scrollTop = 0;
@@ -69,10 +90,15 @@ export function openDrawer(panel, innerHTML) {
   return { modal: d, close: () => closeDrawer(panel) };
 }
 
-export function closeDrawer(panel) {
+export function closeDrawer(panel, { restoreFocus = true } = {}) {
   const d = panel._drawerEl;
   if (!d) return;
   panel._drawerEl = null;
+  panel._drawerDismissOutside = false;
+  if (panel._drawerOutsideHandler) {
+    document.removeEventListener("pointerdown", panel._drawerOutsideHandler, true);
+    panel._drawerOutsideHandler = null;
+  }
   panel._refreshSurface = null;
   if (panel._drawerKeyHandler) {
     document.removeEventListener("keydown", panel._drawerKeyHandler);
@@ -86,7 +112,7 @@ export function closeDrawer(panel) {
   setTimeout(() => d.remove(), 200);
   const back = panel._drawerRestoreFocus;
   panel._drawerRestoreFocus = null;
-  if (back && back.isConnected) try { back.focus(); } catch (_) {}
+  if (restoreFocus && back && back.isConnected) try { back.focus(); } catch (_) {}
   if (panel._onDrawerClosed) { const f = panel._onDrawerClosed; panel._onDrawerClosed = null; f(); }
 }
 
